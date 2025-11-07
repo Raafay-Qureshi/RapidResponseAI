@@ -1,0 +1,109 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Brampton City Hall",
+        "type": "government",
+        "capacity": 500,
+        "address": "2 Wellington St W, Brampton, ON L6Y 4R2"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-79.7624, 43.7315]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Peel Memorial Hospital",
+        "type": "hospital",
+        "capacity": 1200,
+        "address": "20 Lynch St, Brampton, ON L6W 2Z8"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-79.7645, 43.6832]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Fire Station 201",
+        "type": "fire_station",
+        "capacity": 50,
+        "address": "50 Bramalea Rd, Brampton, ON"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-79.7892, 43.7412]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Fire Station 202",
+        "type": "fire_station",
+        "capacity": 50,
+        "address": "75 Mississauga Rd, Brampton, ON"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-79.7234, 43.6892]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Water Treatment Plant",
+        "type": "water",
+        "capacity": 100000,
+        "address": "150 Central Park Dr, Brampton, ON"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-79.7845, 43.7156]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Emergency Operations Centre",
+        "type": "emergency",
+        "capacity": 200,
+        "address": "8 Rutherford Rd S, Brampton, ON"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-79.7534, 43.7285]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Fire Station 203",
+        "type": "fire_station",
+        "capacity": 50,
+        "address": "100 Bovaird Dr E, Brampton, ON"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-79.7456, 43.7398]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "William Osler Health Centre",
+        "type": "hospital",
+        "capacity": 800,
+        "address": "2100 Bovaird Dr E, Brampton, ON L6R 3J7"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-79.7123, 43.7401]
+      }
+    }
+  ]
+}

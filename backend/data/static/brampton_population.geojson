@@ -1,0 +1,110 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "tract_id": "BT001",
+        "population": 8500,
+        "density": 3200,
+        "vulnerable_pop": 850,
+        "area_km2": 2.66,
+        "name": "Downtown Brampton"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-79.7700, 43.7250],
+          [-79.7550, 43.7250],
+          [-79.7550, 43.7350],
+          [-79.7700, 43.7350],
+          [-79.7700, 43.7250]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "tract_id": "BT002",
+        "population": 12000,
+        "density": 4500,
+        "vulnerable_pop": 1440,
+        "area_km2": 2.67,
+        "name": "North Brampton"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-79.7700, 43.7350],
+          [-79.7550, 43.7350],
+          [-79.7550, 43.7450],
+          [-79.7700, 43.7450],
+          [-79.7700, 43.7350]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "tract_id": "BT003",
+        "population": 9800,
+        "density": 3800,
+        "vulnerable_pop": 980,
+        "area_km2": 2.58,
+        "name": "East Brampton"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-79.7550, 43.7250],
+          [-79.7400, 43.7250],
+          [-79.7400, 43.7350],
+          [-79.7550, 43.7350],
+          [-79.7550, 43.7250]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "tract_id": "BT004",
+        "population": 11500,
+        "density": 4200,
+        "vulnerable_pop": 1380,
+        "area_km2": 2.74,
+        "name": "West Brampton"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-79.7850, 43.7250],
+          [-79.7700, 43.7250],
+          [-79.7700, 43.7350],
+          [-79.7850, 43.7350],
+          [-79.7850, 43.7250]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "tract_id": "BT005",
+        "population": 7200,
+        "density": 2900,
+        "vulnerable_pop": 720,
+        "area_km2": 2.48,
+        "name": "South Brampton"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-79.7700, 43.7150],
+          [-79.7550, 43.7150],
+          [-79.7550, 43.7250],
+          [-79.7700, 43.7250],
+          [-79.7700, 43.7150]
+        ]]
+      }
+    }
+  ]
+}
