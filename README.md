@@ -15,8 +15,6 @@ It **autonomously detects wildfires using satellite data (like NASA FIRMS)** and
 
 ## 📚 Documentation Structure
 
-(This section remains the same)
-
 ### Core Architecture Documents
 
 1.  **[01_SYSTEM_ARCHITECTURE.md](01_SYSTEM_ARCHITECTURE.md)**
