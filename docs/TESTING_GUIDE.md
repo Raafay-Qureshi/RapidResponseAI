@@ -140,16 +140,33 @@ python test_weather_basic.py
 
 ---
 
----
+## Testing GeoHubClient
 
-## Testing BaseAgent
+### ⚠️ Important: Fixing GeoJSON Loading Errors
 
-The BaseAgent is an abstract base class that doesn't require any external API dependencies, making it easy to test.
+If you see "module 'fiona' has no attribute 'path'" errors, you need to install compatible versions:
 
-### Option 1: Use Virtual Environment (Recommended)
+**Fix the dependencies:**
+```bash
+# Uninstall all geo packages
+pip uninstall -y geopandas shapely pyproj fiona numpy
+
+# Install compatible versions
+pip install --user "numpy<2"
+pip install --user "fiona<1.10"
+pip install --user geopandas shapely pyproj
+
+# Verify installation
+python -c "import geopandas; print(f'geopandas {geopandas.__version__}')"
+
+# Run test
+python backend/tests/test_geohub_client.py
+```
+
+### Option 1: Use Virtual Environment (Recommended - Clean Installation)
 
 ```bash
-# Create virtual environment (if not already created)
+# Create virtual environment
 python -m venv backend/venv
 
 # Activate it
@@ -158,39 +175,7 @@ backend\venv\Scripts\activate
 # On Linux/Mac:
 source backend/venv/bin/activate
 
-# No additional dependencies needed (uses only Python standard library)
-
-# Run test
-python backend/tests/test_base_agent.py
-```
-
-### Option 2: Run Directly (No Dependencies Required)
-
-Since BaseAgent only uses Python's standard library (`abc` module), you can run the test directly:
-
-```bash
-python backend/tests/test_base_agent.py
-```
-
-### What the Tests Verify
-
-The test suite for BaseAgent includes 6 comprehensive tests:
-
-1. **Cannot Instantiate BaseAgent** - Verifies that the abstract class raises `TypeError` when instantiated directly
-2. **Cannot Instantiate Incomplete Agent** - Verifies that classes missing the `analyze` method cannot be instantiated
-3. **Can Instantiate Concrete Agent** - Verifies that properly implemented subclasses work correctly
-4. **Analyze Method Works** - Tests that the async `analyze` method functions properly
-5. **Log Method Works** - Tests that the `_log` helper method outputs correctly
-6. **Inheritance Properties** - Verifies that all required methods and attributes are present
-
-### Expected Output
-
-When all tests pass, you should see:
-
-```
-============================================================
 Testing BaseAgent Abstract Class
-============================================================
 
 === Test 1: BaseAgent Cannot Be Instantiated ===
 ✓ PASSED: BaseAgent cannot be instantiated
@@ -213,12 +198,9 @@ Testing BaseAgent Abstract Class
 === Test 6: Inheritance Properties ===
 ✓ PASSED: Inheritance properties are correct
 
-============================================================
 Test Summary
-============================================================
 Passed: 6/6
 ✓ ALL TESTS PASSED
-============================================================
 ```
 
 ### Quick Test
@@ -247,12 +229,79 @@ Run with:
 cd backend
 python quick_test_agent.py
 ```
+# Install compatible versions
+pip install "numpy<2"
+pip install "fiona<1.10"
+pip install geopandas shapely pyproj
+
+# Run test
+python backend/tests/test_geohub_client.py
+```
+
+### Option 2: Fix in Existing Installation (With --user flag)
+
+```bash
+# Uninstall conflicting packages
+pip uninstall -y geopandas shapely pyproj numpy fiona
+
+# Install compatible versions with --user flag
+pip install --user "numpy<2"
+pip install --user "fiona<1.10"
+pip install --user geopandas shapely pyproj
+
+# Run test
+python backend/tests/test_geohub_client.py
+```
+
+### Option 3: Quick Test Without GeoJSON Files
+
+If you're having dependency issues, the GeoHubClient has built-in fallback sample data. You can test it by temporarily removing the requirement:
+
+```bash
+# Just install basic dependencies
+pip install --user requests python-dotenv
+
+# The test will use fallback sample data instead of loading GeoJSON files
+python backend/tests/test_geohub_client.py
+```
+
+Note: This won't test the actual GeoJSON file loading, but will test the fallback functionality.
+
+### Option 4: Run with WSL (if available)
+
+Since you have WSL installed:
+
+```bash
+wsl
+cd /mnt/c/Raafay/Coding/HAM
+pip install geopandas shapely pyproj
+python backend/tests/test_geohub_client.py
+```
+
+### What the Test Does
+
+The GeoHubClient test suite validates:
+1. **Infrastructure Data Loading** - Tests loading of Brampton infrastructure (fire stations, hospitals, etc.)
+2. **Population Data Loading** - Tests loading of census tract data with population statistics
+3. **Roads Data Loading** - Tests loading of major roads and highways
+4. **Location-Based Filtering** - Verifies data can be filtered by geographic location
+5. **Data Caching** - Ensures the caching mechanism works properly
+6. **Data Structure Validation** - Confirms all data has the expected schema
+
+### Expected Output
+
+The test will display:
+- Number of infrastructure features loaded
+- Population statistics (total population, vulnerable population, density)
+- Road network information (capacity, lanes, road classes)
+- Caching performance metrics
+- Data structure validation results
 
 ---
 
 ## Running All Tests
 
-To run all tests (SatelliteClient, WeatherClient, and BaseAgent):
+To run all client tests (SatelliteClient, WeatherClient, and GeoHubClient):
 
 ```bash
 # Activate virtual environment first (if using one)
@@ -260,4 +309,4 @@ cd backend
 python tests/test_base_agent.py
 python tests/test_satellite_client.py
 python tests/test_weather_client.py
-```
+python tests/test_geohub_client.py

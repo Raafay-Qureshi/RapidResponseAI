@@ -1,0 +1,120 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Queen Street",
+        "road_class": "arterial",
+        "lanes": 4,
+        "capacity_vph": 2000,
+        "surface": "asphalt"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-79.7850, 43.7300],
+          [-79.7700, 43.7300],
+          [-79.7550, 43.7300],
+          [-79.7400, 43.7300]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Main Street North",
+        "road_class": "arterial",
+        "lanes": 4,
+        "capacity_vph": 2000,
+        "surface": "asphalt"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-79.7625, 43.7150],
+          [-79.7625, 43.7250],
+          [-79.7625, 43.7350],
+          [-79.7625, 43.7450]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Bovaird Drive",
+        "road_class": "arterial",
+        "lanes": 4,
+        "capacity_vph": 2000,
+        "surface": "asphalt"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-79.7850, 43.7400],
+          [-79.7700, 43.7400],
+          [-79.7550, 43.7400],
+          [-79.7400, 43.7400]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Steeles Avenue",
+        "road_class": "arterial",
+        "lanes": 6,
+        "capacity_vph": 3000,
+        "surface": "asphalt"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-79.7850, 43.7150],
+          [-79.7700, 43.7150],
+          [-79.7550, 43.7150],
+          [-79.7400, 43.7150]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Highway 410",
+        "road_class": "highway",
+        "lanes": 8,
+        "capacity_vph": 6000,
+        "surface": "asphalt"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-79.7500, 43.7100],
+          [-79.7500, 43.7200],
+          [-79.7500, 43.7300],
+          [-79.7500, 43.7400],
+          [-79.7500, 43.7500]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Bramalea Road",
+        "road_class": "arterial",
+        "lanes": 4,
+        "capacity_vph": 2000,
+        "surface": "asphalt"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-79.7892, 43.7150],
+          [-79.7892, 43.7250],
+          [-79.7892, 43.7350],
+          [-79.7892, 43.7450]
+        ]
+      }
+    }
+  ]
+}
