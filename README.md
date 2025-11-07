@@ -1,77 +1,76 @@
-# RapidResponseAI - Complete Documentation
+# HAM - Complete Documentation
 
 ## 🎯 What This Is
 
-**RapidResponseAI** is an automated emergency response intelligence system that uses satellite data, real-time sensors, and multi-agent AI to generate complete emergency response plans in under 60 seconds.
+**RapidResponseAI** is a **proactive B2G (Business-to-Government) tool** for professional emergency managers.
 
-**Built for:** BramHacks 2025 Hackathon  
+It **autonomously detects wildfires using satellite data (like NASA FIRMS)** and then uses a multi-agent AI system to generate a complete, actionable emergency response plan.
+
+**Core Value:** We find the fire *before* the first 911 call and replace a 2-3 hour manual analysis with a **60-second automated plan**.
+
+**Built for:** BramHacks 2025 Hackathon
 **Challenge Theme:** Using space technology to build stronger, more sustainable, resilient communities
 
 ---
 
 ## 📚 Documentation Structure
 
-This folder contains everything your team needs to build RapidResponseAI in 3 days:
+(This section remains the same)
 
 ### Core Architecture Documents
 
-1. **[01_SYSTEM_ARCHITECTURE.md](01_SYSTEM_ARCHITECTURE.md)**
-   - High-level system overview
-   - Component breakdown
-   - Data flow diagrams
-   - Technology stack
+1.  **[01_SYSTEM_ARCHITECTURE.md](01_SYSTEM_ARCHITECTURE.md)**
+    * High-level system overview
+    * Component breakdown
+    * Data flow diagrams
+    * Technology stack
 
-2. **[02_BACKEND_ARCHITECTURE.md](02_BACKEND_ARCHITECTURE.md)**
-   - Python Flask server implementation
-   - Multi-agent system detailed code
-   - All 5 agent implementations
-   - API client code
-   - Orchestrator logic
+2.  **[02_BACKEND_ARCHITECTURE.md](02_BACKEND_ARCHITECTURE.md)**
+    * Python Flask server implementation
+    * Multi-agent system detailed code
+    * All 5 agent implementations
+    * API client code
+    * Orchestrator logic
 
-3. **[03_FRONTEND_ARCHITECTURE.md](03_FRONTEND_ARCHITECTURE.md)**
-   - React component structure
-   - Mapbox integration
-   - WebSocket real-time updates
-   - UI/UX implementation
-   - State management
+3.  **[03_FRONTEND_ARCHITECTURE.md](03_FRONTEND_ARCHITECTURE.md)**
+    * React component structure (B2G Dashboard)
+    * Mapbox integration
+    * WebSocket real-time updates
+    * State management
 
 ### Implementation Guides
 
-4. **[04_DAY_BY_DAY_PLAN.md](04_DAY_BY_DAY_PLAN.md)**
-   - Hour-by-hour breakdown of 3 days
-   - What to build when
-   - Team coordination
-   - Daily checkpoints
-   - Contingency plans
+4.  **[04_DAY_BY_DAY_PLAN.md](04_DAY_BY_DAY_PLAN.md)**
+    * Hour-by-hour breakdown of 3 days
+    * Daily checkpoints
+    * Contingency plans
 
-5. **[05_DEMO_SCRIPT.md](05_DEMO_SCRIPT.md)**
-   - Complete 5-minute judge pitch
-   - What to say, when to say it
-   - Handling questions
-   - Reading the judge
-   - Backup plans if things break
+5.  **[05_DEMO_SCRIPT.md](05_DEMO_SCRIPT.md)**
+    * Complete 5-minute judge pitch
+    * Handling questions
+    * Backup plans
 
-6. **[06_QUICK_REFERENCE.md](06_QUICK_REFERENCE.md)**
-   - Quick start commands
-   - Common issues & fixes
-   - Testing checklist
-   - Debugging tools
-   - Key numbers to remember
+6.  **[06_QUICK_REFERENCE.md](06_QUICK_REFERENCE.md)**
+    * Quick start commands
+    * Common issues & fixes
+    * Testing checklist
 
 ---
 
 ## 🚀 Getting Started (Right Now)
 
+(This section remains the same)
+
 ### Step 1: Read These (15 minutes)
-1. This README
-2. [01_SYSTEM_ARCHITECTURE.md](01_SYSTEM_ARCHITECTURE.md) - Get the big picture
-3. [04_DAY_BY_DAY_PLAN.md](04_DAY_BY_DAY_PLAN.md) - Day 0 section
+1.  This README
+2.  [01_SYSTEM_ARCHITECTURE.md](01_SYSTEM_ARCHITECTURE.md) - Get the big picture
+3.  [04_DAY_BY_DAY_PLAN.md](04_DAY_BY_DAY_PLAN.md) - Day 0 section
 
 ### Step 2: Get API Keys (15 minutes)
-- NASA FIRMS: https://firms.modaps.eosdis.nasa.gov/api/
-- OpenWeather: https://openweathermap.org/api
-- Mapbox: https://account.mapbox.com/
-- OpenRouter API: https://openrouter.ai/
+* NASA FIRMS: https://firms.modaps.eosdis.nasa.gov/api/
+* OpenWeather: https://openweathermap.org/api
+* Mapbox: https://account.mapbox.com/
+* OpenRouter API: https://openrouter.ai/
 
 ### Step 3: Set Up Your Environment (30 minutes)
 
@@ -106,43 +105,44 @@ npm start
 ### Step 4: Explore the Documentation
 - **Backend Development:** Read [02_BACKEND_ARCHITECTURE.md](02_BACKEND_ARCHITECTURE.md)
 - **Frontend Development:** Read [03_FRONTEND_ARCHITECTURE.md](03_FRONTEND_ARCHITECTURE.md)
-- **Multi-Agent System:** Read agent sections in Backend Architecture doc
 - **Demo Preparation:** Read [05_DEMO_SCRIPT.md](05_DEMO_SCRIPT.md)
 
 ---
 
 ## 🎯 The Big Picture
 
-### What You're Building
+### What You're Building: A Proactive B2G Pipeline
 
 ```
-USER TRIGGERS DISASTER
+PROACTIVE DETECTION
+(Satellite detects thermal anomaly)
          ↓
 BACKEND ORCHESTRATOR ACTIVATES
+(Fires 60-second process)
          ↓
 5 AGENTS RUN IN PARALLEL:
-  1. Damage Assessment (satellite analysis)
-  2. Population Impact (affected people)
-  3. Routing (evacuation routes)
-  4. Resource Allocation (ambulances, buses)
-  5. Prediction (fire spread timeline)
+  1. Damage Assessment (What's burning?)
+  2. Population Impact (Who's in danger?)
+  3. Prediction (Where is it going?)
+  4. Routing (How do we get out?)
+  5. Resource Allocation (What help is needed?)
          ↓
 AI LLM SYNTHESIZES RESULTS
+(Generates plan, summaries, alerts)
          ↓
-COMPLETE EMERGENCY PLAN GENERATED (60 seconds)
-         ↓
-FRONTEND DISPLAYS: MAP + PLAN + TIMELINE
+B2G DASHBOARD UPDATES
+(Fire Chief sees full plan: Map + Plan + Timeline)
          ↓
 AUTO-UPDATES EVERY 15 MINUTES
 ```
 
 ### Why This Wins
 
-**Innovation (35%):** Multi-agent AI for emergency response is completely novel  
-**Technical Functionality (25%):** Actually works end-to-end with real APIs  
-**Emerging Technology (15%):** Agentic AI + Multi-modal LLM synthesis  
-**Challenge Alignment (15%):** Disaster preparedness using satellite data  
-**Pitch Quality (10%):** Dramatic live demo with clear value prop  
+**Innovation (35%):** Proactive, pre-911 detection using a multi-agent AI system. 
+**Technical Functionality (25%):** Works end-to-end with real NASA and weather APIs.
+**Emerging Technology (15%):** Agentic AI + LLM synthesis for decision-making.  
+**Challenge Alignment (15%):** Directly uses space tech (satellites) to build community resilience.
+**Pitch Quality (10%):** A dramatic, life-saving demo that's easy to understand.
 
 **Total Target: 88/100** 🎯
 
@@ -194,13 +194,12 @@ AUTO-UPDATES EVERY 15 MINUTES
 **Integrations:**
 - OpenStreetMap (routing)
 - Brampton GeoHub (local data)
-- OSRM (path calculations)
 
 ---
 
 ## 🎤 The Elevator Pitch
 
-*"We use multi-agent AI and real-time satellite data to generate complete emergency response plans in 60 seconds instead of 2-3 hours, giving first responders time to save lives."*
+*"RapidResponseAI proactively detects wildfires using satellite data, giving emergency managers a critical head-start before the first 911 call. It then generates a complete response plan in 60 seconds, turning a 3-hour manual process into an automated, life-saving action."*
 
 ---
 
@@ -231,22 +230,18 @@ AUTO-UPDATES EVERY 15 MINUTES
 ### Backend Development
 - **Focus:** Python, Flask, agents, APIs
 - **Key Doc:** [02_BACKEND_ARCHITECTURE.md](02_BACKEND_ARCHITECTURE.md)
-- **Key Goals:** All agents return valid data, robust API endpoints
 
 ### Frontend Development
 - **Focus:** React, Mapbox, UI, WebSocket
 - **Key Doc:** [03_FRONTEND_ARCHITECTURE.md](03_FRONTEND_ARCHITECTURE.md)
-- **Key Goals:** Beautiful, functional dashboard with real-time updates
 
 ### AI/ML Integration
 - **Focus:** LLM integration, fire model, agent logic
 - **Key Doc:** Backend Architecture (agent sections)
-- **Key Goals:** AI generates coherent emergency plans
 
 ### Demo & Presentation
 - **Focus:** Pitch, practice, polish, backup plans
 - **Key Doc:** [05_DEMO_SCRIPT.md](05_DEMO_SCRIPT.md)
-- **Key Goals:** Smooth 5-minute pitch, confident delivery
 
 ---
 
@@ -259,18 +254,11 @@ AUTO-UPDATES EVERY 15 MINUTES
 4. **Have backups** - For every possible failure
 
 ### What Makes Judges Say "Wow"
+- Proactive detection using real NASA satellite data (beats the 911 call) 🛰️
 - Fire spreading on map in real-time ✨
 - 60-second complete plan generation ⚡
-- Multi-language emergency alerts 🌍
-- Real NASA satellite data 🛰️
+- Multi-language emergency alerts (for B2G users to send) 🌍
 - Live updates as conditions change 🔄
-
-### Common Pitfalls to Avoid
-- ❌ Building too many features poorly
-- ❌ Forgetting to practice demo
-- ❌ No backup plan when APIs fail
-- ❌ Over-complicating the architecture
-- ❌ Not testing on demo screen
 
 ---
 
