@@ -175,6 +175,60 @@ backend\venv\Scripts\activate
 # On Linux/Mac:
 source backend/venv/bin/activate
 
+Testing BaseAgent Abstract Class
+
+=== Test 1: BaseAgent Cannot Be Instantiated ===
+✓ PASSED: BaseAgent cannot be instantiated
+
+=== Test 2: Incomplete Agent Cannot Be Instantiated ===
+✓ PASSED: IncompleteAgent cannot be instantiated
+
+=== Test 3: Concrete Agent Can Be Instantiated ===
+✓ PASSED: ConcreteAgent instantiated successfully
+  Agent name: ConcreteAgent
+
+=== Test 4: Analyze Method Works ===
+[ConcreteAgent] Running analysis
+✓ PASSED: Analyze method works correctly
+
+=== Test 5: Log Method Works ===
+[ConcreteAgent] This is a test message
+✓ PASSED: Log method works correctly
+
+=== Test 6: Inheritance Properties ===
+✓ PASSED: Inheritance properties are correct
+
+Test Summary
+Passed: 6/6
+✓ ALL TESTS PASSED
+```
+
+### Quick Test
+
+To quickly verify the BaseAgent structure without running the full test suite:
+
+```python
+# quick_test_agent.py
+from agents.base_agent import BaseAgent
+from typing import Dict, Any
+
+class MyAgent(BaseAgent):
+    async def analyze(self, *args, **kwargs) -> Dict[str, Any]:
+        self._log("Hello from MyAgent!")
+        return {"status": "ok"}
+
+import asyncio
+agent = MyAgent()
+print(f"Agent name: {agent.name}")
+result = asyncio.run(agent.analyze())
+print(f"Result: {result}")
+```
+
+Run with:
+```bash
+cd backend
+python quick_test_agent.py
+```
 # Install compatible versions
 pip install "numpy<2"
 pip install "fiona<1.10"
@@ -252,6 +306,7 @@ To run all client tests (SatelliteClient, WeatherClient, and GeoHubClient):
 ```bash
 # Activate virtual environment first (if using one)
 cd backend
+python tests/test_base_agent.py
 python tests/test_satellite_client.py
 python tests/test_weather_client.py
 python tests/test_geohub_client.py
