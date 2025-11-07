@@ -140,6 +140,18 @@ python test_weather_basic.py
 
 ---
 
+## Testing PopulationImpactAgent
+
+```bash
+# Activate virtual environment first (if using one)
+pip install -r backend/requirements.txt
+python backend/tests/test_population_impact.py
+```
+
+The script builds synthetic census blocks, runs `PopulationImpactAgent`, and asserts that totals, vulnerable populations, language splits, and critical facilities match expectations. It prints individual checkmarks for each scenario and a final success message when all assertions pass.
+
+---
+
 ## Running All Tests
 
 To run both SatelliteClient and WeatherClient tests:
@@ -149,3 +161,4 @@ To run both SatelliteClient and WeatherClient tests:
 cd backend
 python tests/test_satellite_client.py
 python tests/test_weather_client.py
+python tests/test_population_impact.py
