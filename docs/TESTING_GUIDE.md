@@ -311,9 +311,66 @@ The test will display:
 
 ---
 
+## Testing PredictionAgent
+
+### ⚠️ NumPy Installation Issues
+
+If you encounter NumPy compilation errors (GCC version issues), use selective installation:
+
+```bash
+# Install core dependencies that work
+pip install --user flask requests python-dotenv numpy shapely
+
+# Then run the test
+python backend/tests/test_prediction.py
+```
+
+### Option 1: Virtual Environment (Recommended - May have NumPy issues)
+
+```bash
+# Create virtual environment
+python -m venv backend/venv
+
+# Activate it
+# On Windows:
+backend\venv\Scripts\activate
+# On Linux/Mac:
+source backend/venv/bin/activate
+
+# Try full installation (may fail on NumPy)
+pip install -r backend/requirements.txt
+
+# If NumPy fails, install selectively
+pip install flask requests python-dotenv numpy shapely
+python backend/tests/test_prediction.py
+```
+
+### Option 2: User Installation (Works around NumPy issues)
+
+```bash
+# Install core dependencies
+pip install --user flask requests python-dotenv numpy shapely
+python backend/tests/test_prediction.py
+```
+
+The test suite validates:
+1. **Wildfire Analysis** - Tests the full wildfire prediction pipeline with mocked helper functions
+2. **Flood Analysis** - Verifies the placeholder implementation for flood disasters
+3. **Unknown Disaster Types** - Ensures proper error handling for unsupported disaster types
+
+### Expected Output
+
+The test will display:
+- Successful wildfire analysis with spread rate, predictions, and arrival times
+- Placeholder response for flood disasters
+- Error handling for unknown disaster types
+- Final success message when all tests pass
+
+---
+
 ## Running All Tests
 
-To run all client tests (SatelliteClient, WeatherClient, and GeoHubClient):
+To run all client tests (SatelliteClient, WeatherClient, GeoHubClient, and PredictionAgent):
 
 ```bash
 # Activate virtual environment first (if using one)
@@ -322,3 +379,4 @@ python tests/test_base_agent.py
 python tests/test_satellite_client.py
 python tests/test_weather_client.py
 python tests/test_geohub_client.py
+python tests/test_prediction.py
