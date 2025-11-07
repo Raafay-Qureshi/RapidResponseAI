@@ -64,7 +64,7 @@
 │  • OpenWeather (weather/wind)                               │
 │  • OSM/OSRM (roads/routing)                                 │
 │  • Brampton GeoHub (local data)                             │
-│  • Claude API (LLM orchestration)                           │
+│  • OpenRouter API (LLM orchestration)                       │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -95,7 +95,7 @@
 - **Responsibilities:**
   - Multi-agent coordination
   - Data aggregation
-  - Claude API integration for synthesis
+  - OpenRouter API integration for synthesis
   - Response plan generation
   - Update scheduling (every 15 min)
 
@@ -165,11 +165,11 @@ Each agent is a Python module with specific responsibilities:
 
 4. ORCHESTRATION (T+35-45s)
    └─> Orchestrator collects all agent outputs
-   └─> Feeds to Claude API
-   └─> Claude synthesizes into coherent plan
+   └─> Feeds to AI LLM via OpenRouter
+   └─> LLM synthesizes into coherent plan
 
 5. DOCUMENT GENERATION (T+45-55s)
-   └─> Claude generates 12-page emergency plan
+   └─> AI LLM generates 12-page emergency plan
    └─> Maps and visualizations created
    └─> Multi-language translations
 
@@ -346,8 +346,8 @@ Each agent is a Python module with specific responsibilities:
 - **WebSocket:** socket.io-client
 
 ### AI/ML
-- **LLM:** Claude 3.5 Sonnet (via Anthropic API)
-- **Vision:** GPT-4 Vision (optional, for image analysis)
+- **LLM:** Available models via OpenRouter API
+- **Vision:** Optional image analysis models
 - **Fire Modeling:** Custom cellular automata
 
 ### External Services

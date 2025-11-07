@@ -71,32 +71,43 @@ This folder contains everything your team needs to build RapidResponseAI in 3 da
 - NASA FIRMS: https://firms.modaps.eosdis.nasa.gov/api/
 - OpenWeather: https://openweathermap.org/api
 - Mapbox: https://account.mapbox.com/
-- Claude API: You already have this!
+- OpenRouter API: https://openrouter.ai/
 
 ### Step 3: Set Up Your Environment (30 minutes)
-**Backend:**
+
+**Backend Setup:**
 ```bash
 cd backend
 python -m venv venv
-source venv/bin/activate
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
-# Create .env with API keys
+
+# Copy the example .env file and add your API keys
+cp .env.example .env
+# Edit .env with your actual API keys
+
+# Run the backend server
 python app.py
 ```
 
-**Frontend:**
+**Frontend Setup:**
 ```bash
 cd frontend
 npm install
-# Create .env with API keys
+
+# Create .env file with your API keys
+echo "REACT_APP_API_URL=http://localhost:5000/api" > .env
+echo "REACT_APP_MAPBOX_TOKEN=your-mapbox-token" >> .env
+
+# Start the development server
 npm start
 ```
 
-### Step 4: Divide and Conquer
-- **Backend person:** Read [02_BACKEND_ARCHITECTURE.md](02_BACKEND_ARCHITECTURE.md)
-- **Frontend person:** Read [03_FRONTEND_ARCHITECTURE.md](03_FRONTEND_ARCHITECTURE.md)
-- **AI person:** Read agent sections in Backend doc
-- **Demo person:** Read [05_DEMO_SCRIPT.md](05_DEMO_SCRIPT.md)
+### Step 4: Explore the Documentation
+- **Backend Development:** Read [02_BACKEND_ARCHITECTURE.md](02_BACKEND_ARCHITECTURE.md)
+- **Frontend Development:** Read [03_FRONTEND_ARCHITECTURE.md](03_FRONTEND_ARCHITECTURE.md)
+- **Multi-Agent System:** Read agent sections in Backend Architecture doc
+- **Demo Preparation:** Read [05_DEMO_SCRIPT.md](05_DEMO_SCRIPT.md)
 
 ---
 
@@ -116,7 +127,7 @@ BACKEND ORCHESTRATOR ACTIVATES
   4. Resource Allocation (ambulances, buses)
   5. Prediction (fire spread timeline)
          ↓
-CLAUDE LLM SYNTHESIZES RESULTS
+AI LLM SYNTHESIZES RESULTS
          ↓
 COMPLETE EMERGENCY PLAN GENERATED (60 seconds)
          ↓
@@ -167,7 +178,7 @@ AUTO-UPDATES EVERY 15 MINUTES
 **Backend:**
 - Python 3.11+
 - Flask/FastAPI
-- Claude API (Anthropic)
+- OpenRouter API (AI LLM)
 - NASA FIRMS API
 - NOAA GOES API
 - OpenWeather API
@@ -215,27 +226,27 @@ AUTO-UPDATES EVERY 15 MINUTES
 
 ---
 
-## 💪 Team Roles
+## 💪 Development Areas
 
-### Backend Lead
-- **Responsibility:** Python, Flask, agents, APIs
+### Backend Development
+- **Focus:** Python, Flask, agents, APIs
 - **Key Doc:** [02_BACKEND_ARCHITECTURE.md](02_BACKEND_ARCHITECTURE.md)
-- **Success Metric:** All agents return valid data
+- **Key Goals:** All agents return valid data, robust API endpoints
 
-### Frontend Lead
-- **Responsibility:** React, Mapbox, UI, WebSocket
+### Frontend Development
+- **Focus:** React, Mapbox, UI, WebSocket
 - **Key Doc:** [03_FRONTEND_ARCHITECTURE.md](03_FRONTEND_ARCHITECTURE.md)
-- **Success Metric:** Beautiful, functional dashboard
+- **Key Goals:** Beautiful, functional dashboard with real-time updates
 
-### AI/ML Lead
-- **Responsibility:** Claude integration, fire model, agent logic
+### AI/ML Integration
+- **Focus:** LLM integration, fire model, agent logic
 - **Key Doc:** Backend Architecture (agent sections)
-- **Success Metric:** Claude generates coherent plans
+- **Key Goals:** AI generates coherent emergency plans
 
-### Demo Lead
-- **Responsibility:** Pitch, practice, polish, backup plans
+### Demo & Presentation
+- **Focus:** Pitch, practice, polish, backup plans
 - **Key Doc:** [05_DEMO_SCRIPT.md](05_DEMO_SCRIPT.md)
-- **Success Metric:** Smooth 5-minute pitch
+- **Key Goals:** Smooth 5-minute pitch, confident delivery
 
 ---
 
@@ -353,7 +364,7 @@ Use this to track your progress:
 - OpenWeather API Docs: https://openweathermap.org/api
 - Mapbox GL JS Docs: https://docs.mapbox.com/mapbox-gl-js/
 - Flask-SocketIO Docs: https://flask-socketio.readthedocs.io/
-- Anthropic Claude Docs: https://docs.anthropic.com/
+- OpenRouter API Docs: https://openrouter.ai/docs
 
 ---
 

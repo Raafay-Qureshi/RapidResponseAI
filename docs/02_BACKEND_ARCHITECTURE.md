@@ -213,9 +213,9 @@ class DisasterOrchestrator:
         }
     
     async def _synthesize_plan(self, disaster: Dict, agent_results: Dict) -> Dict:
-        """Use Claude API to synthesize final plan"""
+        """Use OpenRouter API to synthesize final plan"""
         
-        # Prepare context for Claude
+        # Prepare context for AI LLM
         context = {
             'disaster_type': disaster['type'],
             'location': disaster['location'],
@@ -223,30 +223,30 @@ class DisasterOrchestrator:
             'agent_outputs': agent_results
         }
         
-        # Call Claude API
-        claude_response = await self._call_claude_api(context)
+        # Call OpenRouter API
+        llm_response = await self._call_llm_api(context)
         
         # Structure the plan
         plan = {
-            'executive_summary': claude_response['summary'],
-            'situation_overview': claude_response['overview'],
+            'executive_summary': llm_response['summary'],
+            'situation_overview': llm_response['overview'],
             'affected_areas': agent_results['damage_assessment'],
             'population_impact': agent_results['population_impact'],
             'evacuation_plan': agent_results['evacuation_routes'],
             'resource_deployment': agent_results['resource_allocation'],
             'timeline_predictions': agent_results['predictions'],
-            'communication_templates': claude_response['templates'],
+            'communication_templates': llm_response['templates'],
             'maps': self._generate_map_urls(disaster['id'], agent_results),
             'generated_at': datetime.now().isoformat()
         }
         
         return plan
     
-    async def _call_claude_api(self, context: Dict) -> Dict:
-        """Call Claude API to generate plan text"""
-        from anthropic import AsyncAnthropic
+    async def _call_llm_api(self, context: Dict) -> Dict:
+        """Call OpenRouter API to generate plan text"""
+        import aiohttp
         
-        client = AsyncAnthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))
+        api_key = os.getenv('OPENROUTER_API_KEY')
         
         prompt = f"""
         You are an emergency response coordinator. Generate a comprehensive emergency response plan.
@@ -267,14 +267,20 @@ class DisasterOrchestrator:
         Be specific, actionable, and use the exact data provided.
         """
         
-        message = await client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=4000,
-            messages=[{"role": "user", "content": prompt}]
-        )
-        
-        # Parse Claude's response
-        response_text = message.content[0].text
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                'https://openrouter.ai/api/v1/chat/completions',
+                headers={
+                    'Authorization': f'Bearer {api_key}',
+                    'Content-Type': 'application/json'
+                },
+                json={
+                    'model': 'anthropic/claude-3.5-sonnet',
+                    'messages': [{'role': 'user', 'content': prompt}]
+                }
+            ) as response:
+                data = await response.json()
+                response_text = data['choices'][0]['message']['content']
         
         # Extract sections (simplified for demo)
         return {
@@ -898,7 +904,7 @@ class Config:
     # API Keys
     NASA_FIRMS_API_KEY = os.getenv('NASA_FIRMS_API_KEY')
     OPENWEATHER_API_KEY = os.getenv('OPENWEATHER_API_KEY')
-    ANTHROPIC_API_KEY = os.getenv('ANTHROPIC_API_KEY')
+    OPENROUTER_API_KEY = os.getenv('OPENROUTER_API_KEY')
     MAPBOX_TOKEN = os.getenv('MAPBOX_TOKEN')
     
     # Server
@@ -926,12 +932,12 @@ config = Config()
 
 ```bash
 # Install dependencies
-pip install flask flask-socketio flask-cors anthropic requests geopandas shapely pyproj python-dotenv
+pip install flask flask-socketio flask-cors requests geopandas shapely pyproj python-dotenv aiohttp
 
 # Set environment variables
 export NASA_FIRMS_API_KEY="your-key"
 export OPENWEATHER_API_KEY="your-key"
-export ANTHROPIC_API_KEY="your-key"
+export OPENROUTER_API_KEY="your-key"
 
 # Run server
 python app.py

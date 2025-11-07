@@ -8,10 +8,10 @@
 
 ### Setup & Preparation (2 hours)
 
-**Team Lead:**
-- [ ] Assign roles: Backend, Frontend, AI/ML, Demo
+**Initial Setup:**
 - [ ] Create shared GitHub repo
 - [ ] Set up team communication (Discord/Slack)
+- [ ] Review and assign development areas
 
 **Everyone:**
 - [ ] Clone repo
@@ -20,9 +20,9 @@
   - NASA FIRMS: https://firms.modaps.eosdis.nasa.gov/api/
   - OpenWeather: https://openweathermap.org/api
   - Mapbox: https://account.mapbox.com/
-  - Claude API: Already have access via Anthropic
+  - OpenRouter API: https://openrouter.ai/
 
-**Backend Person:**
+**Backend Development:**
 - [ ] Install Python 3.11+
 - [ ] Create `requirements.txt`:
 ```txt
@@ -38,7 +38,7 @@ python-dotenv==1.0.0
 ```
 - [ ] Download sample Brampton data from GeoHub
 
-**Frontend Person:**
+**Frontend Development:**
 - [ ] Install Node 18+
 - [ ] Create React app: `npx create-react-app rapidresponse-frontend`
 - [ ] Install dependencies:
@@ -46,12 +46,12 @@ python-dotenv==1.0.0
 npm install mapbox-gl socket.io-client axios chart.js react-chartjs-2
 ```
 
-**AI Person:**
-- [ ] Test Claude API access
-- [ ] Familiarize with Anthropic SDK
+**AI/ML Integration:**
+- [ ] Test OpenRouter API access
+- [ ] Review API documentation
 - [ ] Draft emergency plan template
 
-**Demo Person:**
+**Demo Preparation:**
 - [ ] Research Brampton geography
 - [ ] Find historical fire/emergency data for validation
 - [ ] Start pitch deck outline
@@ -64,7 +64,7 @@ npm install mapbox-gl socket.io-client axios chart.js react-chartjs-2
 
 ### Morning Session (9 AM - 1 PM): Data Ingestion
 
-#### Backend Team (4 hours)
+#### Backend Development (4 hours)
 
 **Hour 1: Project Setup**
 ```bash
@@ -78,7 +78,7 @@ Create `.env`:
 ```
 NASA_FIRMS_API_KEY=your-key
 OPENWEATHER_API_KEY=your-key
-ANTHROPIC_API_KEY=your-key
+OPENROUTER_API_KEY=your-key
 MAPBOX_TOKEN=your-key
 ```
 
@@ -125,7 +125,7 @@ if __name__ == '__main__':
 
 Test: `python app.py` and visit endpoints
 
-#### Frontend Team (4 hours)
+#### Frontend Development (4 hours)
 
 **Hour 1: Project Setup**
 ```bash
@@ -162,7 +162,7 @@ Create `src/components/Dashboard.js`:
 
 ### Afternoon Session (2 PM - 6 PM): Agent Foundation
 
-#### Backend Team (4 hours)
+#### Backend Development (4 hours)
 
 **Hour 1: Agent Base Class**
 Create `agents/base_agent.py`:
@@ -196,7 +196,7 @@ Create `agents/population_impact.py`:
 - Hardcode Brampton population estimates for now
 - Return sample data structure
 
-#### Frontend Team (4 hours)
+#### Frontend Development (4 hours)
 
 **Hour 1: Disaster Trigger Component**
 Create `src/components/Controls/DisasterTrigger.js`:
@@ -304,7 +304,7 @@ Create `src/components/Shared/ProgressBar.js`:
 
 ### Morning Session (9 AM - 1 PM): Complete Agents
 
-#### Backend Team (4 hours)
+#### Backend Development (4 hours)
 
 **Hour 1: Routing Agent**
 Create `agents/routing.py`:
@@ -333,7 +333,7 @@ result = orchestrator.run_all_agents(disaster_data)
 # Should get back complete analysis in ~10 seconds
 ```
 
-#### Frontend Team (4 hours)
+#### Frontend Development (4 hours)
 
 **Hour 1: WebSocket Setup**
 Create `src/services/websocket.js`:
@@ -362,7 +362,7 @@ Create `src/components/EmergencyPlan/ResourceTable.js`:
 
 ### Afternoon Session (2 PM - 6 PM): Claude LLM Integration
 
-#### Backend Team (4 hours)
+#### Backend Development (4 hours)
 
 **Hour 1: Claude API Setup**
 ```python
@@ -383,7 +383,7 @@ def test_claude():
 Add to `orchestrator.py`:
 ```python
 async def synthesize_plan(agent_results):
-    """Use Claude to generate emergency plan"""
+    """Use OpenRouter to generate emergency plan"""
     prompt = f"""
     Generate emergency response plan from this analysis:
     
@@ -404,13 +404,20 @@ async def synthesize_plan(agent_results):
     Be specific and actionable.
     """
     
-    message = client.messages.create(
-        model="claude-sonnet-4-20250514",
-        max_tokens=3000,
-        messages=[{"role": "user", "content": prompt}]
-    )
-    
-    return parse_claude_response(message.content[0].text)
+    async with aiohttp.ClientSession() as session:
+        async with session.post(
+            'https://openrouter.ai/api/v1/chat/completions',
+            headers={
+                'Authorization': f'Bearer {os.getenv("OPENROUTER_API_KEY")}',
+                'Content-Type': 'application/json'
+            },
+            json={
+                'model': 'anthropic/claude-3.5-sonnet',
+                'messages': [{'role': 'user', 'content': prompt}]
+            }
+        ) as response:
+            data = await response.json()
+            return parse_llm_response(data['choices'][0]['message']['content'])
 ```
 
 **Hour 4: WebSocket Integration**
@@ -433,7 +440,7 @@ def process_disaster(disaster_id):
     emit('disaster_complete', {'disaster_id': disaster_id, 'plan': plan})
 ```
 
-#### Frontend Team (4 hours)
+#### Frontend Development (4 hours)
 
 **Hour 1: Executive Summary Component**
 Create `src/components/EmergencyPlan/ExecutiveSummary.js`:
@@ -462,7 +469,7 @@ Create `src/components/Map/Markers.js`:
 
 ### Evening Session (7 PM - 10 PM): End-to-End Integration
 
-#### Whole Team (3 hours)
+#### All Contributors (3 hours)
 
 **Hour 1: Integration Testing**
 - Frontend → Backend → Agents → Claude → Frontend
@@ -487,7 +494,7 @@ Create `src/components/Map/Markers.js`:
 
 **You should have:**
 - [x] All 5 agents working
-- [x] Claude generating emergency plans
+- [x] AI LLM generating emergency plans
 - [x] WebSocket real-time updates
 - [x] Frontend showing complete plan
 - [x] Map with routes, markers, danger zones
@@ -504,7 +511,7 @@ Create `src/components/Map/Markers.js`:
 
 ### Morning Session (9 AM - 1 PM): Visual Polish
 
-#### Frontend Team (4 hours)
+#### Frontend Development (4 hours)
 
 **Hour 1: Design System**
 - Consistent colors/fonts
@@ -529,7 +536,7 @@ Create `src/components/Map/Markers.js`:
 - Connection lost states
 - Retry mechanisms
 
-#### Backend Team (4 hours)
+#### Backend Development (4 hours)
 
 **Hour 1: Error Handling**
 - Wrap all API calls in try/catch
@@ -699,10 +706,10 @@ Create `src/components/Map/Markers.js`:
 - **Priority 3:** Everything else
 
 ### Division of Labor Pro Tips:
-- **Backend person:** Should have strongest Python/API skills
-- **Frontend person:** Should know React well
-- **AI person:** Should be comfortable with prompting
-- **Demo person:** Best communicator, organized
+- **Backend Development:** Requires strong Python/API skills
+- **Frontend Development:** Requires React and JavaScript expertise
+- **AI/ML Integration:** Requires understanding of LLM APIs and prompting
+- **Demo/Presentation:** Requires strong communication and organizational skills
 
 ---
 
