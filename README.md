@@ -57,8 +57,6 @@ It **autonomously detects wildfires using satellite data (like NASA FIRMS)** and
 
 ## 🚀 Getting Started (Right Now)
 
-(This section remains the same)
-
 ### Step 1: Read These (15 minutes)
 1.  This README
 2.  [01_SYSTEM_ARCHITECTURE.md](01_SYSTEM_ARCHITECTURE.md) - Get the big picture
@@ -207,7 +205,7 @@ AUTO-UPDATES EVERY 15 MINUTES
 - [ ] Backend server running
 - [ ] APIs returning data
 - [ ] Frontend displaying map
-- [ ] Can trigger disaster event
+- [ ] Can trigger a disaster event
 
 ### Should Have (Day 2)
 - [ ] All 5 agents working
