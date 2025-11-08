@@ -24,62 +24,6 @@
   color: white;
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-
-:root {
-  --danger-red: #ff4444;
-  --warning-orange: #ff9500;
-  --safe-green: #4CAF50;
-  --info-blue: #2196F3;
-  --dark-bg: #1a1a1a;
-  --card-bg: #2d2d2d;
-  --panel-bg: #2d2d2d;
-  --text-primary: #ffffff;
-  --text-secondary: #b0b0b0;
-  --border: #444444;
-}
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  background: var(--dark-bg);
-  color: var(--text-primary);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-.App {
-  min-height: 100vh;
-  background: var(--dark-bg);
-  color: var(--text-primary);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-}
-
-.app-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 1.5rem 2rem;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-}
-
-.app-header h1 {
-  margin: 0;
-  font-size: 2rem;
-  font-weight: 700;
-  color: white;
-}
-
-.subtitle {
-  margin: 0.5rem 0;
-  opacity: 0.9;
-  font-size: 1rem;
-  color: white;
-}
-
 .disclaimer {
   margin-top: 1rem;
   padding: 0.75rem 1rem;
@@ -108,7 +52,6 @@ body {
     font-size: 0.85rem;
     padding: 0.5rem 0.75rem;
   }
-  color: white;
 }
 
 /* Scrollbar styling */
