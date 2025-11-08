@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useWebSocketContext } from '../services/websocket';
 import MapView from './Map/MapView';
 import DisasterTrigger from './Controls/DisasterTrigger';
-import WebSocketTest from './Test/WebSocketTest';
 import './Dashboard.css';
 
 function Dashboard() {
@@ -173,8 +172,6 @@ function Dashboard() {
         </div>
       </div>
 
-      {/* WebSocket Test Component - Temporary for testing */}
-      <WebSocketTest />
     </div>
   );
 }
