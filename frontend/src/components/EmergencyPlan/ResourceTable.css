@@ -1,0 +1,269 @@
+.resource-section {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+/* Resource Summary Cards */
+.resource-summary {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.resource-card {
+  display: flex;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: var(--card-bg);
+  border-radius: 8px;
+  border-left: 4px solid;
+  transition: transform 0.2s ease;
+}
+
+.resource-card:hover {
+  transform: translateY(-2px);
+}
+
+.resource-card.sufficient {
+  border-left-color: var(--safe-green);
+}
+
+.resource-card.marginal {
+  border-left-color: var(--warning-orange);
+}
+
+.resource-card.insufficient {
+  border-left-color: var(--danger-red);
+}
+
+.resource-icon {
+  font-size: 2.5rem;
+}
+
+.resource-content {
+  flex: 1;
+}
+
+.resource-type {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.resource-numbers {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.required-count {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.separator {
+  font-size: 1.5rem;
+  color: var(--text-muted);
+}
+
+.available-count {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.resource-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.status-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 3px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.status-badge.sufficient {
+  background: rgba(76, 175, 80, 0.2);
+  color: var(--safe-green);
+}
+
+.status-badge.marginal {
+  background: rgba(255, 149, 0, 0.2);
+  color: var(--warning-orange);
+}
+
+.status-badge.insufficient {
+  background: rgba(255, 68, 68, 0.2);
+  color: var(--danger-red);
+}
+
+/* Resource Gaps Alert */
+.resource-gaps-alert {
+  display: flex;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: rgba(255, 68, 68, 0.1);
+  border: 2px solid var(--danger-red);
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.gaps-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.gaps-content h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--danger-red);
+}
+
+.gaps-list {
+  margin: 0 0 1rem 0;
+  padding-left: 1.5rem;
+  color: var(--text-primary);
+}
+
+.gaps-list li {
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+
+.gaps-recommendation {
+  margin: 0;
+  padding: 0.75rem;
+  background: rgba(255, 149, 0, 0.1);
+  border-left: 3px solid var(--warning-orange);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+}
+
+/* Deployment Section */
+.deployment-section {
+  margin-top: 2rem;
+}
+
+.deployment-title {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.deployment-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.deployment-card {
+  padding: 1rem;
+  background: var(--card-bg);
+  border-radius: 6px;
+  border-left: 3px solid;
+}
+
+.deployment-card.fire-station {
+  border-left-color: #ff6b6b;
+}
+
+.deployment-card.hospital {
+  border-left-color: #4CAF50;
+}
+
+.deployment-card.police {
+  border-left-color: #2196F3;
+}
+
+.deployment-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.deployment-icon {
+  font-size: 1.5rem;
+}
+
+.deployment-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.deployment-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.deployment-resources {
+  color: var(--text-primary);
+}
+
+.deployment-coords {
+  color: var(--text-muted);
+  font-family: 'Roboto Mono', monospace;
+  font-size: 0.75rem;
+}
+
+/* Mutual Aid Section */
+.mutual-aid-section {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 8px;
+}
+
+.mutual-aid-title {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.mutual-aid-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.mutual-aid-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: var(--card-bg);
+  border-radius: 4px;
+}
+
+.municipality-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.requested-resources {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .resource-summary,
+  .deployment-grid {
+    grid-template-columns: 1fr;
+  }
+}

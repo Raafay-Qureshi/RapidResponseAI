@@ -61,7 +61,7 @@ function App() {
     <WebSocketProvider url="ws://localhost:5000">
       <div className="App">
         <header className="app-header">
-          <h1>🚨 RapidResponse AI</h1>
+          <h1>🚨 HAM - Heimdall Alert Module </h1>
           <p className="subtitle">Emergency Response Intelligence System</p>
           <div className="disclaimer">
             ⚠️ SIMULATION MODE - For Demonstration Only
