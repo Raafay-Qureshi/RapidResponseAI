@@ -31,7 +31,7 @@ function Dashboard() {
               situation_overview: "Satellite imagery confirms active wildfire spreading at 2.5 km/h towards residential areas. Wind conditions are favorable for rapid spread. Population impact assessment shows 2,500 residents in immediate danger zone.",
               communication_templates: {
                 en: "🚨 WILDFIRE ALERT: Evacuate immediately from HWY 407/410 area. Fire spreading rapidly. Follow emergency routes. Stay tuned for updates.",
-                pa: "🚨 ਅग्नि ਸੰਕਟ ਚੇਤਾਵਨੀ: HWY 407/410 ਖੇਤਰ ਤੋਂ ਤੁਰੰਤ ਖਾਲੀ ਕਰੋ। ਅੱਗ ਤੇਜ਼ੀ ਨਾਲ ਫੈਲ ਰਹੀ ਹੈ। ਐਮਰਜੈਂਸੀ ਰੂਟਾਂ ਦਾ ਪਾਲਣ ਕਰੋ। ਅਪਡੇਟਾਂ ਲਈ ਟਿਊਨਡ ਰਹੋ।",
+                pa: "🚨 ਅग्नi ਸੰਕਟ ਚੇਤਾਵਨੀ: HWY 407/410 ਖੇਤਰ ਤੋਂ ਤੁਰੰਤ ਖਾਲੀ ਕਰੋ। ਅੱਗ ਤੇਜ਼ੀ ਨਾਲ ਫੈਲ ਰਹੀ ਹੈ। ਐਮਰਜੈਂਸੀ ਰੂਟਾਂ ਦਾ ਪਾਲਣ ਕਰੋ। ਅਪਡੇਟਾਂ ਲਈ ਟਿਊਨਡ ਰਹੋ।",
                 hi: "🚨 अग्नि संकट चेतावनी: HWY 407/410 क्षेत्र से तुरंत खाली करें। आग तेजी से फैल रही है। आपातकालीन मार्गों का पालन करें। अपडेट के लिए ट्यून रहें।"
               }
             });
@@ -66,6 +66,7 @@ function Dashboard() {
         </div>
 
         <div className="control-section">
+<<<<<<< Updated upstream
           <div className={`status-indicator ${connected ? 'connected' : 'disconnected'}`}>
             <span className={`status-dot ${connected ? 'ready' : ''}`}></span>
             <span className="status-text">
@@ -74,6 +75,11 @@ function Dashboard() {
             {socket && connected && (
               <span className="socket-id">ID: {socket.id.substring(0, 8)}...</span>
             )}
+=======
+          <div className="status-indicator">
+            <span className="status-dot ready"></span>
+            <span className="status-text">System Ready</span>
+>>>>>>> Stashed changes
           </div>
         </div>
       </div>
