@@ -88,15 +88,35 @@ python app.py
 **Frontend Setup:**
 ```bash
 cd frontend
+
+# Install all dependencies
 npm install
 
-# Create .env file with your API keys
-echo "REACT_APP_API_URL=http://localhost:5000/api" > .env
-echo "REACT_APP_MAPBOX_TOKEN=your-mapbox-token" >> .env
+# Create .env file from example
+cp .env.example .env
+
+# Edit .env with your actual Mapbox token if needed
+# The .env.example already contains a working Mapbox token for development
 
 # Start the development server
 npm start
 ```
+
+The app will automatically open at `http://localhost:3000`
+
+**Installed Dependencies:**
+- `mapbox-gl` ^3.16.0 - Map visualization
+- `socket.io-client` ^4.8.1 - Real-time updates
+- `axios` ^1.13.2 - HTTP client for API calls
+- `chart.js` ^4.5.1 - Data visualization
+- `react-chartjs-2` ^5.3.1 - React wrapper for Chart.js
+- `react` ^19.2.0 - React framework
+- `react-dom` ^19.2.0 - React DOM rendering
+- `react-scripts` 5.0.1 - Create React App scripts
+
+**Environment Variables:**
+- `REACT_APP_API_URL` - Backend API endpoint (default: http://localhost:5000/api)
+- `REACT_APP_MAPBOX_TOKEN` - Mapbox GL access token for map rendering
 
 ### Step 4: Explore the Documentation
 - **Backend Development:** Read [02_BACKEND_ARCHITECTURE.md](02_BACKEND_ARCHITECTURE.md)
