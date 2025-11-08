@@ -1,0 +1,235 @@
+.executive-summary {
+  background: linear-gradient(to bottom, rgba(255, 68, 68, 0.05), transparent);
+  animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.copy-button {
+  padding: 0.5rem 1rem;
+  background: rgba(102, 126, 234, 0.2);
+  border: 1px solid #667eea;
+  border-radius: 4px;
+  color: #667eea;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.copy-button:hover {
+  background: rgba(102, 126, 234, 0.3);
+}
+
+.copy-button.copied {
+  background: rgba(76, 175, 80, 0.2);
+  border-color: var(--safe-green);
+  color: var(--safe-green);
+}
+
+/* Critical Alert Box */
+.critical-alert {
+  display: flex;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: rgba(255, 68, 68, 0.1);
+  border: 2px solid var(--danger-red);
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(255, 68, 68, 0);
+  }
+}
+
+.alert-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.alert-content {
+  flex: 1;
+}
+
+.alert-title {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--danger-red);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.alert-text {
+  margin: 0;
+  color: var(--text-primary);
+  line-height: 1.6;
+  font-size: 1rem;
+}
+
+/* Executive Stats */
+.executive-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat-card {
+  display: flex;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: var(--card-bg);
+  border-radius: 8px;
+  border-left: 4px solid;
+  transition: transform 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+}
+
+.stat-card.critical {
+  border-left-color: var(--danger-red);
+  background: linear-gradient(135deg, rgba(255, 68, 68, 0.1), var(--card-bg));
+}
+
+.stat-card.warning {
+  border-left-color: var(--warning-orange);
+  background: linear-gradient(135deg, rgba(255, 149, 0, 0.1), var(--card-bg));
+}
+
+.stat-card.info {
+  border-left-color: var(--info-blue);
+  background: linear-gradient(135deg, rgba(33, 150, 243, 0.1), var(--card-bg));
+}
+
+.stat-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.stat-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.stat-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.stat-detail {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+/* Recommendations */
+.recommendations {
+  padding: 1.5rem;
+  background: rgba(102, 126, 234, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+.recommendations-title {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.recommendations-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.recommendation-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: var(--card-bg);
+  border-radius: 4px;
+  border-left: 3px solid;
+}
+
+.recommendation-item.priority-critical {
+  border-left-color: var(--danger-red);
+}
+
+.recommendation-item.priority-high {
+  border-left-color: var(--warning-orange);
+}
+
+.recommendation-item.priority-moderate {
+  border-left-color: var(--info-blue);
+}
+
+.priority-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 3px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+}
+
+.priority-critical .priority-badge {
+  background: var(--danger-red);
+  color: white;
+}
+
+.priority-high .priority-badge {
+  background: var(--warning-orange);
+  color: white;
+}
+
+.priority-moderate .priority-badge {
+  background: var(--info-blue);
+  color: white;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .executive-stats {
+    grid-template-columns: 1fr;
+  }
+}

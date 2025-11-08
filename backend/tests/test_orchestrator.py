@@ -1,11 +1,78 @@
 import asyncio
 import os
 import sys
+import types
 from typing import Any, Dict, List
 
-import geopandas as gpd
-import pandas as pd
-from shapely.geometry import Polygon, mapping
+from unittest.mock import AsyncMock
+
+if "aiohttp" not in sys.modules:
+    class _ClientTimeout:
+        def __init__(self, total: int | float | None = None):
+            self.total = total
+
+    class _ClientSession:
+        def __init__(self, *args: Any, **kwargs: Any):
+            raise RuntimeError("aiohttp is not installed in the test environment.")
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, exc_type, exc, tb):
+            return False
+
+    sys.modules["aiohttp"] = types.SimpleNamespace(
+        ClientTimeout=_ClientTimeout,
+        ClientSession=_ClientSession,
+    )
+
+if "geopandas" not in sys.modules:
+    class _GeoDataFrame:
+        ...
+
+    def _read_file(*args: Any, **kwargs: Any):
+        raise RuntimeError("geopandas is not installed in the test environment.")
+
+    sys.modules["geopandas"] = types.SimpleNamespace(
+        GeoDataFrame=_GeoDataFrame,
+        read_file=_read_file,
+    )
+
+if "shapely" not in sys.modules:
+    class _Point:
+        def __init__(self, *args: Any, **kwargs: Any):
+            self.args = args
+
+        def buffer(self, *_args: Any, **_kwargs: Any):
+            return self
+
+        def intersects(self, *_args: Any, **_kwargs: Any) -> bool:
+            return True
+
+    class _Polygon:
+        def __init__(self, *args: Any, **kwargs: Any):
+            self.args = args
+
+    def _shape(obj: Any) -> Any:
+        return obj
+
+    geometry_module = types.ModuleType("shapely.geometry")
+    geometry_module.Point = _Point
+    geometry_module.shape = _shape
+    geometry_module.Polygon = _Polygon
+
+    geometry_base_module = types.ModuleType("shapely.geometry.base")
+    geometry_base_module.BaseGeometry = object
+
+    shapely_module = types.ModuleType("shapely")
+    shapely_module.geometry = geometry_module
+    errors_module = types.ModuleType("shapely.errors")
+    errors_module.GEOSException = Exception
+
+    sys.modules["shapely"] = shapely_module
+    sys.modules["shapely.geometry"] = geometry_module
+    sys.modules["shapely.geometry.base"] = geometry_base_module
+    sys.modules["shapely.errors"] = errors_module
 
 # Ensure backend package is on path
 TESTS_DIR = os.path.dirname(__file__)
@@ -24,87 +91,27 @@ class FakeSocket:
         self.events.append({"event": event, "payload": payload, "room": room})
 
 
-def _sample_population() -> gpd.GeoDataFrame:
-    polygons = [
-        Polygon([(-79.87, 43.72), (-79.85, 43.72), (-79.85, 43.74), (-79.87, 43.74)]),
-        Polygon([(-79.86, 43.74), (-79.84, 43.74), (-79.84, 43.76), (-79.86, 43.76)]),
-        Polygon([(-80.00, 43.60), (-79.98, 43.60), (-79.98, 43.62), (-80.00, 43.62)]),
-    ]
-
-    data = {
-        "population": [120, 230, 15],
-        "age_65_plus": [20, 45, 2],
-        "age_under_18": [30, 70, 5],
-        "primary_language": ["English", "Punjabi", "English"],
-        "neighborhood": ["Downtown", "North Ridge", "Far West"],
-        "geometry": polygons,
-    }
-    return gpd.GeoDataFrame(data, crs="EPSG:4326")
-
-
-def _sample_infrastructure() -> pd.DataFrame:
-    return pd.DataFrame(
-        {
-            "name": ["Civic Centre", "Central High School", "Emergency Ops"],
-            "type": ["government", "school", "emergency"],
-        }
-    )
-
-
-class DummySatelliteClient:
-    async def fetch_imagery(self, location: Dict[str, float]) -> Dict[str, Any]:
-        perimeter = Polygon(
-            [
-                (-79.88, 43.71),
-                (-79.83, 43.71),
-                (-79.83, 43.77),
-                (-79.88, 43.77),
-                (-79.88, 43.71),
-            ]
-        )
-        return {
-            "fire_perimeter": mapping(perimeter),
-            "thermal_intensity": 365,
-            "satellite": "TESTSAT",
-        }
-
-
-class DummyWeatherClient:
-    async def fetch_current(self, location: Dict[str, float]) -> Dict[str, Any]:
-        return {"main": {"temp": 21, "humidity": 55}}
-
-    async def fetch_forecast(self, location: Dict[str, float]) -> Dict[str, Any]:
-        return {
-            "list": [
-                {"wind": {"speed": 6}, "main": {"humidity": 65}},
-                {"wind": {"speed": 8}, "main": {"humidity": 72}},
-            ]
-        }
-
-
-class DummyGeoHubClient:
-    def __init__(self):
-        self.population = _sample_population()
-        self.infrastructure = _sample_infrastructure()
-
-    async def fetch_population(self, location: Dict[str, float]):
-        return self.population
-
-    async def fetch_infrastructure(self, location: Dict[str, float]):
-        return self.infrastructure
-
-    async def fetch_roads(self, location: Dict[str, float]):
-        return {"road_segments": 12}
-
-
 async def test_disaster_pipeline():
     socket = FakeSocket()
     orchestrator = DisasterOrchestrator(socket)
-    orchestrator.data_clients = {
-        "satellite": DummySatelliteClient(),
-        "weather": DummyWeatherClient(),
-        "geohub": DummyGeoHubClient(),
+    orchestrator._fetch_all_data = AsyncMock(
+        return_value={"satellite": {"fire_perimeter": "mock"}}
+    )
+    mock_agents = {
+        "damage": {"severity": "moderate", "affected_area_km2": 12},
+        "population": {"total_affected": 350},
+        "routing": {"priority_routes": []},
+        "resource": {"crews": 5},
+        "prediction": {"outlook": "stable"},
     }
+    orchestrator._run_all_agents = AsyncMock(return_value=mock_agents)
+    orchestrator._call_llm_api = AsyncMock(
+        return_value={
+            "summary": "Mock summary",
+            "overview": "Mock overview",
+            "templates": {"en": "English alert", "pa": "Punjabi alert", "hi": "Hindi alert"},
+        }
+    )
 
     trigger = {
         "type": "wildfire",
@@ -113,9 +120,11 @@ async def test_disaster_pipeline():
     disaster_id = orchestrator.create_disaster(trigger)
     plan = await orchestrator.process_disaster(disaster_id)
 
-    assert plan["summary"]["total_population_impacted"] == 350
-    assert plan["summary"]["severity"] in {"moderate", "high", "extreme"}
-    assert plan["summary"]["outlook"] == "stable"
+    assert plan["executive_summary"] == "Mock summary"
+    assert plan["situation_overview"] == "Mock overview"
+    assert plan["communication_templates"]["pa"] == "Punjabi alert"
+    assert plan["affected_areas"] == orchestrator.get_disaster(disaster_id)["agent_results"]["damage"]
+    assert plan["population_impact"]["total_affected"] == 350
     assert orchestrator.get_plan(disaster_id) == plan
     assert orchestrator.get_disaster(disaster_id)["status"] == "complete"
 
@@ -123,17 +132,12 @@ async def test_disaster_pipeline():
     assert emitted_events[0] == "disaster_created"
     assert emitted_events[-1] == "disaster_complete"
 
-    print("✓ DisasterOrchestrator pipeline produced a plan successfully")
+    print("✓ DisasterOrchestrator pipeline produced a synthesized plan successfully")
 
 
 async def test_create_and_fetch():
     socket = FakeSocket()
     orchestrator = DisasterOrchestrator(socket)
-    orchestrator.data_clients = {
-        "satellite": DummySatelliteClient(),
-        "weather": DummyWeatherClient(),
-        "geohub": DummyGeoHubClient(),
-    }
 
     trigger = {"type": "flood", "location": {"lat": 43.70, "lon": -79.80}}
     disaster_id = orchestrator.create_disaster(trigger)
@@ -205,9 +209,114 @@ def test_build_master_prompt_defaults():
     assert prompt.count("{}") >= 5  # each empty agent block renders a JSON placeholder
 
 
+def test_extract_section_and_missing_delimiter():
+    socket = FakeSocket()
+    orchestrator = DisasterOrchestrator(socket)
+
+    llm_text = """
+### EXECUTIVE SUMMARY ###
+Critical update here.
+### SITUATION OVERVIEW ###
+Detailed overview lines.
+### COMMUNICATION TEMPLATES (ENGLISH) ###
+English alert text.
+### COMMUNICATION TEMPLATES (PUNJABI) ###
+Punjabi alert text.
+### COMMUNICATION TEMPLATES (HINDI) ###
+Hindi alert text.
+"""
+    summary = orchestrator._extract_section(
+        llm_text,
+        "### EXECUTIVE SUMMARY ###",
+        "### SITUATION OVERVIEW ###",
+    )
+    assert summary == "Critical update here."
+
+    missing_section = orchestrator._extract_section(
+        llm_text,
+        "### UNKNOWN SECTION ###",
+        "### SITUATION OVERVIEW ###",
+    )
+    assert missing_section.startswith("Error: Could not find section")
+
+
+def test_parse_llm_response_structure():
+    socket = FakeSocket()
+    orchestrator = DisasterOrchestrator(socket)
+
+    response = """
+### EXECUTIVE SUMMARY ###
+Fire is spreading rapidly near Main St.
+### SITUATION OVERVIEW ###
+Paragraph one details.
+Paragraph two details.
+### COMMUNICATION TEMPLATES (ENGLISH) ###
+English template text.
+### COMMUNICATION TEMPLATES (PUNJABI) ###
+Punjabi template text.
+### COMMUNICATION TEMPLATES (HINDI) ###
+Hindi template text.
+"""
+
+    parsed = orchestrator._parse_llm_response(response)
+
+    assert parsed["summary"] == "Fire is spreading rapidly near Main St."
+    assert "Paragraph one details." in parsed["overview"]
+    assert parsed["templates"]["en"] == "English template text."
+    assert parsed["templates"]["pa"] == "Punjabi template text."
+    assert parsed["templates"]["hi"] == "Hindi template text."
+
+
+async def test_process_disaster_emits_progress_and_context():
+    socket = FakeSocket()
+    orchestrator = DisasterOrchestrator(socket)
+
+    mock_data = {"roads": {"segments": 2}}
+    mock_agents = {
+        "damage": {"severity": "moderate"},
+        "population": {"total_affected": 123},
+        "routing": {"priority_routes": []},
+        "resource": {"crews": 4},
+        "prediction": {"outlook": "stable"},
+    }
+    orchestrator._fetch_all_data = AsyncMock(return_value=mock_data)
+    orchestrator._run_all_agents = AsyncMock(return_value=mock_agents)
+    orchestrator._call_llm_api = AsyncMock(
+        return_value={
+            "summary": "Integration summary",
+            "overview": "Integration overview",
+            "templates": {"en": "T1", "pa": "T2", "hi": "T3"},
+        }
+    )
+
+    trigger = {"type": "flood", "location": {"lat": 43.7, "lon": -79.8}}
+    disaster_id = orchestrator.create_disaster(trigger)
+    await orchestrator.process_disaster(disaster_id)
+
+    progress_events = [evt for evt in socket.events if evt["event"] == "progress"]
+    assert [evt["payload"]["phase"] for evt in progress_events] == [
+        "data_ingestion",
+        "agent_processing",
+        "synthesis",
+    ]
+    assert progress_events[-1]["payload"]["progress"] == 70
+
+    orchestrator._call_llm_api.assert_awaited_once()
+    context = orchestrator._call_llm_api.call_args.args[0]
+    assert context["disaster_type"] == "flood"
+    assert context["location"] == {"lat": 43.7, "lon": -79.8}
+    assert context["agent_outputs"] == mock_agents
+
+    final_event = socket.events[-1]
+    assert final_event["event"] == "disaster_complete"
+    assert final_event["payload"]["plan"]["executive_summary"] == "Integration summary"
+    assert final_event["payload"]["plan"]["resource_deployment"] == mock_agents["resource"]
+
+
 async def main():
     await test_disaster_pipeline()
     await test_create_and_fetch()
+    await test_process_disaster_emits_progress_and_context()
     print("\n✅ All DisasterOrchestrator tests passed!")
 
 

@@ -33,10 +33,12 @@
 - ✅ Empty context handling
 - ✅ Prompt structure validation
 
-#### 3. Response Parsing Tests (3 tests)
+#### 3. Response Parsing Tests (5 tests)
 - ✅ Basic response parsing
 - ✅ Long text handling (5000+ chars)
 - ✅ Empty string handling
+- ✅ Section extraction with graceful delimiter fallbacks
+- ✅ Structured template parsing (English/Punjabi/Hindi)
 
 #### 4. Error Handling Tests (5 tests)
 - ✅ Missing API key detection
@@ -129,6 +131,24 @@ Testing DisasterOrchestrator Implementation
 ==================================================
 All tests passed! [SUCCESS]
 ==================================================
+```
+
+#### Focused Pytest (LLM Parsing Helpers)
+```bash
+$ ./backend/venv/bin/pytest \
+    backend/tests/test_orchestrator.py::test_extract_section_and_missing_delimiter \
+    backend/tests/test_orchestrator.py::test_parse_llm_response_structure
+
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-7.4.4, pluggy-1.6.0
+rootdir: /home/james/personal/HAM
+plugins: anyio-4.11.0, asyncio-0.23.0
+asyncio: mode=Mode.STRICT
+collected 2 items
+
+backend/tests/test_orchestrator.py ..                                    [100%]
+
+============================== 2 passed in 0.90s ===============================
 ```
 
 ### Documentation Updates
