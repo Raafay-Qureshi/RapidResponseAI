@@ -41,14 +41,15 @@ async def main():
     print(f"[PASS] Parsed response: {result}")
     
     # Test 4: _call_llm_api without API key
-    print("\n4. Testing _call_llm_api without API key...")
+    print("\n4. Testing error handling when API key is missing...")
+    print("    (Temporarily removing API key to test error handling)")
     original_key = os.getenv('OPENROUTER_API_KEY')
     if 'OPENROUTER_API_KEY' in os.environ:
         del os.environ['OPENROUTER_API_KEY']
     
     result = await orchestrator._call_llm_api({"test": "context"})
     assert result["summary"] == "Error: LLM API key not configured."
-    print(f"[PASS] Correctly handled missing API key: {result['summary']}")
+    print(f"[PASS] Error handling working correctly: {result['summary']}")
     
     # Restore key if it existed
     if original_key:
