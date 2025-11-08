@@ -1,7 +1,7 @@
 import React from 'react';
 import Dashboard from './components/Dashboard';
 import './App.css';
-import MapView from './components/Map/MapView';
+import Dashboard from './components/Dashboard';
 
 function App() {
   return (
@@ -13,6 +13,7 @@ function App() {
           ⚠️ SIMULATION MODE - For Demonstration Only
         </div>
       </header>
+<<<<<<< Updated upstream
 <<<<<<< HEAD
       <Dashboard />
 =======
@@ -20,6 +21,9 @@ function App() {
         <MapView />
       </main>
 >>>>>>> 63c03dced260d27a12c55fa251c3640e72c3099c
+=======
+      <Dashboard />
+>>>>>>> Stashed changes
     </div>
   );
 }
