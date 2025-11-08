@@ -2,9 +2,12 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import uuid
 from datetime import datetime
 from typing import Any, Dict, Optional
+
+import aiohttp
 
 from .data.geohub_client import GeoHubClient
 from .data.satellite_client import SatelliteClient
@@ -75,22 +78,74 @@ class DisasterOrchestrator:
         try:
             disaster["status"] = "fetching_data"
             self._emit("disaster_status", {"status": "fetching_data"}, room=disaster_id)
+            self._emit(
+                "progress",
+                {
+                    "disaster_id": disaster_id,
+                    "phase": "data_ingestion",
+                    "progress": 10,
+                },
+                room=disaster_id,
+            )
             data = await self._fetch_all_data(disaster)
             disaster["data"] = data
 
             disaster["status"] = "analyzing"
             self._emit("disaster_status", {"status": "analyzing"}, room=disaster_id)
-            agent_results = await self._run_agents(disaster, data)
+            self._emit(
+                "progress",
+                {
+                    "disaster_id": disaster_id,
+                    "phase": "agent_processing",
+                    "progress": 30,
+                },
+                room=disaster_id,
+            )
+            agent_results = await self._run_all_agents(disaster, data)
             disaster["agent_results"] = agent_results
 
             disaster["status"] = "generating_plan"
             self._emit("disaster_status", {"status": "generating_plan"}, room=disaster_id)
-            plan = self._synthesize_plan(disaster, agent_results)
-            disaster["plan"] = plan
+            self._emit(
+                "progress",
+                {
+                    "disaster_id": disaster_id,
+                    "phase": "synthesis",
+                    "progress": 70,
+                },
+                room=disaster_id,
+            )
+
+            context = {
+                "disaster_type": disaster.get("type"),
+                "location": disaster.get("location"),
+                "timestamp": disaster.get("created_at"),
+                "agent_outputs": agent_results,
+            }
+            llm_response = await self._call_llm_api(context)
+
+            final_plan = {
+                "disaster_id": disaster_id,
+                "generated_at": datetime.utcnow().isoformat(),
+                "executive_summary": llm_response.get("summary", ""),
+                "situation_overview": llm_response.get("overview", ""),
+                "communication_templates": llm_response.get("templates", {}),
+                "affected_areas": agent_results.get("damage", {}),
+                "population_impact": agent_results.get("population", {}),
+                "evacuation_plan": agent_results.get("routing", {}),
+                "resource_deployment": agent_results.get("resource", {}),
+                "timeline_predictions": agent_results.get("prediction", {}),
+            }
+
+            disaster["plan"] = final_plan
             disaster["status"] = "complete"
 
-            self._emit("disaster_complete", {"plan": plan}, room=disaster_id)
-            return plan
+            self._emit(
+                "disaster_complete",
+                {"disaster_id": disaster_id, "plan": final_plan},
+                room=disaster_id,
+            )
+            return final_plan
 
         except Exception as exc:
             disaster["status"] = "error"
@@ -133,7 +188,7 @@ class DisasterOrchestrator:
                 self._log(f"Failed to fetch {key} data: {exc}")
         return results
 
-    async def _run_agents(
+    async def _run_all_agents(
         self,
         disaster: Dict[str, Any],
         data: Dict[str, Any],
@@ -280,40 +335,76 @@ Generate the complete emergency response plan. The plan MUST be formatted EXACTL
             },
         }
 
-    def _synthesize_plan(
-        self,
-        disaster: Dict[str, Any],
-        agent_results: Dict[str, Any],
-    ) -> Dict[str, Any]:
-        damage = agent_results.get("damage", {})
-        population = agent_results.get("population", {})
-        routing = agent_results.get("routing", {})
-        resources = agent_results.get("resource", {})
-        prediction = agent_results.get("prediction", {})
+    async def _call_llm_api(self, context: Dict[str, Any]) -> Dict[str, Any]:
+        """Send the synthesized prompt to the LLM provider and parse the response."""
+        api_key = os.getenv("OPENROUTER_API_KEY")
+        if not api_key:
+            self._log("OPENROUTER_API_KEY not configured; returning fallback plan.")
+            return {
+                "summary": "Error: LLM API key not configured.",
+                "overview": "",
+                "templates": {},
+            }
 
-        recommendations = [
-            "Deploy rapid assessment teams to confirm satellite findings.",
-            "Stage relief supplies near critical facilities highlighted by the population agent.",
-            routing.get("priority_routes", [])[0]["notes"]
-            if routing.get("priority_routes")
-            else "Establish temporary wayfinding signage for evac routes.",
-            prediction.get("recommendation", "Review forecast data with meteorology team."),
-        ]
-
-        return {
-            "disaster_id": disaster["id"],
-            "generated_at": datetime.utcnow().isoformat(),
-            "summary": {
-                "type": disaster.get("type"),
-                "status": disaster.get("status"),
-                "affected_area_km2": damage.get("affected_area_km2", 0),
-                "total_population_impacted": population.get("total_affected", 0),
-                "severity": damage.get("severity"),
-                "outlook": prediction.get("outlook"),
-            },
-            "recommendations": recommendations,
-            "agent_snapshots": agent_results,
+        prompt = self._build_master_prompt(context)
+        url = os.getenv("OPENROUTER_URL", "https://openrouter.ai/api/v1/chat/completions")
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
         }
+
+        payload = {
+            "model": os.getenv("OPENROUTER_MODEL", "anthropic/claude-3.5-sonnet"),
+            "messages": [
+                {
+                    "role": "user",
+                    "content": prompt,
+                }
+            ],
+        }
+
+        timeout = aiohttp.ClientTimeout(total=60)
+        try:
+            async with aiohttp.ClientSession(timeout=timeout) as session:
+                async with session.post(url, headers=headers, json=payload) as response:
+                    if response.status != 200:
+                        error_text = await response.text()
+                        self._log(f"LLM API error {response.status}: {error_text}")
+                        return {
+                            "summary": f"Error: LLM API request failed ({response.status}).",
+                            "overview": error_text,
+                            "templates": {},
+                        }
+                    data = await response.json()
+        except Exception as exc:
+            self._log(f"LLM API exception: {exc}")
+            return {
+                "summary": "Error: LLM API request failed.",
+                "overview": str(exc),
+                "templates": {},
+            }
+
+        choices = data.get("choices", [])
+        if not choices:
+            self._log("LLM API response missing choices array.")
+            return {
+                "summary": "Error: LLM API returned no results.",
+                "overview": "",
+                "templates": {},
+            }
+
+        content = choices[0].get("message", {}).get("content", "")
+        if isinstance(content, list):
+            flattened = []
+            for block in content:
+                if isinstance(block, dict):
+                    flattened.append(block.get("text", ""))
+                else:
+                    flattened.append(str(block))
+            content = "\n".join(flattened)
+
+        return self._parse_llm_response(content or "")
 
     def _emit(self, event: str, payload: Dict[str, Any], room: Optional[str] = None) -> None:
         if self.socketio:
