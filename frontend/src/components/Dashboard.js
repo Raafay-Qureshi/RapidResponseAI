@@ -1,11 +1,8 @@
-<<<<<<< Updated upstream
-import React, { useState } from 'react';
-import { useWebSocketContext } from '../services/websocket';
-=======
 import React, { useState, useEffect } from 'react';
->>>>>>> Stashed changes
+import { useWebSocketContext } from '../services/websocket';
 import MapView from './Map/MapView';
 import DisasterTrigger from './Controls/DisasterTrigger';
+import WebSocketTest from './Test/WebSocketTest';
 import './Dashboard.css';
 
 function Dashboard() {
@@ -58,16 +55,6 @@ function Dashboard() {
         </div>
 
         <div className="control-section">
-<<<<<<< Updated upstream
-          <div className={`status-indicator ${connected ? 'connected' : 'disconnected'}`}>
-            <span className={`status-dot ${connected ? 'ready' : ''}`}></span>
-            <span className="status-text">
-              {connected ? '🟢 WebSocket Connected' : '🔴 WebSocket Disconnected'}
-            </span>
-            {socket && connected && (
-              <span className="socket-id">ID: {socket.id.substring(0, 8)}...</span>
-            )}
-=======
           <DisasterTrigger
             onTrigger={(disaster) => {
               setDisaster(disaster);
@@ -79,10 +66,14 @@ function Dashboard() {
         </div>
 
         <div className="control-section">
-          <div className="status-indicator">
-            <span className="status-dot ready"></span>
-            <span className="status-text">System Ready</span>
->>>>>>> Stashed changes
+          <div className={`status-indicator ${connected ? 'connected' : 'disconnected'}`}>
+            <span className={`status-dot ${connected ? 'ready' : ''}`}></span>
+            <span className="status-text">
+              {connected ? '🟢 WebSocket Connected' : '🔴 WebSocket Disconnected'}
+            </span>
+            {socket && connected && (
+              <span className="socket-id">ID: {socket.id.substring(0, 8)}...</span>
+            )}
           </div>
         </div>
       </div>
@@ -181,6 +172,9 @@ function Dashboard() {
           )}
         </div>
       </div>
+
+      {/* WebSocket Test Component - Temporary for testing */}
+      <WebSocketTest />
     </div>
   );
 }
