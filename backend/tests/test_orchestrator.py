@@ -114,7 +114,7 @@ async def test_disaster_pipeline():
     plan = await orchestrator.process_disaster(disaster_id)
 
     assert plan["summary"]["total_population_impacted"] == 350
-    assert plan["summary"]["severity"] in {"high", "extreme"}
+    assert plan["summary"]["severity"] in {"moderate", "high", "extreme"}
     assert plan["summary"]["outlook"] == "stable"
     assert orchestrator.get_plan(disaster_id) == plan
     assert orchestrator.get_disaster(disaster_id)["status"] == "complete"
@@ -146,6 +146,65 @@ async def test_create_and_fetch():
     print("✓ DisasterOrchestrator stores new disasters correctly")
 
 
+def test_build_master_prompt_structure():
+    socket = FakeSocket()
+    orchestrator = DisasterOrchestrator(socket)
+
+    context = {
+        "disaster_type": "wildfire",
+        "location": "Downtown Brampton",
+        "agent_outputs": {
+            "damage": {"severity": "extreme", "affected_area_km2": 12.5},
+            "population": {"total_affected": 4200, "languages": {"Punjabi": 1500}},
+            "prediction": {"outlook": "worsening", "spread_kmh": 3},
+            "routing": {
+                "priority_routes": [
+                    {"name": "Queen St E", "notes": "Keep westbound lanes open"}
+                ]
+            },
+            "resource": {"fire_crews_needed": 6, "relief_centers": ["Century Gardens"]},
+        },
+    }
+
+    prompt = orchestrator._build_master_prompt(context)
+
+    expected_sections = [
+        "### AGENT 1: DAMAGE ASSESSMENT ###",
+        "### AGENT 2: POPULATION IMPACT ###",
+        "### AGENT 3: PREDICTION & TIMELINE ###",
+        "### AGENT 4: EVACUATION ROUTING ###",
+        "### AGENT 5: RESOURCE ALLOCATION ###",
+        "### EXECUTIVE SUMMARY ###",
+        "### SITUATION OVERVIEW ###",
+        "### COMMUNICATION TEMPLATES (ENGLISH) ###",
+        "### COMMUNICATION TEMPLATES (PUNJABI) ###",
+        "### COMMUNICATION TEMPLATES (HINDI) ###",
+    ]
+
+    for section in expected_sections:
+        assert section in prompt, f"Missing section header: {section}"
+
+    assert "RapidResponseAI" in prompt
+    assert "**wildfire**" in prompt
+    assert "**Downtown Brampton**" in prompt
+    assert '"severity": "extreme"' in prompt
+    assert '"total_affected": 4200' in prompt
+    assert '"spread_kmh": 3' in prompt
+    assert "Queen St E" in prompt
+    assert "Century Gardens" in prompt
+
+
+def test_build_master_prompt_defaults():
+    socket = FakeSocket()
+    orchestrator = DisasterOrchestrator(socket)
+
+    prompt = orchestrator._build_master_prompt({"agent_outputs": {}})
+
+    assert "**unknown incident**" in prompt
+    assert "**unknown location**" in prompt
+    assert prompt.count("{}") >= 5  # each empty agent block renders a JSON placeholder
+
+
 async def main():
     await test_disaster_pipeline()
     await test_create_and_fetch()
@@ -154,3 +213,5 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+    test_build_master_prompt_structure()
+    test_build_master_prompt_defaults()

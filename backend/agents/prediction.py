@@ -32,12 +32,26 @@ class PredictionAgent(BaseAgent):
         Main coordinator for modeling fire spread.
         Calls helper functions to do the actual work.
         """
-        weather = data['weather']
+        weather_input = data.get('weather') or {}
+        if isinstance(weather_input, dict) and weather_input.get('list'):
+            weather = weather_input['list'][0]
+        else:
+            weather = weather_input
+
         current_boundary_geojson = data.get('fire_perimeter')
         current_boundary_geom = shape(current_boundary_geojson) if current_boundary_geojson else None
 
         # --- Task #24 ---
         spread_rate, factors = _calculate_fire_spread_rate(weather)
+        humidity = weather.get('main', {}).get('humidity', factors.get('humidity_percent', 50))
+        wind_speed = factors.get('wind_speed_kmh', 0)
+
+        if spread_rate >= 6 or (wind_speed >= 45 and humidity <= 35):
+            outlook = 'worsening'
+        elif spread_rate <= 3 and humidity >= 55:
+            outlook = 'stable'
+        else:
+            outlook = 'guarded'
 
         # --- Task #25 ---
         timeline_predictions = _generate_timeline_predictions(
@@ -58,7 +72,8 @@ class PredictionAgent(BaseAgent):
             'current_spread_rate_kmh': round(spread_rate, 2),
             'predictions': timeline_predictions,
             'critical_arrival_times': arrival_times,
-            'factors': factors
+            'factors': factors,
+            'outlook': outlook
         }
 
     async def _model_flood_spread(self, disaster: Dict, data: Dict) -> Dict:
