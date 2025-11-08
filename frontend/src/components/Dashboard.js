@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { useWebSocketContext } from '../services/websocket';
 import MapView from './Map/MapView';
 import './Dashboard.css';
 
 function Dashboard() {
+  const { connected, isReady, socket } = useWebSocketContext();
   // eslint-disable-next-line no-unused-vars
   const [disaster, setDisaster] = useState(null);
   // eslint-disable-next-line no-unused-vars
@@ -22,9 +24,14 @@ function Dashboard() {
         </div>
 
         <div className="control-section">
-          <div className="status-indicator">
-            <span className="status-dot ready"></span>
-            <span className="status-text">System Ready</span>
+          <div className={`status-indicator ${connected ? 'connected' : 'disconnected'}`}>
+            <span className={`status-dot ${connected ? 'ready' : ''}`}></span>
+            <span className="status-text">
+              {connected ? '🟢 WebSocket Connected' : '🔴 WebSocket Disconnected'}
+            </span>
+            {socket && connected && (
+              <span className="socket-id">ID: {socket.id.substring(0, 8)}...</span>
+            )}
           </div>
         </div>
       </div>
@@ -81,6 +88,11 @@ function Dashboard() {
                   <span className="stat-label">Response Time</span>
                 </div>
               </div>
+              {isReady && (
+                <div className="websocket-ready-badge">
+                  ✓ Real-time updates enabled
+                </div>
+              )}
             </div>
           )}
         </div>

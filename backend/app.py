@@ -15,10 +15,11 @@ sys.path.append(os.path.dirname(__file__))
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:3000"])
+# Allow both common dev ports for CORS
+CORS(app, origins=["http://localhost:3000", "http://localhost:3001"])
 
-# Initialize SocketIO with CORS support
-socketio = SocketIO(app, cors_allowed_origins=["http://localhost:3000"])
+# Initialize SocketIO with CORS support - allow both dev ports
+socketio = SocketIO(app, cors_allowed_origins=["http://localhost:3000", "http://localhost:3001"])
 
 # Initialize orchestrator with socketio instance (commented out for now due to missing dependencies)
 # orchestrator = DisasterOrchestrator(socketio)
