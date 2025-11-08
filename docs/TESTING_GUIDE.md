@@ -160,7 +160,9 @@ pip install -r backend/requirements.txt
 python backend/tests/test_orchestrator.py
 ```
 
-This harness injects lightweight dummy data clients so the orchestrator can run through data fetching, agent execution, status updates, and plan synthesis entirely offline. Expect status logs from every agent and a final “All DisasterOrchestrator tests passed!” message.
+This harness injects lightweight dummy data clients so the orchestrator can run through data fetching, agent execution, status updates, and plan synthesis entirely offline. It now also runs regression checks on `_build_master_prompt`, ensuring the five agent JSON blocks are injected and that the required section headers are present (Executive Summary, Situation Overview, and all communication templates). Expect status logs from every agent, prompt test assertions, and a final “All DisasterOrchestrator tests passed!” message.
+
+> **Tip:** If you only need to validate the prompt formatter, set up the environment once (installing `geopandas`, `shapely`, etc. from `backend/requirements.txt`) and re-run `python backend/tests/test_orchestrator.py`. The prompt tests execute immediately after the async pipeline and do not require any external APIs or LLM calls.
 
 ---
 
