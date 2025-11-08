@@ -225,6 +225,61 @@ Generate the complete emergency response plan. The plan MUST be formatted EXACTL
 """
         return prompt
 
+    def _extract_section(self, text: str, start_delim: str, end_delim: str) -> str:
+        """Helper to extract text between two delimiters."""
+        try:
+            start_index = text.index(start_delim) + len(start_delim)
+            end_index = text.index(end_delim, start_index)
+            return text[start_index:end_index].strip()
+        except ValueError:
+            if start_delim in text:
+                return text.split(start_delim, 1)[-1].split("###", 1)[0].strip()
+            self._log(f"Warning: Could not find delimiter {start_delim}")
+            return f"Error: Could not find section {start_delim}"
+
+    def _parse_llm_response(self, response_text: str) -> Dict[str, Any]:
+        """Parses the raw LLM text block into a structured dict."""
+        self._log("Parsing LLM response...")
+
+        summary = self._extract_section(
+            response_text,
+            "### EXECUTIVE SUMMARY ###",
+            "### SITUATION OVERVIEW ###",
+        )
+        overview = self._extract_section(
+            response_text,
+            "### SITUATION OVERVIEW ###",
+            "### COMMUNICATION TEMPLATES (ENGLISH) ###",
+        )
+
+        template_en = self._extract_section(
+            response_text,
+            "### COMMUNICATION TEMPLATES (ENGLISH) ###",
+            "### COMMUNICATION TEMPLATES (PUNJABI) ###",
+        )
+        template_pa = self._extract_section(
+            response_text,
+            "### COMMUNICATION TEMPLATES (PUNJABI) ###",
+            "### COMMUNICATION TEMPLATES (HINDI) ###",
+        )
+
+        try:
+            template_hi = response_text.split("### COMMUNICATION TEMPLATES (HINDI) ###", 1)[
+                -1
+            ].strip()
+        except Exception:
+            template_hi = "Error: Could not parse Hindi template."
+
+        return {
+            "summary": summary,
+            "overview": overview,
+            "templates": {
+                "en": template_en,
+                "pa": template_pa,
+                "hi": template_hi,
+            },
+        }
+
     def _synthesize_plan(
         self,
         disaster: Dict[str, Any],

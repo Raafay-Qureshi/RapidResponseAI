@@ -205,6 +205,64 @@ def test_build_master_prompt_defaults():
     assert prompt.count("{}") >= 5  # each empty agent block renders a JSON placeholder
 
 
+def test_extract_section_and_missing_delimiter():
+    socket = FakeSocket()
+    orchestrator = DisasterOrchestrator(socket)
+
+    llm_text = """
+### EXECUTIVE SUMMARY ###
+Critical update here.
+### SITUATION OVERVIEW ###
+Detailed overview lines.
+### COMMUNICATION TEMPLATES (ENGLISH) ###
+English alert text.
+### COMMUNICATION TEMPLATES (PUNJABI) ###
+Punjabi alert text.
+### COMMUNICATION TEMPLATES (HINDI) ###
+Hindi alert text.
+"""
+    summary = orchestrator._extract_section(
+        llm_text,
+        "### EXECUTIVE SUMMARY ###",
+        "### SITUATION OVERVIEW ###",
+    )
+    assert summary == "Critical update here."
+
+    missing_section = orchestrator._extract_section(
+        llm_text,
+        "### UNKNOWN SECTION ###",
+        "### SITUATION OVERVIEW ###",
+    )
+    assert missing_section.startswith("Error: Could not find section")
+
+
+def test_parse_llm_response_structure():
+    socket = FakeSocket()
+    orchestrator = DisasterOrchestrator(socket)
+
+    response = """
+### EXECUTIVE SUMMARY ###
+Fire is spreading rapidly near Main St.
+### SITUATION OVERVIEW ###
+Paragraph one details.
+Paragraph two details.
+### COMMUNICATION TEMPLATES (ENGLISH) ###
+English template text.
+### COMMUNICATION TEMPLATES (PUNJABI) ###
+Punjabi template text.
+### COMMUNICATION TEMPLATES (HINDI) ###
+Hindi template text.
+"""
+
+    parsed = orchestrator._parse_llm_response(response)
+
+    assert parsed["summary"] == "Fire is spreading rapidly near Main St."
+    assert "Paragraph one details." in parsed["overview"]
+    assert parsed["templates"]["en"] == "English template text."
+    assert parsed["templates"]["pa"] == "Punjabi template text."
+    assert parsed["templates"]["hi"] == "Hindi template text."
+
+
 async def main():
     await test_disaster_pipeline()
     await test_create_and_fetch()
