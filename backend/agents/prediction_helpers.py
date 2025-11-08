@@ -3,8 +3,9 @@ Helper functions for PredictionAgent.
 These are stubs that will be implemented in subsequent tasks.
 """
 
+import numpy as np
 from typing import Dict, List, Tuple
-from shapely.geometry import shape
+from shapely.geometry import shape, Point
 try:
     from pyproj import Geod
 except ImportError:
@@ -102,59 +103,73 @@ def _generate_timeline_predictions(current_boundary_geojson: Dict, spread_rate: 
     return predictions
 
 
+def _distance_to_boundary(boundary_geom: shape, point_geom: Point) -> float:
+    """Calculate distance from a point to a polygon boundary in km"""
+    if not boundary_geom or not point_geom:
+        return float('inf')
+    # .distance returns degrees, convert to km
+    distance_degrees = boundary_geom.distance(point_geom)
+    return distance_degrees * 111.1  # Approx km per degree
+
+
+def _calculate_directional_factor(fire_center: Point, target_point: Point, wind_dir: float) -> float:
+    """
+    Very simple directional model.
+    Returns > 1 if target is downwind, < 1 if upwind.
+    """
+    # Calculate angle from fire to target
+    target_angle = np.degrees(np.arctan2(target_point.y - fire_center.y, target_point.x - fire_center.x))
+    # Convert wind direction (from) to angle (to)
+    wind_angle = (wind_dir - 180) % 360
+
+    # Find difference in angles
+    angle_diff = 180 - abs(abs(target_angle - wind_angle) - 180)
+
+    # Cosine function gives 1 for 0 diff, 0 for 90 diff, -1 for 180 diff
+    # We'll scale it to be 1.5 (downwind) to 0.5 (upwind)
+    factor = (np.cos(np.radians(angle_diff)) + 1) / 2  # Scale 0-1
+    return 0.5 + factor  # Scale 0.5 - 1.5
+
+
 def _identify_critical_points(location: Dict) -> List[Dict]:
-    """
-    Identify critical points that need protection from fire spread.
-
-    Args:
-        location: Disaster location dictionary
-
-    Returns:
-        List of critical point dictionaries
-    """
-    # Stub implementation - will be replaced in Task #26
-    # For now, return some sample points near the disaster location
-    lat = location.get('lat', 43.7)
-    lon = location.get('lon', -79.8)
-
-    critical_points = [
-        {'lat': lat + 0.01, 'lon': lon + 0.01, 'type': 'residential'},
-        {'lat': lat - 0.01, 'lon': lon - 0.01, 'type': 'school'},
-        {'lat': lat + 0.005, 'lon': lon - 0.005, 'type': 'hospital'}
+    """Identify critical infrastructure or population centers"""
+    # Hardcoded for demo
+    return [
+        {'name': 'Residential Area A', 'lat': 43.735, 'lon': -79.860},
+        {'name': 'Highway 410', 'lat': 43.740, 'lon': -79.855},
+        {'name': 'Main Street Commercial', 'lat': 43.745, 'lon': -79.850}
     ]
 
-    return critical_points
 
+def _calculate_arrival_times(boundary_geom: shape, points: List, spread_rate: float, wind_dir: float) -> List[Dict]:
+    """Calculate when fire will reach each critical point"""
+    results = []
+    if not boundary_geom:
+        return []
 
-def _calculate_arrival_times(current_boundary_geom, critical_points: List[Dict],
-                           spread_rate: float, wind_direction_deg: float) -> List[Dict]:
-    """
-    Calculate arrival times for fire to reach critical points.
+    fire_center = boundary_geom.centroid
 
-    Args:
-        current_boundary_geom: Current fire boundary geometry
-        critical_points: List of critical points
-        spread_rate: Spread rate in km/h
-        wind_direction_deg: Wind direction in degrees
+    for point_data in points:
+        point_geom = Point(point_data['lon'], point_data['lat'])
 
-    Returns:
-        List of arrival time dictionaries
-    """
-    # Stub implementation - will be replaced in Task #26
-    arrival_times = []
+        # Calculate distance from boundary to point
+        distance_km = _distance_to_boundary(boundary_geom, point_geom)
 
-    for point in critical_points:
-        # Simple distance-based calculation (would be more sophisticated)
-        # Assume points are within 1-5 km and calculate time based on spread rate
-        distance_km = 2.0  # Placeholder distance
-        time_hours = distance_km / spread_rate
-        time_seconds = int(time_hours * 3600)
+        # Adjust for wind direction
+        directional_factor = _calculate_directional_factor(
+            fire_center, point_geom, wind_dir
+        )
 
-        arrival_times.append({
-            'point': point,
-            'arrival_time': f'2023-10-01T{12 + int(time_hours):02d}:00:00Z',
-            'distance_km': distance_km,
-            'time_hours': round(time_hours, 2)
+        effective_spread_rate = spread_rate * directional_factor
+        if effective_spread_rate <= 0:  # or very small
+            hours_until_arrival = float('inf')
+        else:
+            hours_until_arrival = distance_km / effective_spread_rate
+
+        results.append({
+            'location': point_data['name'],
+            'hours_until_arrival': round(hours_until_arrival, 1),
+            'confidence': 'high' if hours_until_arrival < 6 else 'medium'
         })
 
-    return arrival_times
+    return sorted(results, key=lambda x: x['hours_until_arrival'])
