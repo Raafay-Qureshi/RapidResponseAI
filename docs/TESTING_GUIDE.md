@@ -438,11 +438,65 @@ Running test_timeline_predictions_realistic_values...
 PASS: test_timeline_predictions_realistic_values
 ```
 
+### Testing Arrival Times at Critical Points (Task #26)
+
+The `_calculate_arrival_times` and related functions have comprehensive unit tests:
+
+```bash
+# Run arrival time tests specifically
+python backend/tests/test_arrival_times.py
+
+# Or run all prediction-related tests
+python backend/tests/test_prediction.py
+python backend/tests/test_fire_spread_rate.py
+python backend/tests/test_timeline_predictions.py
+python backend/tests/test_arrival_times.py
+```
+
+**Test Coverage (9 comprehensive tests):**
+1. **Distance Calculation** - Tests `_distance_to_boundary` with sample data and None inputs
+2. **Directional Factor** - Validates wind direction effects on spread rate
+3. **Critical Points** - Tests `_identify_critical_points` returns proper structure
+4. **Arrival Times Structure** - Ensures correct list format with required fields
+5. **Sorting** - Verifies results are sorted by arrival time
+6. **None Boundary Handling** - Tests behavior with None boundary geometry
+7. **Different Spread Rates** - Validates arrival times scale with spread rate
+8. **Confidence Levels** - Tests confidence assignment based on time (< 6h = high, >= 6h = medium)
+
+**Expected Test Output:**
+```
+.........
+----------------------------------------------------------------------
+Ran 9 tests in 0.003s
+
+OK
+Running test_calculate_arrival_times_confidence_levels...
+PASS: test_calculate_arrival_times_confidence_levels
+Running test_calculate_arrival_times_different_spread_rates...
+PASS: test_calculate_arrival_times_different_spread_rates
+Running test_calculate_arrival_times_sorted...
+PASS: test_calculate_arrival_times_sorted
+Running test_calculate_arrival_times_structure...
+PASS: test_calculate_arrival_times_structure
+Running test_calculate_arrival_times_with_none_boundary...
+PASS: test_calculate_arrival_times_with_none_boundary
+Running test_calculate_directional_factor...
+PASS: test_calculate_directional_factor
+Running test_distance_to_boundary_with_none...
+PASS: test_distance_to_boundary_with_none
+Running test_distance_to_boundary_with_sample_data...
+PASS: test_distance_to_boundary_with_sample_data
+Running test_identify_critical_points...
+PASS: test_identify_critical_points
+```
+
 The test suite validates:
 1. **Wildfire Analysis** - Tests the full wildfire prediction pipeline with mocked helper functions
 2. **Flood Analysis** - Verifies the placeholder implementation for flood disasters
 3. **Unknown Disaster Types** - Ensures proper error handling for unsupported disaster types
 4. **Fire Spread Rate Calculation** - Comprehensive unit tests for the spread rate formula
+5. **Timeline Predictions** - Tests 1, 3, and 6-hour fire spread projections
+6. **Arrival Times** - Validates critical point arrival time calculations with wind effects
 
 ### Expected Output
 
@@ -453,6 +507,173 @@ The test will display:
 - Final success message when all tests pass
 
 ---
+
+## Running All Prediction Tests
+
+### Comprehensive Prediction Test Suite
+
+The comprehensive test suite runs all prediction-related tests (fire spread rate, timeline predictions, and arrival times) in a single execution:
+
+```bash
+# Run all prediction tests at once
+python backend/tests/test_prediction_comprehensive.py
+
+# Or run individual test suites
+python backend/tests/test_fire_spread_rate.py
+python backend/tests/test_timeline_predictions.py
+python backend/tests/test_arrival_times.py
+```
+
+**Comprehensive Test Coverage (27 total tests):**
+
+**Fire Spread Rate Tests (6 tests):**
+1. **Sample Data Testing** - Validates calculation with real Toronto weather data
+2. **High Wind/Low Humidity** - Tests fast spread conditions (hot, dry, windy)
+3. **Low Wind/High Humidity** - Tests slow spread conditions (cool, humid, calm)
+4. **Default Values** - Tests behavior with missing weather data
+5. **Extreme Values** - Tests bounds checking with extreme weather conditions
+6. **Formula Validation** - Verifies mathematical correctness of the spread rate formula
+
+**Timeline Predictions Tests (12 tests):**
+1. **Structure Validation** - Ensures correct dictionary structure with hour_1, hour_3, hour_6 keys
+2. **Confidence Decrease** - Verifies confidence decreases over time (0.75 - hours × 0.05)
+3. **Area Increase** - Confirms predicted fire area grows with time
+4. **Boundary Expansion** - Tests that GeoJSON polygons are properly expanded
+5. **None Input Handling** - Validates behavior with None polygon input
+6. **Different Spread Rates** - Tests predictions with varying spread rates
+7. **Polygon Area Calculation** - Tests `_calculate_polygon_area` with sample data and None
+8. **Polygon Expansion** - Tests `_expand_polygon` with sample data and None
+9. **Distance Effect** - Verifies larger distances create larger expanded polygons
+10. **Realistic Values** - Ensures predictions produce positive, increasing areas with valid confidence
+
+**Arrival Times Tests (9 tests):**
+1. **Distance Calculation** - Tests `_distance_to_boundary` with sample data and None inputs
+2. **Directional Factor** - Validates wind direction effects on spread rate
+3. **Critical Points** - Tests `_identify_critical_points` returns proper structure
+4. **Arrival Times Structure** - Ensures correct list format with required fields
+5. **Sorting** - Verifies results are sorted by arrival time
+6. **None Boundary Handling** - Tests behavior with None boundary geometry
+7. **Different Spread Rates** - Validates arrival times scale with spread rate
+8. **Confidence Levels** - Tests confidence assignment based on time (< 6h = high, >= 6h = medium)
+
+**Expected Comprehensive Test Output:**
+```
+=== COMPREHENSIVE PREDICTION TEST SUITE ===
+
+test_calculate_fire_spread_rate_default_values (test_fire_spread_rate.TestFireSpreadRate.test_calculate_fire_spread_rate_default_values)
+Test with empty weather dict (should use defaults). ... ok
+test_calculate_fire_spread_rate_extreme_values (test_fire_spread_rate.TestFireSpreadRate.test_calculate_fire_spread_rate_extreme_values)
+Test with extreme weather values (bounds testing). ... ok
+test_calculate_fire_spread_rate_formula_validation (test_fire_spread_rate.TestFireSpreadRate.test_calculate_fire_spread_rate_formula_validation)
+Test that the formula is calculated correctly. ... ok
+test_calculate_fire_spread_rate_high_wind_low_humidity (test_fire_spread_rate.TestFireSpreadRate.test_calculate_fire_spread_rate_high_wind_low_humidity)
+Test with high wind and low humidity (fast spread conditions). ... ok
+test_calculate_fire_spread_rate_low_wind_high_humidity (test_fire_spread_rate.TestFireSpreadRate.test_calculate_fire_spread_rate_low_wind_high_humidity)
+Test with low wind and high humidity (slow spread conditions). ... ok
+test_calculate_fire_spread_rate_with_sample_data (test_fire_spread_rate.TestFireSpreadRate.test_calculate_fire_spread_rate_with_sample_data)
+Test fire spread rate calculation with Toronto sample weather data. ... ok
+test_calculate_polygon_area_with_none (test_timeline_predictions.TestTimelinePredictions.test_calculate_polygon_area_with_none)
+Test polygon area calculation with None input. ... Running test_calculate_polygon_area_with_none...
+PASS: test_calculate_polygon_area_with_none
+ok
+test_calculate_polygon_area_with_sample_data (test_timeline_predictions.TestTimelinePredictions.test_calculate_polygon_area_with_sample_data)
+Test polygon area calculation with sample data. ... Running test_calculate_polygon_area_with_sample_data...
+PASS: test_calculate_polygon_area_with_sample_data
+ok
+test_expand_polygon_distance_effect (test_timeline_predictions.TestTimelinePredictions.test_expand_polygon_distance_effect)
+Test that larger distances create larger polygons. ... Running test_expand_polygon_distance_effect...
+PASS: test_expand_polygon_distance_effect
+ok
+test_expand_polygon_with_none (test_timeline_predictions.TestTimelinePredictions.test_expand_polygon_with_none)
+Test polygon expansion with None input. ... Running test_expand_polygon_with_none...
+PASS: test_expand_polygon_with_none
+ok
+test_expand_polygon_with_sample_data (test_timeline_predictions.TestTimelinePredictions.test_expand_polygon_with_sample_data)
+Test polygon expansion with sample data. ... Running test_expand_polygon_with_sample_data...
+PASS: test_expand_polygon_with_sample_data
+ok
+test_generate_timeline_predictions_area_increases (test_timeline_predictions.TestTimelinePredictions.test_generate_timeline_predictions_area_increases)
+Test that predicted area increases with time. ... Running test_generate_timeline_predictions_area_increases...
+PASS: test_generate_timeline_predictions_area_increases
+ok
+test_generate_timeline_predictions_boundary_expansion (test_timeline_predictions.TestTimelinePredictions.test_generate_timeline_predictions_boundary_expansion)
+Test that boundaries are properly expanded. ... Running test_generate_timeline_predictions_boundary_expansion...
+PASS: test_generate_timeline_predictions_boundary_expansion
+ok
+test_generate_timeline_predictions_confidence_decreases (test_timeline_predictions.TestTimelinePredictions.test_generate_timeline_predictions_confidence_decreases)
+Test that confidence decreases with time. ... Running test_generate_timeline_predictions_confidence_decreases...
+PASS: test_generate_timeline_predictions_confidence_decreases
+ok
+test_generate_timeline_predictions_different_spread_rates (test_timeline_predictions.TestTimelinePredictions.test_generate_timeline_predictions_different_spread_rates)
+Test predictions with different spread rates. ... Running test_generate_timeline_predictions_different_spread_rates...
+PASS: test_generate_timeline_predictions_different_spread_rates
+ok
+test_generate_timeline_predictions_structure (test_timeline_predictions.TestTimelinePredictions.test_generate_timeline_predictions_structure)
+Test that timeline predictions return correct structure. ... Running test_generate_timeline_predictions_structure...
+PASS: test_generate_timeline_predictions_structure
+ok
+test_generate_timeline_predictions_with_none_polygon (test_timeline_predictions.TestTimelinePredictions.test_generate_timeline_predictions_with_none_polygon)
+Test behavior with None polygon input. ... Running test_generate_timeline_predictions_with_none_polygon...
+PASS: test_generate_timeline_predictions_with_none_polygon
+ok
+test_timeline_predictions_realistic_values (test_timeline_predictions.TestTimelinePredictions.test_timeline_predictions_realistic_values)
+Test that predictions produce realistic fire spread values. ... Running test_timeline_predictions_realistic_values...
+PASS: test_timeline_predictions_realistic_values
+ok
+test_calculate_arrival_times_confidence_levels (test_arrival_times.TestArrivalTimes.test_calculate_arrival_times_confidence_levels)
+Test that confidence levels are assigned correctly. ... Running test_calculate_arrival_times_confidence_levels...
+PASS: test_calculate_arrival_times_confidence_levels
+ok
+test_calculate_arrival_times_different_spread_rates (test_arrival_times.TestArrivalTimes.test_calculate_arrival_times_different_spread_rates)
+Test arrival times with different spread rates. ... Running test_calculate_arrival_times_different_spread_rates...
+PASS: test_calculate_arrival_times_different_spread_rates
+ok
+test_calculate_arrival_times_sorted (test_arrival_times.TestArrivalTimes.test_calculate_arrival_times_sorted)
+Test that arrival times are sorted by time. ... Running test_calculate_arrival_times_sorted...
+PASS: test_calculate_arrival_times_sorted
+ok
+test_calculate_arrival_times_structure (test_arrival_times.TestArrivalTimes.test_calculate_arrival_times_structure)
+Test that arrival times return correct structure. ... Running test_calculate_arrival_times_structure...
+PASS: test_calculate_arrival_times_structure
+ok
+test_calculate_arrival_times_with_none_boundary (test_arrival_times.TestArrivalTimes.test_calculate_arrival_times_with_none_boundary)
+Test behavior with None boundary input. ... Running test_calculate_arrival_times_with_none_boundary...
+PASS: test_calculate_arrival_times_with_none_boundary
+ok
+test_calculate_directional_factor (test_arrival_times.TestArrivalTimes.test_calculate_directional_factor)
+Test directional factor calculation. ... Running test_calculate_directional_factor...
+PASS: test_calculate_directional_factor
+ok
+test_distance_to_boundary_with_none (test_arrival_times.TestArrivalTimes.test_distance_to_boundary_with_none)
+Test distance calculation with None input. ... Running test_distance_to_boundary_with_none...
+PASS: test_distance_to_boundary_with_none
+ok
+test_distance_to_boundary_with_sample_data (test_arrival_times.TestArrivalTimes.test_distance_to_boundary_with_sample_data)
+Test distance calculation with sample data. ... Running test_distance_to_boundary_with_sample_data...
+PASS: test_distance_to_boundary_with_sample_data
+ok
+test_identify_critical_points (test_arrival_times.TestArrivalTimes.test_identify_critical_points)
+Test critical points identification. ... Running test_identify_critical_points...
+PASS: test_identify_critical_points
+ok
+
+----------------------------------------------------------------------
+Ran 27 tests in 0.015s
+
+OK
+
+=== COMPREHENSIVE TEST SUMMARY ===
+Tests run: 27
+Failures: 0
+Errors: 0
+PASS: ALL COMPREHENSIVE PREDICTION TESTS PASSED
+ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.016s
+
+OK
+```
 
 ## Running All Tests
 
