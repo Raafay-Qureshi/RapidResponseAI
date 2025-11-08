@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
 import { useWebSocketContext } from '../services/websocket';
+import React, { useState, useEffect } from 'react';
 import MapView from './Map/MapView';
 import WebSocketTest from './Test/WebSocketTest';
+import DisasterTrigger from './Controls/DisasterTrigger';
 import './Dashboard.css';
 
 function Dashboard() {
@@ -14,6 +15,35 @@ function Dashboard() {
   const [loading, setLoading] = useState(false);
   // eslint-disable-next-line no-unused-vars
   const [progress, setProgress] = useState(0);
+
+  // Simulate progress when disaster is triggered
+  useEffect(() => {
+    if (loading && disaster) {
+      const interval = setInterval(() => {
+        setProgress(prev => {
+          if (prev >= 100) {
+            clearInterval(interval);
+            setLoading(false);
+            // Mock plan completion
+            setPlan({
+              disaster_id: disaster.disaster_id,
+              executive_summary: "40-acre wildfire detected at HWY 407/410 interchange. High-risk WUI area with immediate evacuation needed.",
+              situation_overview: "Satellite imagery confirms active wildfire spreading at 2.5 km/h towards residential areas. Wind conditions are favorable for rapid spread. Population impact assessment shows 2,500 residents in immediate danger zone.",
+              communication_templates: {
+                en: "🚨 WILDFIRE ALERT: Evacuate immediately from HWY 407/410 area. Fire spreading rapidly. Follow emergency routes. Stay tuned for updates.",
+                pa: "🚨 ਅग्नि ਸੰਕਟ ਚੇਤਾਵਨੀ: HWY 407/410 ਖੇਤਰ ਤੋਂ ਤੁਰੰਤ ਖਾਲੀ ਕਰੋ। ਅੱਗ ਤੇਜ਼ੀ ਨਾਲ ਫੈਲ ਰਹੀ ਹੈ। ਐਮਰਜੈਂਸੀ ਰੂਟਾਂ ਦਾ ਪਾਲਣ ਕਰੋ। ਅਪਡੇਟਾਂ ਲਈ ਟਿਊਨਡ ਰਹੋ।",
+                hi: "🚨 अग्नि संकट चेतावनी: HWY 407/410 क्षेत्र से तुरंत खाली करें। आग तेजी से फैल रही है। आपातकालीन मार्गों का पालन करें। अपडेट के लिए ट्यून रहें।"
+              }
+            });
+            return 100;
+          }
+          return prev + 2; // Increment by 2% every 100ms for ~5 second demo
+        });
+      }, 100);
+
+      return () => clearInterval(interval);
+    }
+  }, [loading, disaster]);
 
   return (
     <div className="dashboard">
@@ -33,6 +63,20 @@ function Dashboard() {
             {socket && connected && (
               <span className="socket-id">ID: {socket.id.substring(0, 8)}...</span>
             )}
+          <DisasterTrigger
+            onTrigger={(disaster) => {
+              setDisaster(disaster);
+              setLoading(true);
+              setProgress(0);
+            }}
+            disabled={loading}
+          />
+        </div>
+
+        <div className="control-section">
+          <div className="status-indicator">
+            <span className="status-dot ready"></span>
+            <span className="status-text">System Ready</span>
           </div>
         </div>
       </div>
@@ -63,9 +107,42 @@ function Dashboard() {
         <div className="plan-panel">
           {plan ? (
             <div className="plan-content">
-              {/* PlanViewer will go here in next epic */}
               <h2>📋 Emergency Response Plan</h2>
-              <p>Plan viewer component coming in Epic 7...</p>
+
+              <div className="plan-section">
+                <h3>🚨 Executive Summary</h3>
+                <p>{plan.executive_summary}</p>
+              </div>
+
+              <div className="plan-section">
+                <h3>📊 Situation Overview</h3>
+                <p>{plan.situation_overview}</p>
+              </div>
+
+              <div className="plan-section">
+                <h3>📢 Public Communications</h3>
+
+                <div className="communication-template">
+                  <h4>🇬🇧 English</h4>
+                  <div className="template-content">
+                    {plan.communication_templates?.en}
+                  </div>
+                </div>
+
+                <div className="communication-template">
+                  <h4>🇮🇳 Punjabi</h4>
+                  <div className="template-content">
+                    {plan.communication_templates?.pa}
+                  </div>
+                </div>
+
+                <div className="communication-template">
+                  <h4>🇮🇳 Hindi</h4>
+                  <div className="template-content">
+                    {plan.communication_templates?.hi}
+                  </div>
+                </div>
+              </div>
             </div>
           ) : (
             <div className="empty-state">

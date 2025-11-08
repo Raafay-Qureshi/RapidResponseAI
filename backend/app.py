@@ -22,6 +22,7 @@ CORS(app, origins=["http://localhost:3000", "http://localhost:3001"])
 socketio = SocketIO(app, cors_allowed_origins=["http://localhost:3000", "http://localhost:3001"])
 
 # Initialize orchestrator with socketio instance (commented out for now due to missing dependencies)
+# from orchestrator import DisasterOrchestrator
 # orchestrator = DisasterOrchestrator(socketio)
 orchestrator = None
 
@@ -40,11 +41,16 @@ def trigger_disaster():
         if not data:
             return jsonify({"error": "No data provided"}), 400
 
-        if not orchestrator:
-            return jsonify({"error": "Orchestrator not initialized"}), 500
-
-        disaster_id = orchestrator.create_disaster(data)
-        return jsonify({"disaster_id": disaster_id, "status": "created"})
+        # Mock response for demo purposes with location data
+        import uuid
+        disaster_id = f"wildfire-{uuid.uuid4().hex[:8]}"
+        return jsonify({
+            "disaster_id": disaster_id,
+            "status": "created",
+            "type": data.get("type", "wildfire"),
+            "location": data.get("location", {"lat": 43.7315, "lon": -79.8620}),
+            "severity": data.get("severity", "high")
+        })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
