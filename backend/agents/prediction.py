@@ -1,47 +1,67 @@
-from __future__ import annotations
-
-from typing import Any, Dict, Optional
-
 from .base_agent import BaseAgent
+import numpy as np
+from typing import Dict, List
+from datetime import datetime
+from shapely.geometry import shape, Point
 
+# Import helper functions that will be built in other tasks
+# (Or they can be methods within this class)
+from .prediction_helpers import (
+    _calculate_fire_spread_rate,
+    _generate_timeline_predictions,
+    _calculate_arrival_times,
+    _identify_critical_points
+)
 
 class PredictionAgent(BaseAgent):
-    """Provide short-term risk outlooks based on weather forecasts."""
+    async def analyze(self, disaster: Dict, data: Dict) -> Dict:
+        """
+        Model disaster spread and generate timeline predictions
+        """
+        self._log(f"Modeling {disaster['type']} spread")
 
-    async def analyze(
-        self,
-        disaster_type: str,
-        weather_forecast: Optional[Dict[str, Any]],
-    ) -> Dict[str, Any]:
-        self._log("Modeling disaster spread potential")
+        if disaster['type'] == 'wildfire':
+            return await self._model_fire_spread(disaster, data)
+        elif disaster['type'] == 'flood':
+            return await self._model_flood_spread(disaster, data)
+        else:
+            raise ValueError(f"Unknown disaster type: {disaster['type']}")
 
-        outlook = "stable"
-        drivers = {}
+    async def _model_fire_spread(self, disaster: Dict, data: Dict) -> Dict:
+        """
+        Main coordinator for modeling fire spread.
+        Calls helper functions to do the actual work.
+        """
+        weather = data['weather']
+        current_boundary_geojson = data.get('fire_perimeter')
+        current_boundary_geom = shape(current_boundary_geojson) if current_boundary_geojson else None
 
-        if weather_forecast and "list" in weather_forecast:
-            periods = weather_forecast["list"]
-            max_wind = max((period["wind"]["speed"] for period in periods if "wind" in period), default=0)
-            avg_humidity = sum(
-                period["main"].get("humidity", 0) for period in periods if period.get("main")
-            ) / len(periods or [1])
+        # --- Task #24 ---
+        spread_rate, factors = _calculate_fire_spread_rate(weather)
 
-            if max_wind > 10:
-                outlook = "deteriorating"
-            elif avg_humidity > 80:
-                outlook = "improving"
+        # --- Task #25 ---
+        timeline_predictions = _generate_timeline_predictions(
+            current_boundary_geojson,
+            spread_rate
+        )
 
-            drivers = {"max_wind_speed": max_wind, "avg_humidity": round(avg_humidity, 1)}
+        # --- Task #26 ---
+        critical_points = _identify_critical_points(disaster['location'])
+        arrival_times = _calculate_arrival_times(
+            current_boundary_geom,
+            critical_points,
+            spread_rate,
+            factors['wind_direction_deg']
+        )
 
         return {
-            "disaster_type": disaster_type,
-            "outlook": outlook,
-            "drivers": drivers,
-            "recommendation": self._recommendation(outlook, disaster_type),
+            'current_spread_rate_kmh': round(spread_rate, 2),
+            'predictions': timeline_predictions,
+            'critical_arrival_times': arrival_times,
+            'factors': factors
         }
 
-    def _recommendation(self, outlook: str, disaster_type: str) -> str:
-        if outlook == "deteriorating":
-            return f"Escalate response posture for {disaster_type} within 6 hours."
-        if outlook == "improving":
-            return "Maintain current response levels and monitor conditions."
-        return "Hold steady and reassess with next data update."
+    async def _model_flood_spread(self, disaster: Dict, data: Dict) -> Dict:
+        # Placeholder for hackathon
+        self._log("Flood modeling not implemented")
+        return {'status': 'not_implemented'}
