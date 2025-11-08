@@ -353,10 +353,41 @@ pip install --user flask requests python-dotenv numpy shapely
 python backend/tests/test_prediction.py
 ```
 
+### Testing Fire Spread Rate Calculation (Task #24)
+
+The `_calculate_fire_spread_rate` function has dedicated unit tests:
+
+```bash
+# Run fire spread rate tests specifically
+python backend/tests/test_fire_spread_rate.py
+
+# Or run all prediction-related tests
+python backend/tests/test_prediction.py
+python backend/tests/test_fire_spread_rate.py
+```
+
+**Test Coverage:**
+1. **Sample Data Testing** - Validates calculation with real Toronto weather data
+2. **High Wind/Low Humidity** - Tests fast spread conditions (hot, dry, windy)
+3. **Low Wind/High Humidity** - Tests slow spread conditions (cool, humid, calm)
+4. **Default Values** - Tests behavior with missing weather data
+5. **Extreme Values** - Tests bounds checking with extreme weather conditions
+6. **Formula Validation** - Verifies mathematical correctness of the spread rate formula
+
+**Expected Test Output:**
+```
+......
+----------------------------------------------------------------------
+Ran 6 tests in 0.002s
+
+OK
+```
+
 The test suite validates:
 1. **Wildfire Analysis** - Tests the full wildfire prediction pipeline with mocked helper functions
 2. **Flood Analysis** - Verifies the placeholder implementation for flood disasters
 3. **Unknown Disaster Types** - Ensures proper error handling for unsupported disaster types
+4. **Fire Spread Rate Calculation** - Comprehensive unit tests for the spread rate formula
 
 ### Expected Output
 

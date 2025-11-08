@@ -9,29 +9,40 @@ from shapely.geometry import shape
 
 def _calculate_fire_spread_rate(weather: Dict) -> Tuple[float, Dict]:
     """
-    Calculate fire spread rate based on weather conditions.
-
-    Args:
-        weather: Weather data dictionary
-
-    Returns:
-        Tuple of (spread_rate_kmh, factors_dict)
+    Calculates a simplified fire spread rate based on weather conditions.
     """
-    # Stub implementation - will be replaced in Task #24
-    temperature = weather.get('temperature', 20)
-    humidity = weather.get('humidity', 50)
-    wind_speed = weather.get('wind_speed', 10)
-    wind_direction = weather.get('wind_direction', 0)
+    # Extract data, providing sane defaults
+    wind_speed_ms = weather.get('wind', {}).get('speed', 10)  # m/s from API
+    wind_speed = wind_speed_ms * 3.6  # Convert to km/h
+    temperature = weather.get('main', {}).get('temp', 20)     # Celsius
+    humidity = weather.get('main', {}).get('humidity', 50)  # Percent
+    wind_direction = weather.get('wind', {}).get('deg', 0)    # degrees
 
-    # Simple calculation for demo
-    spread_rate = (wind_speed * 0.5) + ((temperature - 20) * 0.2) - ((humidity - 50) * 0.1)
-    spread_rate = max(0.1, min(spread_rate, 20))  # Clamp between 0.1 and 20 km/h
+    # Simplified fire spread rate calculation
+    # Real models use Rothermel equations, but this is hackathon-friendly
+    base_spread_rate = 2.0  # km/hour base rate
+
+    # Wind factor (0.5x to 3x multiplier)
+    wind_factor = 1 + (wind_speed / 50)
+
+    # Temperature factor
+    temp_factor = 1 + ((temperature - 20) / 40)
+
+    # Humidity factor (inverse)
+    humidity_factor = 1.5 - (humidity / 100)
+
+    # Ensure factors are non-negative
+    wind_factor = max(0.5, wind_factor)
+    temp_factor = max(0.5, temp_factor)
+    humidity_factor = max(0.1, humidity_factor)
+
+    spread_rate = base_spread_rate * wind_factor * temp_factor * humidity_factor
 
     factors = {
+        'wind_speed_kmh': wind_speed,
         'wind_direction_deg': wind_direction,
-        'temperature': temperature,
-        'humidity': humidity,
-        'wind_speed': wind_speed
+        'temperature_c': temperature,
+        'humidity_percent': humidity
     }
 
     return spread_rate, factors
