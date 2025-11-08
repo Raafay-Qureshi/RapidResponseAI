@@ -1,206 +1,215 @@
+from __future__ import annotations
+
 import asyncio
-from typing import Dict, Any
+import uuid
 from datetime import datetime
-from dotenv import load_dotenv
+from typing import Any, Dict, Optional
 
-# Load environment variables from .env file
-load_dotenv()
-
-from data.satellite_client import SatelliteClient
-from data.weather_client import WeatherClient
-from data.geohub_client import GeoHubClient
-from agents.damage_assessment import DamageAssessmentAgent
-from agents.population_impact import PopulationImpactAgent
-from agents.routing import RoutingAgent
-from agents.resource_allocation import ResourceAllocationAgent
-from agents.prediction import PredictionAgent
+from .data.geohub_client import GeoHubClient
+from .data.satellite_client import SatelliteClient
+from .data.weather_client import WeatherClient
+from .agents.damage_assessment import DamageAssessmentAgent
+from .agents.population_impact import PopulationImpactAgent
+from .agents.prediction import PredictionAgent
+from .agents.resource_allocation import ResourceAllocationAgent
+from .agents.routing import RoutingAgent
 
 
 class DisasterOrchestrator:
-    """
-    Orchestrates disaster response by coordinating data collection and agent analysis.
-    Uses asyncio to run tasks in parallel for optimal performance.
-    """
-    
-    def __init__(self, socketio=None):
-        """
-        Initialize the orchestrator with data clients and agents.
-        
-        Args:
-            socketio: Flask-SocketIO instance for real-time progress updates
-        """
-        self.socketio = socketio
-        
-        # Initialize data clients
-        self.data_clients = {
-            'satellite': SatelliteClient(),
-            'weather': WeatherClient(),
-            'geohub': GeoHubClient()
-        }
-        
-        # Initialize agents
-        self.agents = {
-            'damage': DamageAssessmentAgent(),
-            'population': PopulationImpactAgent(),
-            'routing': RoutingAgent(),
-            'resource': ResourceAllocationAgent(),
-            'prediction': PredictionAgent()
-        }
-        
-        # Track active disasters
-        self.active_disasters: Dict[str, Dict[str, Any]] = {}
-    
-    def create_disaster(self, disaster_id: str, disaster_data: Dict) -> Dict:
-        """
-        Create a new disaster entry.
-        
-        Args:
-            disaster_id: Unique identifier for the disaster
-            disaster_data: Dictionary containing disaster details (type, location, etc.)
-        
-        Returns:
-            The created disaster dictionary
-        """
-        self.active_disasters[disaster_id] = {
-            'id': disaster_id,
-            'type': disaster_data.get('type', 'wildfire'),
-            'location': disaster_data.get('location'),
-            'status': 'initialized',
-            'created_at': datetime.now().isoformat(),
-            'data': {},
-            'agent_results': {},
-            'plan': None,
-            'error': None
-        }
-        return self.active_disasters[disaster_id]
-    
-    async def process_disaster(self, disaster_id: str):
-        """Main processing pipeline"""
-        disaster = self.active_disasters[disaster_id]
-        
-        try:
-            # PHASE 1: Data Ingestion (5 seconds)
-            disaster['status'] = 'fetching_data'
-            if self.socketio:
-                self.socketio.emit('progress', {
-                    'disaster_id': disaster_id, 'phase': 'data_ingestion', 'progress': 10
-                }, room=disaster_id)
-            
-            data = await self._fetch_all_data(disaster)
-            disaster['data'] = data
-            
-            # PHASE 2: Agent Processing (25 seconds)
-            disaster['status'] = 'analyzing'
-            if self.socketio:
-                self.socketio.emit('progress', {
-                    'disaster_id': disaster_id, 'phase': 'agent_processing', 'progress': 30
-                }, room=disaster_id)
-            
-            agent_results = await self._run_all_agents(disaster, data)
-            disaster['agent_results'] = agent_results
-            
-            # PHASE 3: Synthesis (20 seconds) - (Stubbed for now)
-            disaster['status'] = 'generating_plan'
-            if self.socketio:
-                self.socketio.emit('progress', {
-                    'disaster_id': disaster_id, 'phase': 'synthesis', 'progress': 70
-                }, room=disaster_id)
-            
-            # This 'plan' will be replaced by the LLM call in the next epic
-            plan = {"executive_summary": "Plan synthesis pending...", **agent_results}
-            disaster['plan'] = plan
-            
-            # --- HACKATHON: Mark as complete after agents ---
-            disaster['status'] = 'complete'
-            if self.socketio:
-                self.socketio.emit('disaster_complete', {
-                    'disaster_id': disaster_id,
-                    'plan': plan
-                }, room=disaster_id)
-            
-        except Exception as e:
-            disaster['status'] = 'error'
-            disaster['error'] = str(e)
-            if self.socketio:
-                self.socketio.emit('disaster_error', {
-                    'disaster_id': disaster_id,
-                    'error': str(e)
-                }, room=disaster_id)
-            print(f"Error processing {disaster_id}: {e}")
+    """Coordinate data ingestion and analysis across all agents."""
 
-    async def _fetch_all_data(self, disaster: Dict) -> Dict:
-        """Fetch data from all sources in parallel"""
-        location = disaster['location']
-        
-        # Parallel API calls
-        tasks = {
-            'satellite': self.data_clients['satellite'].fetch_imagery(location),
-            'weather': self.data_clients['weather'].fetch_current(location),
-            'geohub_pop': self.data_clients['geohub'].fetch_population(location),
-            'geohub_infra': self.data_clients['geohub'].fetch_infrastructure(location)
+    def __init__(self, socketio_instance: Any):
+        self.active_disasters: Dict[str, Dict[str, Any]] = {}
+        self.socketio = socketio_instance
+
+        self.data_clients = {
+            "satellite": SatelliteClient(),
+            "weather": WeatherClient(),
+            "geohub": GeoHubClient(),
         }
-        
-        results = await asyncio.gather(*tasks.values())
-        
-        return dict(zip(tasks.keys(), results))
-    
-    async def _run_all_agents(self, disaster: Dict, data: Dict) -> Dict:
-        """Run all agents in parallel"""
-        location = disaster['location']
-        
-        # Agents can run in parallel.
-        # We must get the damage assessment *first* to pass its boundary to other agents.
-        
-        # 1. Run Damage Assessment first
-        damage_result = await self.agents['damage'].analyze(
-            data['satellite'], 
-            disaster['type']
-        )
-        affected_boundary_geojson = damage_result.get('fire_perimeter')
-        affected_boundary_geom = None
-        if affected_boundary_geojson:
-            from shapely.geometry import shape
-            affected_boundary_geom = shape(affected_boundary_geojson)
-        
-        # 2. Run remaining agents in parallel
-        tasks = {
-            'population': self.agents['population'].analyze(
-                affected_boundary_geojson, 
-                data['geohub_pop']
-            ),
-            'routing': self.agents['routing'].analyze(
-                location, 
-                None,  # 'roads' data stubbed
-                affected_boundary_geom
-            ),
-            'resource': self.agents['resource'].analyze(
-                {},  # 'population_impact' - will be added post-gather
-                data['geohub_infra']
-            ),
-            'prediction': self.agents['prediction'].analyze(
-                disaster, 
-                {'weather': data['weather'], 'fire_perimeter': affected_boundary_geojson}
+
+        self.agents = {
+            "damage": DamageAssessmentAgent(),
+            "population": PopulationImpactAgent(),
+            "routing": RoutingAgent(),
+            "resource": ResourceAllocationAgent(),
+            "prediction": PredictionAgent(),
+        }
+
+    def create_disaster(self, trigger_data: Dict[str, Any]) -> str:
+        """Create new disaster event state."""
+        disaster_type = trigger_data.get("type", "event").lower()
+        timestamp = datetime.utcnow().strftime("%Y%m%d-%H%M%S")
+        unique_id = uuid.uuid4().hex[:8]
+        disaster_id = f"{disaster_type}-{timestamp}-{unique_id}"
+
+        self.active_disasters[disaster_id] = {
+            "id": disaster_id,
+            "type": trigger_data.get("type"),
+            "location": trigger_data.get("location", {}),
+            "status": "initializing",
+            "created_at": datetime.utcnow().isoformat(),
+            "data": {},
+            "agent_results": {},
+            "plan": None,
+            "trigger": trigger_data,
+        }
+
+        self._emit("disaster_created", self.active_disasters[disaster_id], room=disaster_id)
+        return disaster_id
+
+    def get_disaster(self, disaster_id: str) -> Optional[Dict[str, Any]]:
+        return self.active_disasters.get(disaster_id)
+
+    def get_plan(self, disaster_id: str) -> Optional[Dict[str, Any]]:
+        disaster = self.active_disasters.get(disaster_id)
+        return disaster.get("plan") if disaster else None
+
+    async def process_disaster(self, disaster_id: str) -> Optional[Dict[str, Any]]:
+        """Main processing pipeline."""
+        disaster = self.active_disasters.get(disaster_id)
+        if not disaster:
+            raise ValueError(f"Disaster '{disaster_id}' not found")
+
+        try:
+            disaster["status"] = "fetching_data"
+            self._emit("disaster_status", {"status": "fetching_data"}, room=disaster_id)
+            data = await self._fetch_all_data(disaster)
+            disaster["data"] = data
+
+            disaster["status"] = "analyzing"
+            self._emit("disaster_status", {"status": "analyzing"}, room=disaster_id)
+            agent_results = await self._run_agents(disaster, data)
+            disaster["agent_results"] = agent_results
+
+            disaster["status"] = "generating_plan"
+            self._emit("disaster_status", {"status": "generating_plan"}, room=disaster_id)
+            plan = self._synthesize_plan(disaster, agent_results)
+            disaster["plan"] = plan
+            disaster["status"] = "complete"
+
+            self._emit("disaster_complete", {"plan": plan}, room=disaster_id)
+            return plan
+
+        except Exception as exc:
+            disaster["status"] = "error"
+            disaster["error"] = str(exc)
+            self._emit(
+                "disaster_error",
+                {"disaster_id": disaster_id, "error": str(exc)},
+                room=disaster_id,
             )
+            raise
+
+    async def _fetch_all_data(self, disaster: Dict[str, Any]) -> Dict[str, Any]:
+        location = disaster.get("location", {})
+
+        tasks = {
+            "satellite": asyncio.create_task(
+                self.data_clients["satellite"].fetch_imagery(location)
+            ),
+            "weather_current": asyncio.create_task(
+                self.data_clients["weather"].fetch_current(location)
+            ),
+            "weather_forecast": asyncio.create_task(
+                self.data_clients["weather"].fetch_forecast(location)
+            ),
+            "population": asyncio.create_task(
+                self.data_clients["geohub"].fetch_population(location)
+            ),
+            "infrastructure": asyncio.create_task(
+                self.data_clients["geohub"].fetch_infrastructure(location)
+            ),
+            "roads": asyncio.create_task(self.data_clients["geohub"].fetch_roads(location)),
         }
-        
-        results = await asyncio.gather(*tasks.values())
-        agent_outputs = dict(zip(tasks.keys(), results))
-        
-        # 3. Add dependencies
-        # ResourceAgent needs population output
-        agent_outputs['resource'] = await self.agents['resource'].analyze(
-            agent_outputs['population'],
-            data['geohub_infra']
+
+        results: Dict[str, Any] = {}
+        for key, task in tasks.items():
+            try:
+                results[key] = await task
+            except Exception as exc:
+                results[key] = None
+                self._log(f"Failed to fetch {key} data: {exc}")
+        return results
+
+    async def _run_agents(
+        self,
+        disaster: Dict[str, Any],
+        data: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        damage_result = await self.agents["damage"].analyze(
+            data.get("satellite"),
+            disaster.get("type", "unknown"),
         )
-        
-        # 4. Combine all results
-        agent_outputs['damage'] = damage_result
-        return agent_outputs
-    
-    def get_disaster_status(self, disaster_id: str) -> Dict:
-        """Get the current status of a disaster"""
-        return self.active_disasters.get(disaster_id, {})
-    
-    def list_active_disasters(self) -> Dict[str, Dict]:
-        """List all active disasters"""
-        return self.active_disasters
+
+        population_result = await self.agents["population"].analyze(
+            damage_result.get("fire_perimeter"),
+            data.get("population"),
+        )
+
+        routing_result = await self.agents["routing"].analyze(
+            data.get("roads"),
+            data.get("infrastructure"),
+            damage_result,
+        )
+
+        resource_result = await self.agents["resource"].analyze(
+            population_result,
+            routing_result,
+            data.get("infrastructure"),
+        )
+
+        prediction_result = await self.agents["prediction"].analyze(
+            disaster.get("type", "unknown"),
+            data.get("weather_forecast"),
+        )
+
+        return {
+            "damage": damage_result,
+            "population": population_result,
+            "routing": routing_result,
+            "resource": resource_result,
+            "prediction": prediction_result,
+        }
+
+    def _synthesize_plan(
+        self,
+        disaster: Dict[str, Any],
+        agent_results: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        damage = agent_results.get("damage", {})
+        population = agent_results.get("population", {})
+        routing = agent_results.get("routing", {})
+        resources = agent_results.get("resource", {})
+        prediction = agent_results.get("prediction", {})
+
+        recommendations = [
+            "Deploy rapid assessment teams to confirm satellite findings.",
+            "Stage relief supplies near critical facilities highlighted by the population agent.",
+            routing.get("priority_routes", [])[0]["notes"]
+            if routing.get("priority_routes")
+            else "Establish temporary wayfinding signage for evac routes.",
+            prediction.get("recommendation", "Review forecast data with meteorology team."),
+        ]
+
+        return {
+            "disaster_id": disaster["id"],
+            "generated_at": datetime.utcnow().isoformat(),
+            "summary": {
+                "type": disaster.get("type"),
+                "status": disaster.get("status"),
+                "affected_area_km2": damage.get("affected_area_km2", 0),
+                "total_population_impacted": population.get("total_affected", 0),
+                "severity": damage.get("severity"),
+                "outlook": prediction.get("outlook"),
+            },
+            "recommendations": recommendations,
+            "agent_snapshots": agent_results,
+        }
+
+    def _emit(self, event: str, payload: Dict[str, Any], room: Optional[str] = None) -> None:
+        if self.socketio:
+            self.socketio.emit(event, payload, room=room)
+
+    def _log(self, message: str) -> None:
+        print(f"[DisasterOrchestrator] {message}")

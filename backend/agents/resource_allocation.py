@@ -1,74 +1,73 @@
+from __future__ import annotations
+
+import math
+from typing import Any, Dict, List, Optional
+
 from .base_agent import BaseAgent
-from typing import Dict, List
 
 
 class ResourceAllocationAgent(BaseAgent):
-    async def analyze(self, population_impact: Dict, infrastructure: Dict) -> Dict:
-        """
-        Determine resource needs and optimal deployment
-        'population_impact' is the output from PopulationImpactAgent
-        'infrastructure' is the (static) data from GeoHubClient
-        """
-        self._log("Planning resource allocation")
-        
-        # Get population impact data
-        affected_population = population_impact.get('total_affected', 0)
-        vulnerable_population = population_impact.get('vulnerable_population', {})
-        
-        # Calculate needs
-        ambulances_needed = self._calculate_ambulances(vulnerable_population)
-        buses_needed = self._calculate_buses(affected_population)
-        personnel_needed = self._calculate_personnel(affected_population)
-        
-        # Map current resources (hardcoded for demo)
-        current_resources = self._map_current_resources()
-        
-        # In a real app, you'd run an optimization model here.
-        # For demo, just listing needs vs. availability is enough.
-        
-        return {
-            'required_resources': {
-                'ambulances': ambulances_needed,
-                'evacuation_buses': buses_needed,
-                'personnel': personnel_needed
-            },
-            'available_resources': current_resources
-            # 'deployment_plan': deployment_plan,
-            # 'resource_gaps': self._identify_gaps(current_resources, deployment_plan)
-        }
-    
-    def _calculate_ambulances(self, vulnerable_pop: Dict) -> int:
-        """Estimate ambulance needs"""
-        elderly = vulnerable_pop.get('elderly', 0)
-        disabled = vulnerable_pop.get('disabled', 0)  # Assuming this key exists
-        # Assume 1 ambulance per 100 vulnerable individuals
-        return max(1, (int(elderly) + int(disabled)) // 100)
-    
-    def _calculate_buses(self, total_population: int) -> int:
-        """Estimate evacuation bus needs"""
-        # Assume 80% have cars, 20% need buses
-        # Each bus holds ~50 people
-        people_needing_buses = total_population * 0.20
-        return max(1, int(people_needing_buses / 50))
+    """Estimate supply and personnel needs based on population impacts."""
 
-    def _calculate_personnel(self, total_population: int) -> int:
-        """Estimate police/fire personnel needed"""
-        # Simple ratio: 1 responder per 200 affected people
-        return max(5, int(total_population / 200))
-    
-    def _map_current_resources(self) -> Dict:
-        """Map fire stations, hospitals, ambulance bases"""
-        # Query infrastructure databases
-        # Simplified for demo
+    async def analyze(
+        self,
+        population_summary: Dict[str, Any],
+        routing_summary: Dict[str, Any],
+        infrastructure_data: Optional[Any],
+    ) -> Dict[str, Any]:
+        self._log("Planning resource allocation")
+
+        total_affected = population_summary.get("total_affected", 0)
+        vulnerable = population_summary.get("vulnerable_population", {})
+        critical_facilities = population_summary.get("critical_facilities", [])
+
+        shelters_needed = math.ceil(total_affected / 500) if total_affected else 0
+        medical_units = math.ceil(vulnerable.get("elderly", 0) / 100) if vulnerable else 0
+        relief_kits = max(total_affected, 0)
+
         return {
-            'fire_stations': [
-                {'id': 'FS-202', 'lat': 43.720, 'lon': -79.840, 'trucks': 3},
-                {'id': 'FS-205', 'lat': 43.735, 'lon': -79.875, 'trucks': 2}
-            ],
-            'hospitals': [
-                {'id': 'Brampton Civic', 'lat': 43.731, 'lon': -79.762, 'ambulances': 8}
-            ],
-            'police_stations': [
-                {'id': 'PS-21', 'lat': 43.728, 'lon': -79.830, 'units': 12}
-            ]
+            "total_affected": total_affected,
+            "shelters_needed": shelters_needed,
+            "medical_units": medical_units,
+            "relief_kits": relief_kits,
+            "critical_facilities": self._summarize_facilities(critical_facilities),
+            "route_status": routing_summary.get("severity"),
+            "staging_sites": self._candidate_sites(infrastructure_data),
         }
+
+    def _summarize_facilities(self, facilities: List[Dict[str, Any]]) -> List[str]:
+        names: List[str] = []
+        for facility in facilities:
+            name = facility.get("name")
+            if name:
+                names.append(name)
+        return names
+
+    def _candidate_sites(self, infrastructure_data: Optional[Any]) -> List[str]:
+        if infrastructure_data is None:
+            return []
+
+        sites: List[str] = []
+        try:
+            dataset = infrastructure_data
+            if hasattr(dataset, "columns") and "type" in dataset.columns:
+                dataset = dataset[dataset["type"] == "government"]
+
+            if hasattr(dataset, "head"):
+                sample = dataset.head(2)
+                if hasattr(sample, "iterrows"):
+                    for _, row in sample.iterrows():
+                        getter = getattr(row, "get", None)
+                        name = getter("name") if callable(getter) else row.name if isinstance(row, str) else None  # type: ignore[attr-defined]
+                        if not name and hasattr(row, "name"):
+                            value = getattr(row, "name")
+                            if isinstance(value, str):
+                                name = value
+                        if name:
+                            sites.append(name)
+        except Exception:
+            value = getattr(infrastructure_data, "name", None)
+            if value:
+                sites.append(str(value))
+
+        return sites
