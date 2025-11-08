@@ -360,10 +360,6 @@ The `_calculate_fire_spread_rate` function has dedicated unit tests:
 ```bash
 # Run fire spread rate tests specifically
 python backend/tests/test_fire_spread_rate.py
-
-# Or run all prediction-related tests
-python backend/tests/test_prediction.py
-python backend/tests/test_fire_spread_rate.py
 ```
 
 **Test Coverage:**
@@ -381,6 +377,65 @@ python backend/tests/test_fire_spread_rate.py
 Ran 6 tests in 0.002s
 
 OK
+```
+
+### Testing Timeline Predictions (Task #25)
+
+The `_generate_timeline_predictions` function has comprehensive unit tests:
+
+```bash
+# Run timeline prediction tests specifically
+python backend/tests/test_timeline_predictions.py
+
+# Or run all prediction-related tests
+python backend/tests/test_prediction.py
+python backend/tests/test_fire_spread_rate.py
+python backend/tests/test_timeline_predictions.py
+```
+
+**Test Coverage (12 comprehensive tests):**
+1. **Structure Validation** - Ensures correct dictionary structure with hour_1, hour_3, hour_6 keys
+2. **Confidence Decrease** - Verifies confidence decreases over time (0.75 - hours × 0.05)
+3. **Area Increase** - Confirms predicted fire area grows with time
+4. **Boundary Expansion** - Tests that GeoJSON polygons are properly expanded
+5. **None Input Handling** - Validates behavior with None polygon input
+6. **Different Spread Rates** - Tests predictions with varying spread rates
+7. **Polygon Area Calculation** - Tests `_calculate_polygon_area` with sample data and None
+8. **Polygon Expansion** - Tests `_expand_polygon` with sample data and None
+9. **Distance Effect** - Verifies larger distances create larger expanded polygons
+10. **Realistic Values** - Ensures predictions produce positive, increasing areas with valid confidence
+
+**Expected Test Output:**
+```
+............
+----------------------------------------------------------------------
+Ran 12 tests in 0.007s
+
+OK
+Running test_calculate_polygon_area_with_none...
+PASS: test_calculate_polygon_area_with_none
+Running test_calculate_polygon_area_with_sample_data...
+PASS: test_calculate_polygon_area_with_sample_data
+Running test_expand_polygon_distance_effect...
+PASS: test_expand_polygon_distance_effect
+Running test_expand_polygon_with_none...
+PASS: test_expand_polygon_with_none
+Running test_expand_polygon_with_sample_data...
+PASS: test_expand_polygon_with_sample_data
+Running test_generate_timeline_predictions_area_increases...
+PASS: test_generate_timeline_predictions_area_increases
+Running test_generate_timeline_predictions_boundary_expansion...
+PASS: test_generate_timeline_predictions_boundary_expansion
+Running test_generate_timeline_predictions_confidence_decreases...
+PASS: test_generate_timeline_predictions_confidence_decreases
+Running test_generate_timeline_predictions_different_spread_rates...
+PASS: test_generate_timeline_predictions_different_spread_rates
+Running test_generate_timeline_predictions_structure...
+PASS: test_generate_timeline_predictions_structure
+Running test_generate_timeline_predictions_with_none_polygon...
+PASS: test_generate_timeline_predictions_with_none_polygon
+Running test_timeline_predictions_realistic_values...
+PASS: test_timeline_predictions_realistic_values
 ```
 
 The test suite validates:

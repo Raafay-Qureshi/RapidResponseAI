@@ -5,6 +5,11 @@ These are stubs that will be implemented in subsequent tasks.
 
 from typing import Dict, List, Tuple
 from shapely.geometry import shape
+try:
+    from pyproj import Geod
+except ImportError:
+    # Fallback for systems without pyproj
+    Geod = None
 
 
 def _calculate_fire_spread_rate(weather: Dict) -> Tuple[float, Dict]:
@@ -48,36 +53,52 @@ def _calculate_fire_spread_rate(weather: Dict) -> Tuple[float, Dict]:
     return spread_rate, factors
 
 
-def _generate_timeline_predictions(current_boundary_geojson: Dict, spread_rate: float) -> List[Dict]:
-    """
-    Generate timeline predictions for fire spread.
+def _calculate_polygon_area(polygon: Dict) -> float:
+    """Calculate area of GeoJSON polygon in km²"""
+    if not polygon:
+        return 0.0
+    geom = shape(polygon)
+    if Geod is not None:
+        geod = Geod(ellps="WGS84")
+        area_m2, _ = geod.geometry_area_perimeter(geom)
+        return abs(area_m2) / 1_000_000  # Convert to km²
+    else:
+        # Fallback: use shapely's area (in degrees², approximate)
+        # Very rough approximation: 1 degree² ≈ 111² km² ≈ 12321 km²
+        return geom.area * 12321
 
-    Args:
-        current_boundary_geojson: Current fire perimeter
-        spread_rate: Spread rate in km/h
 
-    Returns:
-        List of prediction dictionaries
+def _expand_polygon(polygon: Dict, distance_km: float) -> Dict:
+    """Expands a polygon by a buffer distance in km"""
+    if not polygon:
+        return None
+    # 1 degree is approx 111.1 km
+    buffer_degrees = distance_km / 111.1
+    geom = shape(polygon)
+    expanded_geom = geom.buffer(buffer_degrees)
+    return expanded_geom.__geo_interface__
+
+
+def _generate_timeline_predictions(current_boundary_geojson: Dict, spread_rate: float) -> Dict:
     """
-    # Stub implementation - will be replaced in Task #25
-    predictions = [
-        {
-            'time': '2023-10-01T12:00:00Z',
-            'area': 100.0,
-            'perimeter': current_boundary_geojson
-        },
-        {
-            'time': '2023-10-01T13:00:00Z',
-            'area': 100.0 + (spread_rate * 1),  # 1 hour prediction
-            'perimeter': current_boundary_geojson  # Would be expanded boundary
-        },
-        {
-            'time': '2023-10-01T14:00:00Z',
-            'area': 100.0 + (spread_rate * 2),  # 2 hour prediction
-            'perimeter': current_boundary_geojson  # Would be further expanded
+    Projects fire spread forward for 1, 3, and 6 hours.
+    """
+    predictions = {}
+    for hours in [1, 3, 6]:
+        spread_distance_km = spread_rate * hours
+
+        # Simplified: Just expand radius (buffer)
+        # A real model would expand more in the wind_direction
+        expanded_boundary_geojson = _expand_polygon(
+            current_boundary_geojson,
+            spread_distance_km
+        )
+
+        predictions[f'hour_{hours}'] = {
+            'boundary': expanded_boundary_geojson,
+            'area_km2': _calculate_polygon_area(expanded_boundary_geojson),
+            'confidence': 0.75 - (hours * 0.05)  # Confidence decreases with time
         }
-    ]
-
     return predictions
 
 
