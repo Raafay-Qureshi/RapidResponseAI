@@ -1,6 +1,8 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit, join_room
+from data.satellite_client import SatelliteClient
+from data.weather_client import WeatherClient
 import asyncio
 import sys
 import os
@@ -19,6 +21,9 @@ socketio = SocketIO(app, cors_allowed_origins=["http://localhost:3000"])
 # Initialize orchestrator with socketio instance (commented out for now due to missing dependencies)
 # orchestrator = DisasterOrchestrator(socketio)
 orchestrator = None
+
+# Initialize SocketIO with CORS support
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 # Note: Flask endpoints are sync by default.
 # To call async methods, we use asyncio.run()
@@ -77,6 +82,22 @@ def test_weather():
     data = asyncio.run(client.fetch_current({'lat': 43.7315, 'lon': -79.8620}))
     return jsonify(data)
 
+# WebSocket event handlers
+@socketio.on('connect')
+def handle_connect():
+    print('[WebSocket] Client connected')
+    emit('message', {'data': 'Connected to RapidResponse AI server'})
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    print('[WebSocket] Client disconnected')
+
+@socketio.on('ping')
+def handle_ping(data):
+    print(f'[WebSocket] Ping received: {data}')
+    import time
+    emit('pong', {'timestamp': data.get('timestamp'), 'server_time': time.time()})
+
 @socketio.on('join_disaster')
 def handle_join_disaster(data):
     disaster_id = data.get('disaster_id')
@@ -102,4 +123,5 @@ async def process_disaster_async(disaster_id):
         socketio.emit('disaster_error', {'disaster_id': disaster_id, 'error': str(e)}, room=disaster_id)
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True, port=5000)
+    # Use socketio.run instead of app.run for WebSocket support
+    socketio.run(app, debug=True, port=5000, allow_unsafe_werkzeug=True)
