@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import uuid
 from datetime import datetime
 from typing import Any, Dict, Optional
@@ -159,9 +160,18 @@ class DisasterOrchestrator:
             data.get("infrastructure"),
         )
 
+        prediction_context = {
+            "type": disaster.get("type", "unknown"),
+            "location": disaster.get("location", {}),
+        }
+        prediction_inputs = {
+            "weather": data.get("weather_forecast") or {},
+            "fire_perimeter": damage_result.get("fire_perimeter"),
+        }
+
         prediction_result = await self.agents["prediction"].analyze(
-            disaster.get("type", "unknown"),
-            data.get("weather_forecast"),
+            prediction_context,
+            prediction_inputs,
         )
 
         return {
@@ -171,6 +181,49 @@ class DisasterOrchestrator:
             "resource": resource_result,
             "prediction": prediction_result,
         }
+
+    def _build_master_prompt(self, context: Dict[str, Any]) -> str:
+        """Build the master prompt for the LLM synthesis step."""
+        agent_results = context.get("agent_outputs", {})
+        damage_data = json.dumps(agent_results.get("damage", {}), indent=2)
+        population_data = json.dumps(agent_results.get("population", {}), indent=2)
+        prediction_data = json.dumps(agent_results.get("prediction", {}), indent=2)
+        routing_data = json.dumps(agent_results.get("routing", {}), indent=2)
+        resource_data = json.dumps(agent_results.get("resource", {}), indent=2)
+
+        disaster_type = context.get("disaster_type", "unknown incident")
+        location = context.get("location", "unknown location")
+
+        prompt = f"""
+You are "RapidResponseAI," an expert-level emergency response coordinator for the City of Brampton, Ontario. Your mission is to synthesize raw data from 5 specialized AI agents into a clear, actionable, human-readable emergency plan.
+The incident is a **{disaster_type}** detected at **{location}**.
+Here is the raw data from your 5 agents:
+### AGENT 1: DAMAGE ASSESSMENT ###
+{damage_data}
+### AGENT 2: POPULATION IMPACT ###
+{population_data}
+### AGENT 3: PREDICTION & TIMELINE ###
+{prediction_data}
+### AGENT 4: EVACUATION ROUTING ###
+{routing_data}
+### AGENT 5: RESOURCE ALLOCATION ###
+{resource_data}
+---
+**YOUR TASK:**
+Generate the complete emergency response plan. The plan MUST be formatted EXACTLY as follows. Use the specified headers with `###` delimiters. Be specific, actionable, and use the exact data provided by the agents (e.g., population numbers, km/h spread rate, highway names).
+### EXECUTIVE SUMMARY ###
+(Write a 2-3 sentence summary of the most critical information: What is happening, who is at immediate risk, and the #1 priority action.)
+### SITUATION OVERVIEW ###
+(Write a detailed 2-paragraph analysis of the situation. Combine the data from the Damage, Population, and Prediction agents to paint a clear picture of the threat.)
+### COMMUNICATION TEMPLATES (ENGLISH) ###
+(Write a clear, concise public safety alert for Twitter/X based on the agent data. Use clear instructions.)
+### COMMUNICATION TEMPLATES (PUNJABI) ###
+(Translate the English template into Punjabi. Be accurate and respectful.)
+### COMMUNICATION TEMPLATES (HINDI) ###
+(Translate the English template into Hindi. Be accurate and respectful.)
+---
+"""
+        return prompt
 
     def _synthesize_plan(
         self,

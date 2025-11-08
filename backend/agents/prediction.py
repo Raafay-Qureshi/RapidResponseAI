@@ -132,103 +132,46 @@ class PredictionAgent(BaseAgent):
             ... }
             >>> result = await agent._model_fire_spread(disaster, data)
         """
-        self._log("Modeling wildfire spread with weather-based physics model")
-        logger.debug(f"Fire spread input: disaster={disaster}, data keys={list(data.keys())}")
-        
-        try:
-            # Extract required data
-            if 'weather' not in data:
-                raise KeyError("Weather data is required for fire spread modeling")
-            
-            weather = data['weather']
-            current_boundary_geojson = data.get('fire_perimeter')
-            
-            # Convert GeoJSON to geometry if available
-            current_boundary_geom = None
-            if current_boundary_geojson:
-                try:
-                    current_boundary_geom = shape(current_boundary_geojson)
-                    logger.debug(f"Fire boundary loaded: type={current_boundary_geom.geom_type}")
-                except (GEOSException, Exception) as e:
-                    logger.warning(f"Failed to parse fire perimeter geometry: {e}")
-                    current_boundary_geom = None
-            else:
-                logger.info("No fire perimeter provided, predictions will be relative")
-            
-            # Task #24: Calculate spread rate
-            self._log("Calculating fire spread rate from weather conditions")
-            spread_rate, factors = _calculate_fire_spread_rate(weather)
-            logger.info(f"Spread rate calculated: {spread_rate:.2f} km/h")
-            
-            # Task #25: Generate timeline predictions
-            self._log("Generating timeline predictions for 1, 3, and 6 hours")
-            timeline_predictions = _generate_timeline_predictions(
-                current_boundary_geojson,
-                spread_rate
-            )
-            logger.info(f"Generated {len(timeline_predictions)} timeline predictions")
-            
-            # Task #26: Calculate critical point arrival times
-            self._log("Calculating arrival times at critical infrastructure")
-            critical_points = _identify_critical_points(disaster.get('location', {}))
-            logger.debug(f"Identified {len(critical_points)} critical points")
-            
-            arrival_times = _calculate_arrival_times(
-                current_boundary_geom,
-                critical_points,
-                spread_rate,
-                factors['wind_direction_deg']
-            )
-            logger.info(f"Calculated arrival times for {len(arrival_times)} locations")
-            
-            # Compile results
-            result = {
-                'current_spread_rate_kmh': round(spread_rate, 2),
-                'predictions': timeline_predictions,
-                'critical_arrival_times': arrival_times,
-                'factors': factors
-            }
-            
-            self._log(f"Fire spread modeling complete: {spread_rate:.2f} km/h spread rate")
-            return result
-        
-        except KeyError as e:
-            logger.error(f"Missing required data for fire spread: {e}")
-            raise
-        
-        except ValueError as e:
-            logger.error(f"Invalid data for fire spread: {e}")
-            raise
-        
-        except Exception as e:
-            logger.error(f"Unexpected error in fire spread modeling: {e}", exc_info=True)
-            raise RuntimeError(f"Fire spread modeling failed: {e}")
-    
-    async def _model_flood_spread(self, disaster: Dict, data: Dict) -> Dict:
-        """
-        Model flood spread (placeholder for future implementation).
-        
-        This is a placeholder that will be implemented in future iterations
-        with proper flood modeling based on terrain, rainfall, and drainage.
-        
-        Args:
-            disaster: Dictionary with disaster metadata
-            data: Dictionary containing flood-related data
-        
-        Returns:
-            Dictionary with status indicating not implemented
-        
-        Example:
-            >>> disaster = {'type': 'flood', 'location': {'lat': 43.7, 'lon': -79.8}}
-            >>> result = await agent._model_flood_spread(disaster, {})
-            >>> print(result['status'])
-            'not_implemented'
-        """
-        self._log("Flood modeling not yet implemented (placeholder)")
-        logger.warning("Flood modeling requested but not implemented")
-        
+        weather_input = data.get('weather') or {}
+        if isinstance(weather_input, dict) and weather_input.get('list'):
+            weather = weather_input['list'][0]
+        else:
+            weather = weather_input
+
+        current_boundary_geojson = data.get('fire_perimeter')
+        current_boundary_geom = shape(current_boundary_geojson) if current_boundary_geojson else None
+
+        # --- Task #24 ---
+        spread_rate, factors = _calculate_fire_spread_rate(weather)
+        humidity = weather.get('main', {}).get('humidity', factors.get('humidity_percent', 50))
+        wind_speed = factors.get('wind_speed_kmh', 0)
+
+        if spread_rate >= 6 or (wind_speed >= 45 and humidity <= 35):
+            outlook = 'worsening'
+        elif spread_rate <= 3 and humidity >= 55:
+            outlook = 'stable'
+        else:
+            outlook = 'guarded'
+
+        # --- Task #25 ---
+        timeline_predictions = _generate_timeline_predictions(
+            current_boundary_geojson,
+            spread_rate
+        )
+
+        # --- Task #26 ---
+        critical_points = _identify_critical_points(disaster['location'])
+        arrival_times = _calculate_arrival_times(
+            current_boundary_geom,
+            critical_points,
+            spread_rate,
+            factors['wind_direction_deg']
+        )
+
         return {
-            'status': 'not_implemented',
-            'message': 'Flood spread modeling will be added in future iterations',
-            'disaster_type': 'flood'
+            'current_spread_rate_kmh': round(spread_rate, 2),
+            'predictions': timeline_predictions,
+            'critical_arrival_times': arrival_times,
+            'factors': factors,
+            'outlook': outlook
         }
