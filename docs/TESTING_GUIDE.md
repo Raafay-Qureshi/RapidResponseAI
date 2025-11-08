@@ -152,6 +152,18 @@ The script builds synthetic census blocks, runs `PopulationImpactAgent`, and ass
 
 ---
 
+## Testing DisasterOrchestrator
+
+```bash
+# Activate virtual environment first (if using one)
+pip install -r backend/requirements.txt
+python backend/tests/test_orchestrator.py
+```
+
+This harness injects lightweight dummy data clients so the orchestrator can run through data fetching, agent execution, status updates, and plan synthesis entirely offline. Expect status logs from every agent and a final “All DisasterOrchestrator tests passed!” message.
+
+---
+
 ## Testing GeoHubClient
 
 ### ⚠️ Important: Fixing GeoJSON Loading Errors
