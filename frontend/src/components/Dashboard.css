@@ -1,7 +1,7 @@
 .dashboard {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 120px);
+  min-height: calc(100vh - 80px);
   background: var(--dark-bg);
 }
 
@@ -103,12 +103,14 @@
   grid-template-columns: 1.2fr 1fr;
   gap: 0;
   flex: 1;
+  min-height: 600px;
   overflow: hidden;
   border-top: 1px solid var(--border);
 }
 
 .map-panel {
   position: relative;
+  min-height: 600px;
   overflow: hidden;
   border-right: 1px solid var(--border);
 }
