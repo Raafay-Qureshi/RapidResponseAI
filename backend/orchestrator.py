@@ -17,6 +17,7 @@ from agents.population_impact import PopulationImpactAgent
 from agents.prediction import PredictionAgent
 from agents.resource_allocation import ResourceAllocationAgent
 from agents.routing import RoutingAgent
+from scenarios.july_2020_fire import load_july_2020_scenario, is_july_2020_scenario
 
 
 class DisasterOrchestrator:
@@ -87,7 +88,32 @@ class DisasterOrchestrator:
                 },
                 room=disaster_id,
             )
-            data = await self._fetch_all_data(disaster)
+
+            # Check if this is July 2020 scenario
+            if is_july_2020_scenario(disaster.get('trigger', {})):
+                self._log("Loading July 2020 scenario configuration")
+                scenario_config = load_july_2020_scenario()
+
+                # Store scenario config for reference
+                disaster['scenario_config'] = scenario_config
+
+                # Use scenario data instead of fetching
+                data = {
+                    'weather_current': scenario_config['weather'],
+                    'weather_forecast': scenario_config['weather'],
+                    'satellite': None,  # Will use fire_perimeter directly
+                    'population': scenario_config['population_estimate'],
+                    'infrastructure': scenario_config['infrastructure'],
+                    'roads': None,  # Will fetch this normally
+                }
+
+                # Add fire perimeter to disaster data for agents
+                disaster['fire_perimeter'] = scenario_config['fire_perimeter']
+
+                self._log(f"July 2020 scenario loaded: {scenario_config['disaster']['name']}")
+            else:
+                data = await self._fetch_all_data(disaster)
+
             disaster["data"] = data
 
             disaster["status"] = "analyzing"
