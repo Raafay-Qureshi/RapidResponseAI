@@ -263,8 +263,8 @@ class DisasterOrchestrator:
             "prediction": prediction_result,
         }
 
-    def _build_master_prompt(self, context: Dict[str, Any]) -> str:
-        """Build the master prompt for the LLM synthesis step."""
+    def _create_standard_prompt(self, context: Dict[str, Any]) -> str:
+        """Build the standard prompt for the LLM synthesis step."""
         agent_results = context.get("agent_outputs", {})
         damage_data = json.dumps(agent_results.get("damage", {}), indent=2)
         population_data = json.dumps(agent_results.get("population", {}), indent=2)
@@ -306,6 +306,72 @@ Generate the complete emergency response plan. The plan MUST be formatted EXACTL
 """
         return prompt
 
+    def _create_july_2020_prompt(self, context: Dict[str, Any]) -> str:
+        """Create prompt specifically engineered for July 2020 scenario with HWY 407 emphasis."""
+        agent_outputs = context.get("agent_outputs", {})
+
+        prompt = f"""You are an emergency response coordinator generating a critical emergency response plan for the City of Brampton Fire Chief.
+
+SITUATION:
+This is a WILDLAND-URBAN INTERFACE (WUI) FIRE at the Highway 407/410 interchange.
+
+CRITICAL CONTEXT:
+{json.dumps(agent_outputs, indent=2)}
+
+YOUR TASK:
+Generate a complete emergency response plan with the following sections:
+
+1. EXECUTIVE SUMMARY (2-3 sentences)
+   - Start with: "CRITICAL WUI FIRE AT HWY 407/410 INTERCHANGE"
+   - MUST explicitly state: "RECOMMEND PROACTIVE CLOSURE OF HWY 407 EASTBOUND LANES"
+   - Mention the timeline to highway impact
+   - Mention mutual aid requirement
+   - Be urgent and direct - this is life-safety critical
+   - Use all-caps for critical recommendations
+
+2. SITUATION OVERVIEW (1 paragraph)
+   - Fire size, type, spread rate
+   - Weather conditions driving spread
+   - Population at risk
+   - Infrastructure threatened (emphasize HWY 407)
+   - Why immediate action is required
+
+3. COMMUNICATION TEMPLATES
+   Generate emergency alerts in three languages. Each should be 140-160 characters for SMS:
+
+   a) English: Clear, direct, actionable. Mention location, action required, where to go.
+   b) Punjabi (ਪੰਜਾਬੀ): Translate the English message accurately
+   c) Hindi (हिंदी): Translate the English message accurately
+
+CRITICAL REQUIREMENTS:
+- The executive summary MUST mention "Highway 407" or "HWY 407"
+- The executive summary MUST recommend "proactive closure" or "immediate closure"
+- Use specific numbers from the data (affected population, timeline, etc.)
+- Tone should be urgent but professional
+- This plan will be acted upon immediately - be specific and actionable
+- Emphasize that satellite detection gives us a head start before 911 calls
+
+Format your response EXACTLY as follows:
+
+===EXECUTIVE_SUMMARY===
+[Your 2-3 sentence executive summary here]
+
+===SITUATION_OVERVIEW===
+[Your situation overview paragraph here]
+
+===COMMUNICATION_EN===
+[English alert message]
+
+===COMMUNICATION_PA===
+[Punjabi alert message]
+
+===COMMUNICATION_HI===
+[Hindi alert message]
+
+Remember: Lives depend on this plan. Be specific, urgent, and actionable."""
+
+        return prompt
+
     def _extract_section(self, text: str, start_delim: str, end_delim: str) -> str:
         """Helper to extract text between two delimiters."""
         try:
@@ -318,48 +384,100 @@ Generate the complete emergency response plan. The plan MUST be formatted EXACTL
             self._log(f"Warning: Could not find delimiter {start_delim}")
             return f"Error: Could not find section {start_delim}"
 
-    def _parse_llm_response(self, response_text: str) -> Dict[str, Any]:
+    def _parse_llm_response(self, response_text: str, is_july_2020: bool = False) -> Dict[str, Any]:
         """Parses the raw LLM text block into a structured dict."""
         self._log("Parsing LLM response...")
 
-        summary = self._extract_section(
-            response_text,
-            "### EXECUTIVE SUMMARY ###",
-            "### SITUATION OVERVIEW ###",
-        )
-        overview = self._extract_section(
-            response_text,
-            "### SITUATION OVERVIEW ###",
-            "### COMMUNICATION TEMPLATES (ENGLISH) ###",
-        )
+        if is_july_2020:
+            # Parse July 2020 format with === delimiters
+            sections = {}
 
-        template_en = self._extract_section(
-            response_text,
-            "### COMMUNICATION TEMPLATES (ENGLISH) ###",
-            "### COMMUNICATION TEMPLATES (PUNJABI) ###",
-        )
-        template_pa = self._extract_section(
-            response_text,
-            "### COMMUNICATION TEMPLATES (PUNJABI) ###",
-            "### COMMUNICATION TEMPLATES (HINDI) ###",
-        )
+            # Extract executive summary
+            if '===EXECUTIVE_SUMMARY===' in response_text:
+                start = response_text.index('===EXECUTIVE_SUMMARY===') + len('===EXECUTIVE_SUMMARY===')
+                end = response_text.index('===SITUATION_OVERVIEW===', start)
+                sections['summary'] = response_text[start:end].strip()
+            else:
+                sections['summary'] = "Error: Could not parse executive summary."
 
-        try:
-            template_hi = response_text.split("### COMMUNICATION TEMPLATES (HINDI) ###", 1)[
-                -1
-            ].strip()
-        except Exception:
-            template_hi = "Error: Could not parse Hindi template."
+            # Extract situation overview
+            if '===SITUATION_OVERVIEW===' in response_text:
+                start = response_text.index('===SITUATION_OVERVIEW===') + len('===SITUATION_OVERVIEW===')
+                end = response_text.index('===COMMUNICATION_EN===', start)
+                sections['overview'] = response_text[start:end].strip()
+            else:
+                sections['overview'] = "Error: Could not parse situation overview."
 
-        return {
-            "summary": summary,
-            "overview": overview,
-            "templates": {
-                "en": template_en,
-                "pa": template_pa,
-                "hi": template_hi,
-            },
-        }
+            # Extract communication templates
+            templates = {}
+
+            if '===COMMUNICATION_EN===' in response_text:
+                start = response_text.index('===COMMUNICATION_EN===') + len('===COMMUNICATION_EN===')
+                end = response_text.index('===COMMUNICATION_PA===', start)
+                templates['en'] = response_text[start:end].strip()
+            else:
+                templates['en'] = "Error: Could not parse English template."
+
+            if '===COMMUNICATION_PA===' in response_text:
+                start = response_text.index('===COMMUNICATION_PA===') + len('===COMMUNICATION_PA===')
+                end = response_text.index('===COMMUNICATION_HI===', start)
+                templates['pa'] = response_text[start:end].strip()
+            else:
+                templates['pa'] = "Error: Could not parse Punjabi template."
+
+            if '===COMMUNICATION_HI===' in response_text:
+                start = response_text.index('===COMMUNICATION_HI===') + len('===COMMUNICATION_HI===')
+                # Find end (either next === or end of string)
+                next_marker = response_text.find('===', start)
+                if next_marker == -1:
+                    templates['hi'] = response_text[start:].strip()
+                else:
+                    templates['hi'] = response_text[start:next_marker].strip()
+            else:
+                templates['hi'] = "Error: Could not parse Hindi template."
+
+            sections['templates'] = templates
+            return sections
+        else:
+            # Parse standard format with ### delimiters
+            summary = self._extract_section(
+                response_text,
+                "### EXECUTIVE SUMMARY ###",
+                "### SITUATION OVERVIEW ###",
+            )
+            overview = self._extract_section(
+                response_text,
+                "### SITUATION OVERVIEW ###",
+                "### COMMUNICATION TEMPLATES (ENGLISH) ###",
+            )
+
+            template_en = self._extract_section(
+                response_text,
+                "### COMMUNICATION TEMPLATES (ENGLISH) ###",
+                "### COMMUNICATION TEMPLATES (PUNJABI) ###",
+            )
+            template_pa = self._extract_section(
+                response_text,
+                "### COMMUNICATION TEMPLATES (PUNJABI) ###",
+                "### COMMUNICATION TEMPLATES (HINDI) ###",
+            )
+
+            try:
+                template_hi = response_text.split("### COMMUNICATION TEMPLATES (HINDI) ###", 1)[
+                    -1
+                ].strip()
+            except Exception:
+                template_hi = "Error: Could not parse Hindi template."
+
+            return {
+                "summary": summary,
+                "overview": overview,
+                "templates": {
+                    "en": template_en,
+                    "pa": template_pa,
+                    "hi": template_hi,
+                },
+            }
 
     async def _call_llm_api(self, context: Dict[str, Any]) -> Dict[str, Any]:
         """Send the synthesized prompt to the LLM provider and parse the response."""
@@ -372,12 +490,31 @@ Generate the complete emergency response plan. The plan MUST be formatted EXACTL
                 "templates": {},
             }
 
-        prompt = self._build_master_prompt(context)
+        # Check if this is July 2020 scenario and use specialized prompt
+        agent_outputs = context.get('agent_outputs', {})
+        predictions = agent_outputs.get('prediction', {})
+        critical_arrivals = predictions.get('critical_arrival_times', [])
+
+        is_july_2020 = (
+            context.get('disaster_type') == 'wildfire' and
+            any('407' in str(arrival.get('location', ''))
+                for arrival in critical_arrivals)
+        )
+
+        if is_july_2020:
+            self._log("Using July 2020 specialized prompt (HWY 407 emphasis)")
+            prompt = self._create_july_2020_prompt(context)
+        else:
+            self._log("Using standard prompt")
+            prompt = self._create_standard_prompt(context)
+
         url = os.getenv("OPENROUTER_URL", "https://openrouter.ai/api/v1/chat/completions")
         headers = {
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
             "Accept": "application/json",
+            "HTTP-Referer": "https://rapidresponseai.demo",
+            "X-Title": "RapidResponseAI",
         }
 
         payload = {
@@ -388,6 +525,8 @@ Generate the complete emergency response plan. The plan MUST be formatted EXACTL
                     "content": prompt,
                 }
             ],
+            "temperature": 0.7,
+            "max_tokens": 2000,
         }
 
         timeout = aiohttp.ClientTimeout(total=60)
@@ -430,7 +569,7 @@ Generate the complete emergency response plan. The plan MUST be formatted EXACTL
                     flattened.append(str(block))
             content = "\n".join(flattened)
 
-        return self._parse_llm_response(content or "")
+        return self._parse_llm_response(content or "", is_july_2020=is_july_2020)
 
     def _emit(self, event: str, payload: Dict[str, Any], room: Optional[str] = None) -> None:
         if self.socketio:
