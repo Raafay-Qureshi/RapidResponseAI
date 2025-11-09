@@ -3,6 +3,7 @@ import './PlanViewer.css';
 import ExecutiveSummary from './ExecutiveSummary';
 import Timeline from './Timeline';
 import ResourceTable from './ResourceTable';
+import CommunicationTemplates from './CommunicationTemplates';
 import PopulationImpact from './PopulationImpact';
 import CommunicationTemplates from './CommunicationTemplates';
 
@@ -70,7 +71,10 @@ function PlanViewer({ plan, loading }) {
         {/* ResourceTable component */}
         <ResourceTable allocation={plan.resource_deployment} />
         
-        {/* Communication templates will go here (Task 7.5) */}
+        {/* CommunicationTemplates component */}
+        <CommunicationTemplates templates={plan.communication_templates} />
+        
+        {/* PopulationImpact component */}
         <PopulationImpact
           populationImpact={plan.population_impact}
           affectedAreas={plan.affected_areas}
@@ -78,10 +82,6 @@ function PlanViewer({ plan, loading }) {
         <CommunicationTemplates templates={plan.communication_templates} />
         {/* Population impact will go here (Task 7.6) */}
         
-        <div className="plan-section placeholder">
-          <p>Additional plan sections will be added in subsequent tasks...</p>
-          <pre>{JSON.stringify(plan, null, 2)}</pre>
-        </div>
       </div>
     </div>
   );

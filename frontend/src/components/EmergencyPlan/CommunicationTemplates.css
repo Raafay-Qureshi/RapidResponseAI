@@ -19,72 +19,71 @@
   letter-spacing: 0.05em;
 }
 
+.communication-section {
+  background: linear-gradient(to bottom, rgba(102, 126, 234, 0.05), transparent);
+}
+
+.section-description {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
 /* Templates Grid */
 .templates-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 1fr;
   gap: 1.5rem;
   margin-bottom: 2rem;
 }
 
 .template-card {
-  display: flex;
-  flex-direction: column;
+  padding: 1.5rem;
   background: var(--card-bg);
   border-radius: 8px;
-  overflow: hidden;
   border: 1px solid var(--border);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  animation: fadeInUp 0.5s ease-out forwards;
-  opacity: 0;
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
 .template-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  transform: translateY(-2px);
+  border-color: #667eea;
 }
 
-/* Template Header */
+/* Language-specific font support */
+.template-card.punjabi .template-content {
+  font-family: 'Noto Sans Gurmukhi', 'Segoe UI', sans-serif;
+  font-size: 1.1rem;
+  line-height: 1.8;
+}
+
+.template-card.hindi .template-content {
+  font-family: 'Noto Sans Devanagari', 'Segoe UI', sans-serif;
+  font-size: 1.1rem;
+  line-height: 1.8;
+}
+
 .template-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  padding: 1.25rem;
-  background: rgba(0, 0, 0, 0.2);
-  border-bottom: 1px solid var(--border);
-}
-
-.template-language {
-  display: flex;
   align-items: center;
-  gap: 0.75rem;
-  flex: 1;
-}
-
-.language-flag {
-  font-size: 2rem;
-  flex-shrink: 0;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
 }
 
 .language-info {
   display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.language-flag {
+  font-size: 1.75rem;
 }
 
 .language-name {
-  margin: 0;
   font-size: 1rem;
   font-weight: 600;
   color: var(--text-primary);
@@ -282,5 +281,17 @@
 
   .channels-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .channels-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .template-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
   }
 }

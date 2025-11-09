@@ -14,90 +14,60 @@ function CommunicationTemplates({ templates }) {
   }
 
   const handleCopy = (lang, text) => {
-    if (!navigator?.clipboard) {
-      return;
+    if (text) {
+      navigator.clipboard.writeText(text);
+      setCopiedLang(lang);
+      setTimeout(() => setCopiedLang(null), 2000);
     }
-
-    navigator.clipboard.writeText(text);
-    setCopiedLang(lang);
-    setTimeout(() => setCopiedLang(null), 2000);
   };
 
-  const languageConfigs = [
-    {
-      code: 'en',
-      name: 'English',
-      flag: '🇬🇧',
-      text: templates.en || 'Template not available',
-      description: 'Primary communication language',
-    },
-    {
-      code: 'pa',
-      name: 'ਪੰਜਾਬੀ (Punjabi)',
-      flag: '🇮🇳',
-      text: templates.pa || 'ਟੈਂਪਲੇਟ ਉਪਲਬਧ ਨਹੀਂ ਹੈ',
-      description: 'Largest minority language in Brampton',
-    },
-    {
-      code: 'hi',
-      name: 'हिंदी (Hindi)',
-      flag: '🇮🇳',
-      text: templates.hi || 'टेम्पलेट उपलब्ध नहीं है',
-      description: 'Second largest minority language',
-    },
+  const languages = [
+    { code: 'en', name: 'English', flag: '🇬🇧', font: 'default' },
+    { code: 'pa', name: 'Punjabi (ਪੰਜਾਬੀ)', flag: '🇮🇳', font: 'punjabi' },
+    { code: 'hi', name: 'Hindi (हिंदी)', flag: '🇮🇳', font: 'hindi' }
   ];
 
-  const getSMSStatus = (text) => {
-    const length = text.length;
-    if (length <= 160) return { status: 'optimal', message: 'Single SMS' };
-    if (length <= 320) return { status: 'acceptable', message: '2 SMS segments' };
-    return { status: 'warning', message: '3+ SMS segments' };
+  const getCharacterCount = (text) => {
+    return text ? text.length : 0;
+  };
+
+  const isSMSLength = (text) => {
+    return text && text.length <= 160;
   };
 
   return (
-    <section className="plan-section templates-section">
-      <div className="section-header">
-        <h3>📢 Emergency Communication Templates</h3>
-        <span className="ready-badge">✓ READY TO DEPLOY</span>
-      </div>
-
-      <p className="templates-description">
-        AI-generated emergency alerts in Brampton&apos;s primary languages. Templates are optimized for SMS, social media, and emergency alert systems.
+    <section className="plan-section communication-section">
+      <h3>📢 Multi-Language Emergency Communications</h3>
+      <p className="section-description">
+        Culturally-appropriate emergency alerts for Brampton's diverse population
       </p>
 
       <div className="templates-grid">
-        {languageConfigs.map((lang, idx) => {
-          const smsStatus = getSMSStatus(lang.text);
-          const charCount = lang.text.length;
-          const isCopied = copiedLang === lang.code;
+        {languages.map((lang) => {
+          const text = templates[lang.code];
+          const charCount = getCharacterCount(text);
+          const smsReady = isSMSLength(text);
 
           return (
-            <div
-              key={lang.code}
-              className="template-card"
-              style={{ animationDelay: `${idx * 0.15}s` }}
-            >
+            <div key={lang.code} className={`template-card ${lang.font}`}>
               <div className="template-header">
-                <div className="template-language">
+                <div className="language-info">
                   <span className="language-flag">{lang.flag}</span>
-                  <div className="language-info">
-                    <h4 className="language-name">{lang.name}</h4>
-                    <p className="language-description">{lang.description}</p>
-                  </div>
+                  <span className="language-name">{lang.name}</span>
                 </div>
                 <button
-                  className={`template-copy-btn ${isCopied ? 'copied' : ''}`}
-                  onClick={() => handleCopy(lang.code, lang.text)}
+                  className={`template-copy-btn ${copiedLang === lang.code ? 'copied' : ''}`}
+                  onClick={() => handleCopy(lang.code, text)}
                   title="Copy to clipboard"
                 >
-                  {isCopied ? '✓' : '📋'}
+                  {copiedLang === lang.code ? '✓ Copied' : '📋 Copy'}
                 </button>
               </div>
 
               <div className="template-content">
                 <div className="template-text-wrapper">
                   <p className="template-text" lang={lang.code}>
-                    {lang.text}
+                    {text || 'Template not available'}
                   </p>
                 </div>
               </div>
@@ -107,8 +77,8 @@ function CommunicationTemplates({ templates }) {
                   <span className="char-count">
                     <span className="count-number">{charCount}</span> characters
                   </span>
-                  <span className={`sms-status ${smsStatus.status}`}>
-                    {smsStatus.message}
+                  <span className={`sms-status ${smsReady ? 'optimal' : 'warning'}`}>
+                    {smsReady ? '✓ SMS Ready' : '⚠️ Too long for SMS'}
                   </span>
                 </div>
               </div>
@@ -118,34 +88,41 @@ function CommunicationTemplates({ templates }) {
       </div>
 
       <div className="deployment-instructions">
-        <h4 className="instructions-title">🚀 Deployment Channels</h4>
+        <h4 className="instructions-title">📡 Recommended Deployment Channels</h4>
         <div className="channels-grid">
           <div className="channel-item">
             <span className="channel-icon">📱</span>
             <span className="channel-name">Emergency SMS</span>
-            <span className="channel-status ready">Ready</span>
           </div>
           <div className="channel-item">
-            <span className="channel-icon">🔔</span>
-            <span className="channel-name">Pelmorex Alert Ready</span>
-            <span className="channel-status ready">Ready</span>
-          </div>
-          <div className="channel-item">
-            <span className="channel-icon">📢</span>
-            <span className="channel-name">Social Media</span>
-            <span className="channel-status ready">Ready</span>
+            <span className="channel-icon">🚨</span>
+            <span className="channel-name">AlertReady Canada</span>
           </div>
           <div className="channel-item">
             <span className="channel-icon">📻</span>
-            <span className="channel-name">Radio/TV Broadcast</span>
-            <span className="channel-status ready">Ready</span>
+            <span className="channel-name">Local Radio (AM 740, AM 1540)</span>
+          </div>
+          <div className="channel-item">
+            <span className="channel-icon">📺</span>
+            <span className="channel-name">Cable TV Crawl</span>
+          </div>
+          <div className="channel-item">
+            <span className="channel-icon">🌐</span>
+            <span className="channel-name">Social Media (Twitter/X, Facebook)</span>
+          </div>
+          <div className="channel-item">
+            <span className="channel-icon">🔊</span>
+            <span className="channel-name">Community Loudspeakers</span>
           </div>
         </div>
       </div>
 
       <div className="demographics-note">
         <span className="note-icon">ℹ️</span>
-        <p>Language distribution based on affected area demographics: English (62%), Punjabi (18%), Hindi (9%), Other (11%)</p>
+        <p>
+          Templates optimized for Brampton's demographics: 25% Punjabi speakers, 10% Hindi speakers.
+          All messages include critical safety information and evacuation instructions.
+        </p>
       </div>
     </section>
   );
