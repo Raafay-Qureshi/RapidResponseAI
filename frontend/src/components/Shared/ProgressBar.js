@@ -5,13 +5,9 @@ function ProgressBar({ progress = 0, message = '', estimatedTimeSeconds = 60 }) 
   const [displayProgress, setDisplayProgress] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(estimatedTimeSeconds);
 
-  // Smooth progress animation
+  // Update progress immediately without delay
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setDisplayProgress(progress);
-    }, 100);
-
-    return () => clearTimeout(timer);
+    setDisplayProgress(progress);
   }, [progress]);
 
   // Calculate time remaining

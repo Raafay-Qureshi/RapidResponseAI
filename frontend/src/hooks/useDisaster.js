@@ -88,9 +88,13 @@ function useDisaster() {
     const cleanupComplete = on('disaster_complete', (data) => {
       console.log('[useDisaster] Disaster processing complete:', data);
       setPlan(data.plan);
-      setLoading(false);
       setProgress(100);
       setStatusMessage('Emergency response plan generated');
+      
+      // Keep loading state true for a moment to show 100% completion
+      setTimeout(() => {
+        setLoading(false);
+      }, 2000);
     });
 
     // Plan updates (15-minute auto-refresh)

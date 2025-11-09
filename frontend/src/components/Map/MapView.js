@@ -52,9 +52,24 @@ function MapView({ disaster, plan }) {
       setMapLoaded(true);
     });
 
-    // Error handling
+    // Error handling - only log once to prevent infinite loops
+    let errorLogged = false;
     map.current.on('error', (e) => {
-      console.error('[MapView] Map error:', e);
+      if (!errorLogged) {
+        console.error('[MapView] Map error:', {
+          type: e?.type,
+          error: e?.error,
+          message: e?.error?.message || e?.message,
+          sourceId: e?.sourceId,
+          tile: e?.tile
+        });
+        errorLogged = true;
+        
+        // Reset after a delay to allow future errors
+        setTimeout(() => {
+          errorLogged = false;
+        }, 5000);
+      }
     });
 
     // Cleanup on unmount

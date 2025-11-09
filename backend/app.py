@@ -16,10 +16,19 @@ load_dotenv()
 
 app = Flask(__name__)
 # Allow both common dev ports for CORS
-CORS(app, origins=["http://localhost:3000", "http://localhost:3001"])
+CORS(app, origins=["http://localhost:3000", "http://localhost:3001"], supports_credentials=True)
 
-# Initialize SocketIO with CORS support - allow both dev ports
-socketio = SocketIO(app, cors_allowed_origins=["http://localhost:3000", "http://localhost:3001"])
+# Initialize SocketIO with CORS support and async mode
+socketio = SocketIO(
+    app,
+    cors_allowed_origins=["http://localhost:3000", "http://localhost:3001"],
+    async_mode='eventlet',
+    logger=True,
+    engineio_logger=True,
+    ping_timeout=60,
+    ping_interval=25,
+    cors_credentials=True
+)
 
 # Initialize orchestrator with socketio instance (commented out for now due to missing dependencies)
 # from orchestrator import DisasterOrchestrator
@@ -142,6 +151,7 @@ def simulate_disaster_processing(disaster_id):
     This is a temporary function for testing until the orchestrator is integrated
     """
     import time
+    import eventlet
     
     phases = [
         (20, 'data_ingestion', 'Fetching satellite and weather data...'),
@@ -153,7 +163,7 @@ def simulate_disaster_processing(disaster_id):
     ]
     
     for progress, phase, message in phases:
-        time.sleep(2)  # Simulate processing time
+        eventlet.sleep(2)  # Use eventlet.sleep for proper async delay
         socketio.emit('progress', {
             'disaster_id': disaster_id,
             'progress': progress,
@@ -407,7 +417,7 @@ def simulate_disaster_processing(disaster_id):
         }
     }
     
-    time.sleep(1)
+    eventlet.sleep(1)  # Use eventlet.sleep for proper async delay
     socketio.emit('disaster_complete', {
         'disaster_id': disaster_id,
         'plan': mock_plan
@@ -426,4 +436,4 @@ async def process_disaster_async(disaster_id):
 
 if __name__ == '__main__':
     # Use socketio.run instead of app.run for WebSocket support
-    socketio.run(app, debug=True, port=5000, allow_unsafe_werkzeug=True)
+    socketio.run(app, debug=True, port=5001, allow_unsafe_werkzeug=True, host='127.0.0.1')

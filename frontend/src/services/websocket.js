@@ -28,14 +28,19 @@ export function WebSocketProvider({ children, url }) {
     console.log('[WebSocket] Initializing connection...');
     
     // Create Socket.IO client
-    const socketUrl = url || process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:5000';
+    const socketUrl = url || process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:5001';
+    console.log('[WebSocket] Connecting to:', socketUrl);
     
     const newSocket = io(socketUrl, {
-      transports: ['websocket', 'polling'], // Try websocket first, fallback to polling
+      transports: ['polling', 'websocket'], // Start with polling, upgrade to websocket
       reconnection: true,
       reconnectionAttempts: maxReconnectAttempts,
       reconnectionDelay: 1000,
-      timeout: 10000,
+      reconnectionDelayMax: 5000,
+      timeout: 20000,
+      autoConnect: true,
+      forceNew: false,
+      upgrade: true,
     });
 
     // Connection event handlers
@@ -59,11 +64,17 @@ export function WebSocketProvider({ children, url }) {
 
     newSocket.on('connect_error', (error) => {
       console.error('[WebSocket] Connection error:', error.message);
+      console.error('[WebSocket] Error details:', error);
       reconnectAttempts.current += 1;
       
       if (reconnectAttempts.current >= maxReconnectAttempts) {
         console.error('[WebSocket] Max reconnection attempts reached');
+        setConnected(false);
       }
+    });
+
+    newSocket.on('error', (error) => {
+      console.error('[WebSocket] Socket error:', error);
     });
 
     newSocket.on('reconnect', (attemptNumber) => {
@@ -85,8 +96,11 @@ export function WebSocketProvider({ children, url }) {
       setLastUpdate(new Date());
     });
 
-    // Test connection
-    newSocket.emit('ping', { timestamp: Date.now() });
+    // Wait for connection before emitting
+    newSocket.on('connect', () => {
+      // Test connection after successful connect
+      newSocket.emit('ping', { timestamp: Date.now() });
+    });
 
     setSocket(newSocket);
 
