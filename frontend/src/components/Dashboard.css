@@ -43,8 +43,15 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
-  background: rgba(76, 175, 80, 0.1);
   border-radius: 4px;
+}
+
+.status-indicator.connected {
+  background: rgba(76, 175, 80, 0.1);
+}
+
+.status-indicator.disconnected {
+  background: rgba(255, 68, 68, 0.1);
 }
 
 .status-dot {
@@ -65,8 +72,31 @@
 
 .status-text {
   font-size: 0.875rem;
-  color: var(--safe-green);
   font-weight: 500;
+}
+
+.status-indicator.connected .status-text {
+  color: var(--safe-green);
+}
+
+.status-indicator.disconnected .status-text {
+  color: var(--danger-red);
+}
+
+.socket-id {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-family: monospace;
+}
+
+.websocket-ready-badge {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background: rgba(76, 175, 80, 0.1);
+  border: 1px solid var(--safe-green);
+  border-radius: 4px;
+  color: var(--safe-green);
+  font-size: 0.875rem;
 }
 
 /* Progress Bar */
