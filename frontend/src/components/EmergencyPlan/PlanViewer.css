@@ -114,6 +114,24 @@
   color: white;
 }
 
+.badge.scenario-badge.historical {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.3), rgba(118, 75, 162, 0.3));
+  border: 1px solid #667eea;
+  color: #a8b3ff;
+  animation: badgeAppear 0.5s ease-out;
+}
+
+@keyframes badgeAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 .plan-meta {
   display: flex;
   gap: 2rem;
@@ -147,6 +165,46 @@
 .meta-value.confidence-score {
   font-weight: 700;
   color: var(--safe-green);
+}
+
+/* Scenario Context Box */
+.scenario-context {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.1));
+  border-left: 3px solid #667eea;
+  border-radius: 4px;
+  animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.context-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.context-text {
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.context-text strong {
+  color: #a8b3ff;
+  font-weight: 600;
 }
 
 /* Plan Content */

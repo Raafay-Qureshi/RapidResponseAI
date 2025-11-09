@@ -3,9 +3,24 @@
   animation: slideIn 0.5s ease-out;
 }
 
+.executive-summary.historical {
+  border-left: 4px solid #667eea;
+  background: linear-gradient(to right, rgba(102, 126, 234, 0.08), rgba(255, 68, 68, 0.05), transparent);
+}
+
+.critical-recommendations-section.historical {
+  border-left: 4px solid #667eea;
+  background: linear-gradient(to right, rgba(102, 126, 234, 0.05), transparent);
+}
+
 .executive-summary-compact {
   padding: 1.5rem !important;
   background: transparent !important;
+}
+
+.executive-summary-compact.historical {
+  border-left: 3px solid #667eea;
+  padding-left: 1.25rem !important;
 }
 
 @keyframes slideIn {
@@ -17,6 +32,30 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Historical Indicator */
+.historical-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(102, 126, 234, 0.3);
+}
+
+.indicator-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.indicator-text {
+  font-size: 0.8125rem;
+  color: #a8b3ff;
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
 
 .section-header {

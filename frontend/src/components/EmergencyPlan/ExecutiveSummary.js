@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './ExecutiveSummary.css';
 
-function ExecutiveSummary({ summary, predictions, populationImpact, compact = false }) {
+function ExecutiveSummary({ summary, predictions, populationImpact, isHistorical = false, compact = false }) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -23,7 +23,16 @@ function ExecutiveSummary({ summary, predictions, populationImpact, compact = fa
   // Compact view for summary panel (next to map)
   if (compact) {
     return (
-      <section className="plan-section executive-summary executive-summary-compact">
+      <section className={`plan-section executive-summary executive-summary-compact ${isHistorical ? 'historical' : ''}`}>
+        {isHistorical && (
+          <div className="historical-indicator">
+            <span className="indicator-icon">🕐</span>
+            <span className="indicator-text">
+              Backtest Analysis: Generated using July 2020 conditions
+            </span>
+          </div>
+        )}
+
         <div className="section-header">
           <h3>⚡ Executive Summary</h3>
           <button
@@ -80,7 +89,16 @@ function ExecutiveSummary({ summary, predictions, populationImpact, compact = fa
 
   // Full view - only recommendations (for bottom panel)
   return (
-    <section className="plan-section critical-recommendations-section">
+    <section className={`plan-section critical-recommendations-section ${isHistorical ? 'historical' : ''}`}>
+      {isHistorical && (
+        <div className="historical-indicator">
+          <span className="indicator-icon">🕐</span>
+          <span className="indicator-text">
+            Backtest Analysis: Generated using July 2020 conditions
+          </span>
+        </div>
+      )}
+
       <div className="section-header">
         <h3>🎯 Critical Recommendations</h3>
       </div>

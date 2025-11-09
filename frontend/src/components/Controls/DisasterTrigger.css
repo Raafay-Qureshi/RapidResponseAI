@@ -1,62 +1,99 @@
 .disaster-trigger {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  background: var(--card-bg);
+  border-radius: 8px;
+  padding: 1.5rem;
+  border: 1px solid var(--border);
 }
 
-.trigger-button {
+.trigger-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.trigger-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.info-button {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(102, 126, 234, 0.2);
+  border: 1px solid #667eea;
+  color: #667eea;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  background: linear-gradient(135deg, #ff4444 0%, #cc0000 100%);
-  color: white;
-  border: none;
-  border-radius: 6px;
+}
+
+.info-button:hover {
+  background: rgba(102, 126, 234, 0.3);
+  transform: scale(1.1);
+}
+
+/* Tooltip */
+.scenario-tooltip {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
+  width: 350px;
+  padding: 1rem;
+  background: #2d2d2d;
+  border: 1px solid #667eea;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+  animation: tooltipAppear 0.2s ease-out;
+}
+
+@keyframes tooltipAppear {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.scenario-tooltip h4 {
+  margin: 0 0 0.5rem 0;
   font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(255, 68, 68, 0.3);
-  min-width: 240px;
+  color: #667eea;
 }
 
-.trigger-button:hover:not(:disabled) {
-  background: linear-gradient(135deg, #ff5555 0%, #dd0000 100%);
-  box-shadow: 0 4px 12px rgba(255, 68, 68, 0.4);
-  transform: translateY(-1px);
+.scenario-tooltip p {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
 }
 
-.trigger-button:active:not(:disabled) {
-  transform: translateY(0);
-  box-shadow: 0 2px 6px rgba(255, 68, 68, 0.3);
+.scenario-tooltip p:last-child {
+  margin-bottom: 0;
 }
 
-.trigger-button:disabled {
-  background: #555;
-  cursor: not-allowed;
-  opacity: 0.6;
-  box-shadow: none;
+.tooltip-highlight {
+  padding: 0.5rem;
+  background: rgba(102, 126, 234, 0.1);
+  border-left: 3px solid #667eea;
+  border-radius: 4px;
+  color: var(--text-primary) !important;
+  font-weight: 500;
 }
 
-.trigger-button.loading {
-  background: #666;
-}
-
-.spinner-small {
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: white;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
+/* Trigger Error */
 .trigger-error {
   display: flex;
   align-items: center;
@@ -67,17 +104,148 @@
   border-radius: 4px;
   color: var(--danger-red);
   font-size: 0.875rem;
+  margin-bottom: 1rem;
 }
 
 .error-icon {
   font-size: 1rem;
 }
 
-.trigger-info {
-  text-align: center;
+/* Trigger Controls */
+.trigger-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-.trigger-info small {
+.trigger-button {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.trigger-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+}
+
+.trigger-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.trigger-button.july-2020 {
+  background: linear-gradient(135deg, #f44336, #ff9800);
+}
+
+.trigger-button.july-2020:hover:not(:disabled) {
+  box-shadow: 0 8px 24px rgba(244, 67, 54, 0.4);
+}
+
+.button-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.button-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.button-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.button-subtitle {
+  font-size: 0.875rem;
+  opacity: 0.9;
+  font-weight: 400;
+}
+
+.button-spinner {
+  font-size: 1.5rem;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Advanced Options */
+.advanced-options {
+  margin-top: 0.5rem;
+}
+
+.advanced-options summary {
+  cursor: pointer;
+  padding: 0.5rem;
+  font-size: 0.875rem;
   color: var(--text-secondary);
-  font-size: 0.75rem;
+  user-select: none;
+}
+
+.advanced-options summary:hover {
+  color: var(--text-primary);
+}
+
+.generic-trigger {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  margin-top: 0.5rem;
+}
+
+.generic-trigger select {
+  padding: 0.5rem;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+}
+
+.trigger-button.generic {
+  background: linear-gradient(135deg, #607D8B, #455A64);
+  font-size: 0.875rem;
+  padding: 0.75rem 1rem;
+}
+
+/* Disclaimer */
+.trigger-disclaimer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 235, 59, 0.1);
+  border: 1px solid #FFEB3B;
+  border-radius: 4px;
+}
+
+.disclaimer-icon {
+  font-size: 1.25rem;
+}
+
+.disclaimer-text {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  font-weight: 500;
 }

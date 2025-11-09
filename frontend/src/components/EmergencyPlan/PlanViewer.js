@@ -23,6 +23,13 @@ function PlanViewer({ plan, loading, section = 'summary' }) {
     return null;
   }
 
+  // Check if this is July 2020 scenario
+  const isJuly2020 = (
+    plan.disaster_id?.includes('july') ||
+    plan.disaster_id?.includes('2020') ||
+    plan.metadata?.scenario === 'july_2020_backtest'
+  );
+
   // Summary section (top-right panel)
   if (section === 'summary') {
     return (
@@ -34,9 +41,14 @@ function PlanViewer({ plan, loading, section = 'summary' }) {
             <div className="plan-badges">
               <span className="badge disaster-type">{plan.disaster_type || 'WILDFIRE'}</span>
               <span className="badge severity high">HIGH</span>
+              {isJuly2020 && (
+                <span className="badge scenario-badge historical">
+                  📅 July 2020 Backtest
+                </span>
+              )}
             </div>
           </div>
-          
+
           <div className="plan-meta plan-meta-compact">
             <div className="meta-item">
               <span className="meta-label">ID</span>
@@ -55,6 +67,16 @@ function PlanViewer({ plan, loading, section = 'summary' }) {
               </span>
             </div>
           </div>
+
+          {isJuly2020 && (
+            <div className="scenario-context">
+              <div className="context-icon">💡</div>
+              <div className="context-text">
+                <strong>Historical Context:</strong> This plan represents what RapidResponseAI
+                would have generated 30-60 minutes before the first 911 call on July 15, 2020.
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Executive Summary - Compact Version */}
@@ -63,6 +85,7 @@ function PlanViewer({ plan, loading, section = 'summary' }) {
             summary={plan.executive_summary}
             predictions={plan.timeline_predictions}
             populationImpact={plan.population_impact}
+            isHistorical={isJuly2020}
             compact={true}
           />
         </div>
@@ -80,6 +103,7 @@ function PlanViewer({ plan, loading, section = 'summary' }) {
             summary={plan.executive_summary}
             predictions={plan.timeline_predictions}
             populationImpact={plan.population_impact}
+            isHistorical={isJuly2020}
             compact={false}
           />
           

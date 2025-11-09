@@ -41,16 +41,30 @@ def trigger_disaster():
         if not data:
             return jsonify({"error": "No data provided"}), 400
 
+        # Check if this is a July 2020 scenario
+        metadata = data.get("metadata", {})
+        is_july_2020 = metadata.get("scenario") == "july_2020_backtest"
+
         # Mock response for demo purposes with location data
         import uuid
-        disaster_id = f"wildfire-{uuid.uuid4().hex[:8]}"
-        return jsonify({
+        if is_july_2020:
+            disaster_id = f"wildfire-july-2020-{uuid.uuid4().hex[:8]}"
+        else:
+            disaster_id = f"wildfire-{uuid.uuid4().hex[:8]}"
+
+        response = {
             "disaster_id": disaster_id,
             "status": "created",
             "type": data.get("type", "wildfire"),
             "location": data.get("location", {"lat": 43.7315, "lon": -79.8620}),
             "severity": data.get("severity", "high")
-        })
+        }
+
+        # Include metadata in response if provided
+        if metadata:
+            response["metadata"] = metadata
+
+        return jsonify(response)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
