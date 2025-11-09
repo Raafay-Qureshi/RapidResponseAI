@@ -104,6 +104,11 @@ def handle_ping(data):
     import time
     emit('pong', {'timestamp': data.get('timestamp'), 'server_time': time.time()})
 
+@socketio.on('test_message')
+def handle_test_message(data):
+    print('[Backend] Test message received:', data, flush=True)
+    emit('test_response', {'status': 'received', 'data': data})
+
 @socketio.on('join_disaster')
 def handle_join_disaster(data):
     disaster_id = data.get('disaster_id')
