@@ -70,18 +70,23 @@ def process_disaster_with_orchestrator(socketio, orchestrator, disaster_id, trig
         return
 
     try:
-        # Create disaster in orchestrator
-        orchestrator.active_disasters[disaster_id] = {
-            'id': disaster_id,
-            'type': trigger_.get('type', 'wildfire'),
-            'location': trigger_data.get('location', {}),
-            'status': 'initializing',
-            'created_at': datetime.utcnow().isoformat(),
-            'data': {},
-            'agent_results': {},
-            'plan': None,
-            'trigger': trigger_data,
-        }
+        # Check if disaster already exists (e.g., from analyze-coordinates endpoint)
+        if disaster_id not in orchestrator.active_disasters:
+            # Create disaster in orchestrator only if it doesn't exist
+            orchestrator.active_disasters[disaster_id] = {
+                'id': disaster_id,
+                'type': trigger_data.get('type', 'wildfire'),
+                'location': trigger_data.get('location', {}),
+                'status': 'initializing',
+                'created_at': datetime.utcnow().isoformat(),
+                'data': {},
+                'agent_results': {},
+                'plan': None,
+                'trigger': trigger_data,
+            }
+            print(f'[Backend] Created new disaster: {disaster_id}')
+        else:
+            print(f'[Backend] Using existing disaster: {disaster_id}')
         
         # Run async processing
         loop = asyncio.new_event_loop()

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import MapView from './Map/MapView';
 import PlanViewer from './EmergencyPlan/PlanViewer';
 import DisasterTrigger from './Controls/DisasterTrigger';
+import CoordinateAnalysis from './Controls/CoordinateAnalysis';
 import ProgressBar from './Shared/ProgressBar';
 import useDisaster from '../hooks/useDisaster';
 import { useWebSocketContext } from '../services/websocket';
@@ -25,8 +26,8 @@ function Dashboard() {
 
   // Check if backend is in cached mode
   useEffect(() => {
-    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-    fetch(`${apiUrl}/api/config`)
+    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+    fetch(`${apiUrl}/config`)
       .then(res => res.json())
       .then(data => setIsCachedMode(data.cached_mode))
       .catch(() => setIsCachedMode(false));
@@ -41,8 +42,12 @@ function Dashboard() {
           <span className="location-badge">Brampton, ON</span>
         </div>
         
-        <div className="control-section">
-          <DisasterTrigger 
+        <div className="control-section control-section-wide">
+          <DisasterTrigger
+            onTrigger={triggerDisaster}
+            disabled={loading}
+          />
+          <CoordinateAnalysis
             onTrigger={triggerDisaster}
             disabled={loading}
           />

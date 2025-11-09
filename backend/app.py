@@ -26,7 +26,7 @@ orchestrator = DisasterOrchestrator(socketio) if config.USE_REAL_APIS else None
 
 # Register Routes
 from routes import create_routes
-app.register_blueprint(create_routes(orchestrator))
+app.register_blueprint(create_routes(orchestrator), url_prefix='/api')
 
 # Initialize SocketIO Handlers
 from sockets import init_socketio

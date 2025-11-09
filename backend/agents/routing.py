@@ -14,6 +14,7 @@ class RoutingAgent(BaseAgent):
         infrastructure_data: Optional[Any],
         damage_summary: Dict[str, Any],
         scenario_config: Dict[str, Any] = None,
+        disaster_location: Dict[str, Any] = None,
     ) -> Dict[str, Any]:
         self._log("Planning evacuation routes")
 
@@ -27,8 +28,8 @@ class RoutingAgent(BaseAgent):
         # Get fire perimeter to calculate routes from
         fire_perimeter = damage_summary.get("fire_perimeter", {})
 
-        # Extract center point from fire perimeter or use default
-        center_coords = self._get_center_point(fire_perimeter)
+        # Extract center point from fire perimeter, disaster location, or use default
+        center_coords = self._get_center_point(fire_perimeter, disaster_location)
 
         status = "monitor"
         if severity in ("low", "unknown"):
@@ -46,8 +47,8 @@ class RoutingAgent(BaseAgent):
             "infrastructure_used": self._summarize_infrastructure(infrastructure_data),
         }
     
-    def _get_center_point(self, fire_perimeter: Dict[str, Any]) -> List[float]:
-        """Extract center point from fire perimeter or use default."""
+    def _get_center_point(self, fire_perimeter: Dict[str, Any], disaster_location: Dict[str, Any] = None) -> List[float]:
+        """Extract center point from fire perimeter, disaster location, or use default."""
         try:
             if fire_perimeter and "geometry" in fire_perimeter:
                 coords = fire_perimeter["geometry"].get("coordinates", [[]])
@@ -55,11 +56,20 @@ class RoutingAgent(BaseAgent):
                     # Calculate centroid of polygon
                     lons = [c[0] for c in coords[0]]
                     lats = [c[1] for c in coords[0]]
-                    return [sum(lons) / len(lons), sum(lats) / len(lats)]
-        except Exception:
-            pass
+                    center = [sum(lons) / len(lons), sum(lats) / len(lats)]
+                    self._log(f"Using fire perimeter center: {center}")
+                    return center
+        except Exception as e:
+            self._log(f"Could not extract center from fire perimeter: {e}")
+        
+        # Try disaster location if available
+        if disaster_location and 'lat' in disaster_location and 'lon' in disaster_location:
+            center = [disaster_location['lon'], disaster_location['lat']]
+            self._log(f"Using disaster location: {center}")
+            return center
         
         # Default to HWY 407/410 interchange
+        self._log("Using default location (HWY 407/410)")
         return [-79.8620, 43.7315]
     
     def _generate_evacuation_routes(

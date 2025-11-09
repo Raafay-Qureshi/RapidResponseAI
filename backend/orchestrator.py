@@ -334,6 +334,7 @@ class DisasterOrchestrator:
         damage_result = await self.agents["damage"].analyze(
             data.get("satellite"),
             disaster.get("type", "unknown"),
+            disaster_location=disaster.get("location"),
         )
 
         # Agent 2: Population Impact
@@ -367,6 +368,7 @@ class DisasterOrchestrator:
             data.get("roads"),
             data.get("infrastructure"),
             damage_result,
+            disaster_location=disaster.get("location"),
         )
 
         # Agent 4: Resource Allocation
@@ -429,35 +431,93 @@ class DisasterOrchestrator:
         resource_data = json.dumps(agent_results.get("resource", {}), indent=2)
 
         disaster_type = context.get("disaster_type", "unknown incident")
-        location = context.get("location", "unknown location")
+        location_obj = context.get("location", {})
+        
+        # Format location for better LLM understanding
+        if isinstance(location_obj, dict):
+            lat = location_obj.get("lat", "unknown")
+            lon = location_obj.get("lon", "unknown")
+            location_str = f"coordinates {lat}°N, {lon}°W (latitude: {lat}, longitude: {lon})"
+        else:
+            location_str = str(location_obj)
 
         prompt = f"""
 You are "RapidResponseAI," an expert-level emergency response coordinator for the City of Brampton, Ontario. Your mission is to synthesize raw data from 5 specialized AI agents into a clear, actionable, human-readable emergency plan.
-The incident is a **{disaster_type}** detected at **{location}**.
+
+INCIDENT DETAILS:
+- Type: {disaster_type}
+- Location: {location_str}
+- Time: {context.get("timestamp", "unknown")}
+
+CRITICAL REQUIREMENTS FOR NUMBERS AND REALISM:
+1. **Generate realistic quantitative data**: You MUST include specific numbers for ALL metrics, even if agent data is sparse:
+   - Population affected (residents, workers, travelers)
+   - Fire/incident size in hectares or square kilometers
+   - Spread rate in meters/hour or km/hour
+   - Number of structures threatened or damaged
+   - Responders deployed (firefighters, EMS, police)
+   - Equipment needed (trucks, helicopters, ambulances)
+   - Evacuation capacity and timelines
+   - Road closures and affected infrastructure count
+
+2. **Make intelligent estimates**: For urban areas, assume:
+   - Residential density: 3,000-5,000 people per square kilometer
+   - Commercial areas: add 500-2,000 workers/visitors during business hours
+   - Major highways: 50,000-100,000 daily vehicles
+   - Emergency resources: 20-40 firefighters per station, 3-5 stations can respond
+
+3. **Be dramatically realistic**: This is a real emergency - numbers should reflect urgency:
+   - Don't say "several people" - say "2,300 residents"
+   - Don't say "multiple roads" - say "6 major arterial roads including..."
+   - Don't say "nearby areas" - say "3.2 km radius affecting..."
+   - Include timelines: "12 minutes until highway impact", "45-minute evacuation window"
+
 Here is the raw data from your 5 agents:
 ### AGENT 1: DAMAGE ASSESSMENT ###
 {damage_data}
+
 ### AGENT 2: POPULATION IMPACT ###
 {population_data}
+
 ### AGENT 3: PREDICTION & TIMELINE ###
 {prediction_data}
+
 ### AGENT 4: EVACUATION ROUTING ###
 {routing_data}
+
 ### AGENT 5: RESOURCE ALLOCATION ###
 {resource_data}
+
 ---
+
 **YOUR TASK:**
-Generate the complete emergency response plan. The plan MUST be formatted EXACTLY as follows. Use the specified headers with `###` delimiters. Be specific, actionable, and use the exact data provided by the agents (e.g., population numbers, km/h spread rate, highway names).
+Generate a location-specific emergency response plan with SPECIFIC NUMBERS. You MUST:
+
+1. **Extract location details from agent data**: Look for road names, infrastructure names, neighborhood identifiers
+2. **Generate or enhance numbers**: If agent data lacks specifics, create realistic estimates based on the location type and area
+3. **Reference actual infrastructure**: Use the names of roads, facilities, and landmarks from the agent outputs
+4. **Be quantitatively precise**: Every claim needs a number - people affected, resources needed, distances, times
+
+The plan MUST be formatted EXACTLY as follows with `###` delimiters:
+
 ### EXECUTIVE SUMMARY ###
-(Write a 2-3 sentence summary of the most critical information: What is happening, who is at immediate risk, and the #1 priority action.)
+(2-3 sentences with SPECIFIC NUMBERS: fire size in hectares, population affected, number of structures threatened, key infrastructure at risk, response timeline)
+
 ### SITUATION OVERVIEW ###
-(Write a detailed 2-paragraph analysis of the situation. Combine the data from the Damage, Population, and Prediction agents to paint a clear picture of the threat.)
+(2 detailed paragraphs with SPECIFIC METRICS:
+- Paragraph 1: Fire size, spread rate (km/h), number of structures, infrastructure count, weather conditions
+- Paragraph 2: Population numbers, evacuation capacity, number of responders deployed, equipment count, road closure count, timeline estimates)
+
 ### COMMUNICATION TEMPLATES (ENGLISH) ###
-(Write a clear, concise public safety alert for Twitter/X based on the agent data. Use clear instructions.)
+(140-160 character alert with specific location and action: "EVACUATE NOW: [Area name]. [X] homes affected. Go to [specific location]. Call 911.")
+
 ### COMMUNICATION TEMPLATES (PUNJABI) ###
-(Translate the English template into Punjabi. Be accurate and respectful.)
+(Accurate Punjabi translation maintaining all numbers and location specifics)
+
 ### COMMUNICATION TEMPLATES (HINDI) ###
-(Translate the English template into Hindi. Be accurate and respectful.)
+(Accurate Hindi translation maintaining all numbers and location specifics)
+
+REMEMBER: Empty or vague statements are NOT ACCEPTABLE. Every metric needs a realistic number. Make intelligent estimates for a typical urban area if agent data is incomplete.
 ---
 """
         return prompt
@@ -474,35 +534,51 @@ This is a WILDLAND-URBAN INTERFACE (WUI) FIRE at the Highway 407/410 interchange
 CRITICAL CONTEXT:
 {json.dumps(agent_outputs, indent=2)}
 
-YOUR TASK:
-Generate a complete emergency response plan with the following sections:
+MANDATORY QUANTITATIVE REQUIREMENTS:
+You MUST include specific numbers for ALL metrics. Generate realistic estimates if data is sparse:
+- Fire size in hectares (typical WUI fire: 15-50 hectares)
+- Spread rate in meters/hour (windy conditions: 200-800 m/h)
+- Population affected (residential density: 3,000-5,000 per km²)
+- Highway traffic volume (HWY 407: ~50,000-100,000 vehicles/day)
+- Responders needed (major incident: 60-120 firefighters from 8-15 stations)
+- Equipment count (engines, tankers, aerial units, command vehicles)
+- Structures threatened (residential + commercial count)
+- Timeline to critical infrastructure impact (minutes)
+- Evacuation numbers and safe assembly locations
 
-1. EXECUTIVE SUMMARY (2-3 sentences)
+YOUR TASK:
+Generate a complete emergency response plan with SPECIFIC NUMBERS in the following sections:
+
+1. EXECUTIVE SUMMARY (2-3 sentences with NUMBERS)
    - Start with: "CRITICAL WUI FIRE AT HWY 407/410 INTERCHANGE"
    - MUST explicitly state: "RECOMMEND PROACTIVE CLOSURE OF HWY 407 EASTBOUND LANES"
-   - Mention the timeline to highway impact
-   - Mention mutual aid requirement
+   - Include: fire size (hectares), structures threatened (count), timeline to highway impact (minutes)
+   - Include: population at risk (specific number), responders deployed (count)
+   - Mention mutual aid requirement with specific station count
    - Be urgent and direct - this is life-safety critical
    - Use all-caps for critical recommendations
 
-2. SITUATION OVERVIEW (1 paragraph)
-   - Fire size, type, spread rate
-   - Weather conditions driving spread
-   - Population at risk
-   - Infrastructure threatened (emphasize HWY 407)
+2. SITUATION OVERVIEW (1 paragraph with METRICS)
+   - Fire size in hectares and spread rate in m/hour
+   - Weather conditions with specific wind speed
+   - Population at risk with specific numbers
+   - Infrastructure count (roads, facilities threatened)
+   - Number of responders and equipment deployed
+   - Timeline estimates for critical events
    - Why immediate action is required
 
 3. COMMUNICATION TEMPLATES
    Generate emergency alerts in three languages. Each should be 140-160 characters for SMS:
 
-   a) English: Clear, direct, actionable. Mention location, action required, where to go.
-   b) Punjabi (ਪੰਜਾਬੀ): Translate the English message accurately
-   c) Hindi (हिंदी): Translate the English message accurately
+   a) English: Clear, direct, actionable. Include specific location, action required, and where to go. MUST include at least one number.
+   b) Punjabi (ਪੰਜਾਬੀ): Translate the English message accurately maintaining all numbers
+   c) Hindi (हिंदी): Translate the English message accurately maintaining all numbers
 
 CRITICAL REQUIREMENTS:
 - The executive summary MUST mention "Highway 407" or "HWY 407"
 - The executive summary MUST recommend "proactive closure" or "immediate closure"
-- Use specific numbers from the data (affected population, timeline, etc.)
+- EVERY metric needs a specific number - no vague terms like "several", "many", "nearby"
+- Use realistic estimates for urban area (Brampton population density ~3,500/km²)
 - Tone should be urgent but professional
 - This plan will be acted upon immediately - be specific and actionable
 - Emphasize that satellite detection gives us a head start before 911 calls
@@ -510,21 +586,21 @@ CRITICAL REQUIREMENTS:
 Format your response EXACTLY as follows:
 
 ===EXECUTIVE_SUMMARY===
-[Your 2-3 sentence executive summary here]
+[Your 2-3 sentence executive summary with SPECIFIC NUMBERS here]
 
 ===SITUATION_OVERVIEW===
-[Your situation overview paragraph here]
+[Your situation overview paragraph with SPECIFIC METRICS here]
 
 ===COMMUNICATION_EN===
-[English alert message]
+[English alert message with at least one number]
 
 ===COMMUNICATION_PA===
-[Punjabi alert message]
+[Punjabi alert message maintaining numbers]
 
 ===COMMUNICATION_HI===
-[Hindi alert message]
+[Hindi alert message maintaining numbers]
 
-Remember: Lives depend on this plan. Be specific, urgent, and actionable."""
+Remember: Lives depend on this plan. Be specific, quantitative, urgent, and actionable. Empty statements without numbers are NOT acceptable."""
 
         return prompt
 
@@ -664,16 +740,14 @@ Remember: Lives depend on this plan. Be specific, urgent, and actionable."""
                 room=disaster_id,
             )
 
-        # Check if this is July 2020 scenario and use specialized prompt
-        agent_outputs = context.get('agent_outputs', {})
-        predictions = agent_outputs.get('prediction', {})
-        critical_arrivals = predictions.get('critical_arrival_times', [])
-
-        is_july_2020 = (
-            context.get('disaster_type') == 'wildfire' and
-            any('407' in str(arrival.get('location', ''))
-                for arrival in critical_arrivals)
-        )
+        # Check if this is July 2020 scenario based on explicit metadata
+        # Only use specialized prompt for actual historical July 2020 scenario
+        disaster_id = context.get('disaster_id')
+        disaster = self.active_disasters.get(disaster_id) if disaster_id else None
+        trigger_data = disaster.get('trigger', {}) if disaster else {}
+        metadata = trigger_data.get('metadata', {})
+        
+        is_july_2020 = metadata.get('scenario') == 'july_2020_backtest'
 
         if is_july_2020:
             self._log("Using July 2020 specialized prompt (HWY 407 emphasis)")

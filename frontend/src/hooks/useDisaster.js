@@ -37,17 +37,31 @@ function useDisaster() {
       setStatusMessage('Initializing disaster simulation...');
       setApiStatus(null); // Reset API status
 
-      // Call backend API to trigger disaster
-      const response = await disasterAPI.trigger(disasterData);
+      let response;
       
-      console.log('[useDisaster] Disaster triggered successfully:', response);
+      // Check if this is already a created disaster (has disaster_id)
+      if (disasterData.disaster_id) {
+        // Disaster already created (e.g., from analyze-coordinates)
+        // Just use it directly without creating a new one
+        console.log('[useDisaster] Using existing disaster:', disasterData.disaster_id);
+        response = disasterData;
+      } else {
+        // Call backend API to create new disaster
+        response = await disasterAPI.trigger(disasterData);
+        console.log('[useDisaster] Disaster triggered successfully:', response);
+      }
+      
       setDisaster(response);
 
       // Subscribe to WebSocket updates for this disaster with mode info
       if (response.disaster_id) {
+        // Determine the mode and prepare trigger data
+        const mode = disasterData.use_real_apis !== false ? 'real_apis' : 'simulation';
+        const trigger_data = disasterData.disaster_id ? disasterData : disasterData;
+        
         subscribeToDisaster(response.disaster_id, {
-          mode: disasterData.use_real_apis ? 'real_apis' : 'simulation',
-          trigger_data: disasterData
+          mode: mode,
+          trigger_data: trigger_data
         });
         setStatusMessage('Subscribed to real-time updates');
       }

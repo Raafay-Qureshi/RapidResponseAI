@@ -89,6 +89,20 @@ export const disasterAPI = {
       throw new Error(`Backend not reachable: ${error.message}`);
     }
   },
+
+  /**
+   * Analyze custom coordinates with full agentic process
+   * @param {Object} analysisData - { type, location: {lat, lon}, description }
+   * @returns {Promise} Response with disaster_id
+   */
+  analyzeCoordinates: async (analysisData) => {
+    try {
+      const response = await api.post('/disaster/analyze-coordinates', analysisData);
+      return response.data;
+    } catch (error) {
+      throw new Error(`Failed to analyze coordinates: ${error.message}`);
+    }
+  },
 };
 
 export default api;

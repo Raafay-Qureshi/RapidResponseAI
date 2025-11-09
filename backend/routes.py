@@ -9,11 +9,11 @@ import uuid
 def create_routes(orchestrator):
     main_bp = Blueprint('main', __name__)
 
-    @main_bp.route('/api/health', methods=['GET'])
+    @main_bp.route('/health', methods=['GET'])
     def health_check():
         return jsonify({"status": "healthy", "message": "Backend is running"})
 
-    @main_bp.route('/api/disaster/trigger', methods=['POST'])
+    @main_bp.route('/disaster/trigger', methods=['POST'])
     def trigger_disaster():
         try:
             data = request.get_json()
@@ -54,7 +54,7 @@ def create_routes(orchestrator):
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 
-    @main_bp.route('/api/disaster/<disaster_id>', methods=['GET'])
+    @main_bp.route('/disaster/<disaster_id>', methods=['GET'])
     def get_disaster(disaster_id):
         if not orchestrator:
             return jsonify({"error": "Orchestrator not initialized"}), 500
@@ -64,7 +64,7 @@ def create_routes(orchestrator):
             return jsonify({"error": "Disaster not found"}), 404
         return jsonify(disaster)
 
-    @main_bp.route('/api/disaster/<disaster_id>/plan', methods=['GET'])
+    @main_bp.route('/disaster/<disaster_id>/plan', methods=['GET'])
     def get_disaster_plan(disaster_id):
         if not orchestrator:
             return jsonify({"error": "Orchestrator not initialized"}), 500
@@ -74,19 +74,19 @@ def create_routes(orchestrator):
             return jsonify({"error": "Plan not found"}), 404
         return jsonify(plan)
 
-    @main_bp.route('/api/test/satellite', methods=['GET'])
+    @main_bp.route('/test/satellite', methods=['GET'])
     def test_satellite():
         client = SatelliteClient()
         data = asyncio.run(client.fetch_imagery({'lat': 43.7315, 'lon': -79.8620}))
         return jsonify(data)
 
-    @main_bp.route('/api/test/weather', methods=['GET'])
+    @main_bp.route('/test/weather', methods=['GET'])
     def test_weather():
         client = WeatherClient()
         data = asyncio.run(client.fetch_current({'lat': 43.7315, 'lon': -79.8620}))
         return jsonify(data)
 
-    @main_bp.route('/api/config', methods=['GET'])
+    @main_bp.route('/config', methods=['GET'])
     def get_config():
         """Return current configuration status"""
         return jsonify({
@@ -96,5 +96,62 @@ def create_routes(orchestrator):
             'use_real_apis': config.USE_REAL_APIS,
             'orchestrator_available': orchestrator is not None,
         })
+
+    @main_bp.route('/disaster/analyze-coordinates', methods=['POST'])
+    def analyze_coordinates():
+        """Trigger full agentic process for custom coordinates"""
+        if not orchestrator:
+            return jsonify({"error": "Orchestrator not initialized"}), 500
+        
+        try:
+            data = request.get_json()
+            if not data:
+                return jsonify({"error": "No data provided"}), 400
+            
+            # Validate coordinates
+            location = data.get("location", {})
+            lat = location.get("lat")
+            lon = location.get("lon")
+            
+            if lat is None or lon is None:
+                return jsonify({"error": "Latitude and longitude are required"}), 400
+            
+            # Validate coordinate ranges
+            if not (-90 <= lat <= 90):
+                return jsonify({"error": "Latitude must be between -90 and 90"}), 400
+            if not (-180 <= lon <= 180):
+                return jsonify({"error": "Longitude must be between -180 and 180"}), 400
+            
+            # Create disaster with custom coordinates
+            disaster_type = data.get("type", "wildfire")
+            disaster_data = {
+                "type": disaster_type,
+                "location": {"lat": lat, "lon": lon},
+                "severity": data.get("severity", "high"),
+                "metadata": {
+                    "custom_coordinates": True,
+                    "description": data.get("description", f"Custom analysis at {lat}, {lon}"),
+                },
+                "use_real_apis": True  # Always use real APIs for custom coordinates
+            }
+            
+            disaster_id = orchestrator.create_disaster(disaster_data)
+            
+            # Return complete disaster data for WebSocket subscription
+            response = {
+                "disaster_id": disaster_id,
+                "status": "created",
+                "type": disaster_type,
+                "location": {"lat": lat, "lon": lon},
+                "severity": data.get("severity", "high"),
+                "use_real_apis": True,
+                "metadata": disaster_data["metadata"],
+                "message": "Disaster created and ready for processing"
+            }
+            
+            return jsonify(response)
+            
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
 
     return main_bp

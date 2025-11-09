@@ -7,9 +7,10 @@
 
 /* Control Bar */
 .control-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 2rem;
+  align-items: start;
   padding: 1rem 2rem;
   background: var(--card-bg);
   border-bottom: 1px solid var(--border);
@@ -20,6 +21,13 @@
   display: flex;
   align-items: center;
   gap: 1rem;
+}
+
+.control-section-wide {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 400px;
 }
 
 .control-title {
