@@ -252,6 +252,113 @@ def simulate_disaster_processing(disaster_id):
                 }
             ]
         },
+        'evacuation_plan': {
+            'routes': [
+                {
+                    'id': 'route-1',
+                    'origin': {'lat': 43.7315, 'lon': -79.8620},
+                    'destination': {
+                        'name': 'Brampton Soccer Centre',
+                        'lat': 43.7150,
+                        'lon': -79.8400,
+                        'capacity': 2000
+                    },
+                    'path': {
+                        'type': 'Feature',
+                        'geometry': {
+                            'type': 'LineString',
+                            'coordinates': [
+                                [-79.8620, 43.7315],
+                                [-79.8580, 43.7290],
+                                [-79.8540, 43.7265],
+                                [-79.8500, 43.7240],
+                                [-79.8460, 43.7215],
+                                [-79.8420, 43.7190],
+                                [-79.8400, 43.7150]
+                            ]
+                        }
+                    },
+                    'distance_km': 3.2,
+                    'time_minutes': 45,
+                    'status': 'open',
+                    'priority': 'primary'
+                },
+                {
+                    'id': 'route-2',
+                    'origin': {'lat': 43.7315, 'lon': -79.8620},
+                    'destination': {
+                        'name': 'CAA Centre',
+                        'lat': 43.7300,
+                        'lon': -79.7500,
+                        'capacity': 5000
+                    },
+                    'path': {
+                        'type': 'Feature',
+                        'geometry': {
+                            'type': 'LineString',
+                            'coordinates': [
+                                [-79.8620, 43.7315],
+                                [-79.8400, 43.7312],
+                                [-79.8180, 43.7309],
+                                [-79.7960, 43.7306],
+                                [-79.7740, 43.7303],
+                                [-79.7500, 43.7300]
+                            ]
+                        }
+                    },
+                    'distance_km': 8.5,
+                    'time_minutes': 60,
+                    'status': 'open',
+                    'priority': 'alternate'
+                },
+                {
+                    'id': 'route-3',
+                    'origin': {'lat': 43.7315, 'lon': -79.8620},
+                    'destination': {
+                        'name': 'Cassie Campbell Community Centre',
+                        'lat': 43.7100,
+                        'lon': -79.7800,
+                        'capacity': 1500
+                    },
+                    'path': {
+                        'type': 'Feature',
+                        'geometry': {
+                            'type': 'LineString',
+                            'coordinates': [
+                                [-79.8620, 43.7315],
+                                [-79.8520, 43.7267],
+                                [-79.8420, 43.7219],
+                                [-79.8320, 43.7171],
+                                [-79.8220, 43.7123],
+                                [-79.8120, 43.7075],
+                                [-79.8020, 43.7027],
+                                [-79.7920, 43.6979],
+                                [-79.7820, 43.6931],
+                                [-79.7800, 43.7100]
+                            ]
+                        }
+                    },
+                    'distance_km': 5.8,
+                    'time_minutes': 52,
+                    'status': 'open',
+                    'priority': 'alternate'
+                }
+            ],
+            'priority_routes': [
+                {
+                    'name': 'Primary Evacuation Corridor',
+                    'status': 'open',
+                    'distance_km': 3.2,
+                    'notes': 'Route planned with severity \'high\'.'
+                },
+                {
+                    'name': 'Secondary Relief Route',
+                    'status': 'open',
+                    'distance_km': 8.5,
+                    'notes': 'Alternative path for supply and medical teams.'
+                }
+            ]
+        },
         'population_impact': {
             'total_affected': 2580,
             'vulnerable_population': {

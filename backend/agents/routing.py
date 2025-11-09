@@ -19,32 +19,150 @@ class RoutingAgent(BaseAgent):
         severity = damage_summary.get("severity", "unknown")
         affected_area = damage_summary.get("affected_area_km2", 0)
 
+        # Get fire perimeter to calculate routes from
+        fire_perimeter = damage_summary.get("fire_perimeter", {})
+        
+        # Extract center point from fire perimeter or use default
+        center_coords = self._get_center_point(fire_perimeter)
+        
         status = "monitor"
         if severity in ("low", "unknown"):
             status = "open"
         elif severity == "extreme":
             status = "closed"
 
-        routes = [
-            {
-                "name": "Primary Evacuation Corridor",
-                "status": status,
-                "distance_km": round(max(affected_area, 5), 1),
-                "notes": f"Route planned with severity '{severity}'.",
-            },
-            {
-                "name": "Secondary Relief Route",
-                "status": "open" if status != "closed" else "monitor",
-                "distance_km": round(max(affected_area / 2, 3), 1),
-                "notes": "Alternative path for supply and medical teams.",
-            },
-        ]
+        # Generate routes with full geometry and destination data
+        routes = self._generate_evacuation_routes(center_coords, affected_area, status)
 
         return {
             "severity": severity,
-            "priority_routes": routes,
+            "routes": routes,  # Changed from priority_routes to routes for frontend
+            "priority_routes": routes,  # Keep for backward compatibility
             "infrastructure_used": self._summarize_infrastructure(infrastructure_data),
         }
+    
+    def _get_center_point(self, fire_perimeter: Dict[str, Any]) -> List[float]:
+        """Extract center point from fire perimeter or use default."""
+        try:
+            if fire_perimeter and "geometry" in fire_perimeter:
+                coords = fire_perimeter["geometry"].get("coordinates", [[]])
+                if coords and len(coords[0]) > 0:
+                    # Calculate centroid of polygon
+                    lons = [c[0] for c in coords[0]]
+                    lats = [c[1] for c in coords[0]]
+                    return [sum(lons) / len(lons), sum(lats) / len(lats)]
+        except Exception:
+            pass
+        
+        # Default to HWY 407/410 interchange
+        return [-79.8620, 43.7315]
+    
+    def _generate_evacuation_routes(
+        self,
+        origin: List[float],
+        affected_area: float,
+        status: str,
+    ) -> List[Dict[str, Any]]:
+        """Generate evacuation routes with GeoJSON geometry."""
+        lon, lat = origin
+        
+        # Define safe zone destinations in Brampton
+        destinations = [
+            {
+                "name": "Brampton Soccer Centre",
+                "lat": 43.7150,
+                "lon": -79.8400,
+                "capacity": 2000,
+            },
+            {
+                "name": "CAA Centre",
+                "lat": 43.7300,
+                "lon": -79.7500,
+                "capacity": 5000,
+            },
+            {
+                "name": "Cassie Campbell Community Centre",
+                "lat": 43.7100,
+                "lon": -79.7800,
+                "capacity": 1500,
+            },
+        ]
+        
+        routes = []
+        for i, dest in enumerate(destinations):
+            is_primary = i == 0
+            
+            # Generate simple route path (straight line for demo; would use routing API in production)
+            path_coords = self._generate_route_path(lon, lat, dest["lon"], dest["lat"])
+            
+            # Calculate approximate distance
+            distance_km = self._calculate_distance(lat, lon, dest["lat"], dest["lon"])
+            
+            # Estimate time (assuming 30 km/h average evacuation speed)
+            time_minutes = int((distance_km / 30.0) * 60)
+            
+            route = {
+                "id": f"route-{i+1}",
+                "origin": {"lat": lat, "lon": lon},
+                "destination": dest,
+                "path": {
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "LineString",
+                        "coordinates": path_coords,
+                    },
+                },
+                "distance_km": round(distance_km, 1),
+                "time_minutes": time_minutes,
+                "status": status if is_primary else ("open" if status != "closed" else "monitor"),
+                "priority": "primary" if is_primary else "alternate",
+            }
+            routes.append(route)
+        
+        return routes
+    
+    def _generate_route_path(
+        self,
+        start_lon: float,
+        start_lat: float,
+        end_lon: float,
+        end_lat: float,
+    ) -> List[List[float]]:
+        """Generate a simple route path with waypoints."""
+        # Create a path with intermediate points for smoother animation
+        steps = 10
+        coords = []
+        
+        for i in range(steps + 1):
+            t = i / steps
+            # Simple linear interpolation (would use actual routing in production)
+            lon = start_lon + (end_lon - start_lon) * t
+            lat = start_lat + (end_lat - start_lat) * t
+            coords.append([lon, lat])
+        
+        return coords
+    
+    def _calculate_distance(
+        self,
+        lat1: float,
+        lon1: float,
+        lat2: float,
+        lon2: float,
+    ) -> float:
+        """Calculate approximate distance in km using Haversine formula."""
+        from math import radians, sin, cos, sqrt, atan2
+        
+        R = 6371  # Earth's radius in km
+        
+        lat1_rad = radians(lat1)
+        lat2_rad = radians(lat2)
+        delta_lat = radians(lat2 - lat1)
+        delta_lon = radians(lon2 - lon1)
+        
+        a = sin(delta_lat / 2) ** 2 + cos(lat1_rad) * cos(lat2_rad) * sin(delta_lon / 2) ** 2
+        c = 2 * atan2(sqrt(a), sqrt(1 - a))
+        
+        return R * c
 
     def _summarize_infrastructure(self, infrastructure_data: Optional[Any]) -> List[str]:
         """Extract a short list of infrastructure names if data is available."""
