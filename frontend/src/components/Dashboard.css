@@ -125,6 +125,50 @@
   margin: 0;
   font-size: 0.875rem;
   color: var(--text-secondary);
+/* Error Banner */
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 2rem;
+  background: rgba(255, 68, 68, 0.2);
+  border-bottom: 2px solid var(--danger-red);
+}
+
+.error-icon {
+  font-size: 1.5rem;
+}
+
+.error-message {
+  flex: 1;
+  color: var(--danger-red);
+  font-weight: 500;
+}
+
+.error-dismiss {
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: 1px solid var(--danger-red);
+  border-radius: 4px;
+  color: var(--danger-red);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.error-dismiss:hover {
+  background: var(--danger-red);
+  color: white;
+}
+
+/* Status Indicator Updates */
+.status-indicator.disconnected .status-dot {
+  background: var(--danger-red);
+}
+
+.status-indicator.disconnected .status-text {
+  color: var(--danger-red);
+}
+
 }
 
 /* Main Content Grid */
