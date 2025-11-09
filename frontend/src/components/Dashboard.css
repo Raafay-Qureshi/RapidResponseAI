@@ -143,28 +143,45 @@
   color: var(--danger-red);
 }
 
-/* Main Content Grid */
+/* Main Content Grid - Wrap around layout */
 .main-content {
   display: grid;
-  grid-template-columns: 1.2fr 1fr;
+  grid-template-columns: 1.5fr 1fr;
+  grid-template-rows: auto auto;
   gap: 0;
   flex: 1;
   min-height: 600px;
-  overflow: hidden;
   border-top: 1px solid var(--border);
 }
 
 .map-panel {
+  grid-column: 1;
+  grid-row: 1;
   position: relative;
-  min-height: 600px;
+  min-height: 650px;
+  max-height: 750px;
   overflow: hidden;
   border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: var(--card-bg);
 }
 
 .plan-panel {
+  grid-column: 2;
+  grid-row: 1;
   position: relative;
   overflow-y: auto;
   background: var(--panel-bg);
+  padding: 0;
+  max-height: 750px;
+  border-bottom: 1px solid var(--border);
+}
+
+.plan-panel-bottom {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  background: var(--dark-bg);
+  overflow-y: auto;
   padding: 0;
 }
 
@@ -241,15 +258,59 @@
   font-family: 'Roboto Mono', monospace;
 }
 
+/* Bottom panel styling */
+.plan-panel-bottom {
+  border-top: 1px solid var(--border);
+}
+
 /* Responsive */
+@media (max-width: 1400px) {
+  .main-content {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 @media (max-width: 1200px) {
   .main-content {
     grid-template-columns: 1fr;
-    grid-template-rows: 1fr 1fr;
+    grid-template-rows: auto auto auto;
   }
 
   .map-panel {
+    grid-column: 1;
+    grid-row: 1;
     border-right: none;
     border-bottom: 1px solid var(--border);
+    max-height: 500px;
+  }
+
+  .plan-panel {
+    grid-column: 1;
+    grid-row: 2;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    max-height: 400px;
+  }
+
+  .plan-panel-bottom {
+    grid-column: 1;
+    grid-row: 3;
+  }
+}
+
+@media (max-width: 768px) {
+  .control-bar {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .plan-content-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .plan-content-grid > div:first-child,
+  .plan-content-grid > div:last-child {
+    grid-column: 1 !important;
   }
 }

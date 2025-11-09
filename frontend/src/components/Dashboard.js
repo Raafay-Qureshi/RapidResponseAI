@@ -66,16 +66,16 @@ function Dashboard() {
         </div>
       )}
 
-      {/* Main Content - Split View */}
+      {/* Main Content - Wrap Around Layout */}
       <div className="main-content">
         {/* Left Panel: Map */}
         <div className="map-panel">
           <MapView disaster={disaster} plan={plan} />
         </div>
 
-        {/* Right Panel: Emergency Plan */}
+        {/* Right Panel: Plan Summary */}
         <div className="plan-panel">
-          <PlanViewer plan={plan} loading={loading} />
+          <PlanViewer plan={plan} loading={loading} section="summary" />
           
           {!plan && !loading && (
             <div className="empty-state">
@@ -107,6 +107,13 @@ function Dashboard() {
             </div>
           )}
         </div>
+
+        {/* Bottom Panel: Detailed Plan Sections */}
+        {plan && !loading && (
+          <div className="plan-panel-bottom">
+            <PlanViewer plan={plan} loading={loading} section="details" />
+          </div>
+        )}
       </div>
     </div>
   );

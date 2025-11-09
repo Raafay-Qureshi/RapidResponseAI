@@ -5,6 +5,14 @@
   background: var(--panel-bg);
 }
 
+.plan-viewer-summary {
+  height: 100%;
+}
+
+.plan-viewer-details {
+  min-height: auto;
+}
+
 .plan-viewer.loading {
   justify-content: center;
   align-items: center;
@@ -46,6 +54,26 @@
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-bottom: 2px solid #764ba2;
   flex-shrink: 0;
+}
+
+.plan-header-compact {
+  padding: 1rem 1.5rem;
+}
+
+.plan-header-compact .plan-title {
+  font-size: 1.25rem;
+}
+
+.plan-meta-compact {
+  gap: 1rem;
+}
+
+.plan-meta-compact .meta-label {
+  font-size: 0.7rem;
+}
+
+.plan-meta-compact .meta-value {
+  font-size: 0.8rem;
 }
 
 .plan-title-section {
@@ -128,13 +156,43 @@
   padding: 0;
 }
 
+/* Grid layout for details section */
+.plan-content-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  padding: 2rem;
+  background: var(--panel-bg);
+}
+
 .plan-section {
   padding: 2rem;
   border-bottom: 1px solid var(--border);
+  background: var(--card-bg);
+  border-radius: 8px;
 }
 
 .plan-section:last-child {
   border-bottom: none;
+}
+
+/* Make sections in grid layout look nice */
+.plan-content-grid .plan-section {
+  border-bottom: none;
+  margin: 0;
+}
+
+/* Critical Recommendations, Timeline and Population Impact take full width */
+.plan-content-grid > section:first-child,
+.plan-content-grid > div:nth-child(2),
+.plan-content-grid > div:last-child {
+  grid-column: 1 / -1;
+}
+
+/* Resource and Communication templates side by side */
+.plan-content-grid > div:nth-child(3),
+.plan-content-grid > div:nth-child(4) {
+  grid-column: span 1;
 }
 
 .plan-section h3 {
@@ -181,4 +239,39 @@
 
 .plan-content::-webkit-scrollbar-thumb:hover {
   background: #555;
+}
+
+/* Responsive grid adjustments */
+@media (max-width: 1400px) {
+  .plan-content-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .plan-content-grid > section:first-child,
+  .plan-content-grid > div:nth-child(2),
+  .plan-content-grid > div:nth-child(3),
+  .plan-content-grid > div:nth-child(4),
+  .plan-content-grid > div:last-child {
+    grid-column: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .plan-content-grid {
+    padding: 1rem;
+    gap: 1rem;
+  }
+  
+  .plan-section {
+    padding: 1.5rem;
+  }
+  
+  .plan-header-compact {
+    padding: 1rem;
+  }
+  
+  .plan-meta-compact {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
 }
