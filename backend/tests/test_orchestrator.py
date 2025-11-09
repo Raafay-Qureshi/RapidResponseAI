@@ -2,6 +2,7 @@ import asyncio
 import os
 import sys
 import types
+import pytest
 from typing import Any, Dict, List
 
 from unittest.mock import AsyncMock
@@ -91,6 +92,7 @@ class FakeSocket:
         self.events.append({"event": event, "payload": payload, "room": room})
 
 
+@pytest.mark.asyncio
 async def test_disaster_pipeline():
     socket = FakeSocket()
     orchestrator = DisasterOrchestrator(socket)
@@ -135,6 +137,7 @@ async def test_disaster_pipeline():
     print("✓ DisasterOrchestrator pipeline produced a synthesized plan successfully")
 
 
+@pytest.mark.asyncio
 async def test_create_and_fetch():
     socket = FakeSocket()
     orchestrator = DisasterOrchestrator(socket)
@@ -170,7 +173,7 @@ def test_build_master_prompt_structure():
         },
     }
 
-    prompt = orchestrator._build_master_prompt(context)
+    prompt = orchestrator.create_standard_prompt(context)
 
     expected_sections = [
         "### AGENT 1: DAMAGE ASSESSMENT ###",
@@ -202,7 +205,7 @@ def test_build_master_prompt_defaults():
     socket = FakeSocket()
     orchestrator = DisasterOrchestrator(socket)
 
-    prompt = orchestrator._build_master_prompt({"agent_outputs": {}})
+    prompt = orchestrator.create_standard_prompt({"agent_outputs": {}})
 
     assert "**unknown incident**" in prompt
     assert "**unknown location**" in prompt
@@ -267,6 +270,7 @@ Hindi template text.
     assert parsed["templates"]["hi"] == "Hindi template text."
 
 
+@pytest.mark.asyncio
 async def test_process_disaster_emits_progress_and_context():
     socket = FakeSocket()
     orchestrator = DisasterOrchestrator(socket)

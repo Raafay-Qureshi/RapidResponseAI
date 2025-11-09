@@ -18,6 +18,8 @@ from agents.prediction import PredictionAgent
 from agents.resource_allocation import ResourceAllocationAgent
 from agents.routing import RoutingAgent
 from scenarios.july_2020_fire import load_july_2020_scenario, is_july_2020_scenario
+from utils.cached_loader import load_cached_july_2020, is_cached_data_available
+from utils.config import config
 
 
 class DisasterOrchestrator:
@@ -71,12 +73,14 @@ class DisasterOrchestrator:
         return disaster.get("plan") if disaster else None
 
     async def process_disaster(self, disaster_id: str) -> Optional[Dict[str, Any]]:
-        """Main processing pipeline."""
+        """Main processing pipeline - attempts agent processing first, falls back to cache on failure."""
         disaster = self.active_disasters.get(disaster_id)
         if not disaster:
             raise ValueError(f"Disaster '{disaster_id}' not found")
 
         try:
+            # Always attempt real agent processing first
+            self._log("Starting agent processing pipeline...")
             disaster["status"] = "fetching_data"
             self._emit("disaster_status", {"status": "fetching_data"}, room=disaster_id)
             self._emit(
@@ -147,6 +151,7 @@ class DisasterOrchestrator:
                 "location": disaster.get("location"),
                 "timestamp": disaster.get("created_at"),
                 "agent_outputs": agent_results,
+                "disaster_id": disaster_id,  # Pass disaster_id for progress updates
             }
             llm_response = await self._call_llm_api(context)
 
@@ -174,44 +179,115 @@ class DisasterOrchestrator:
             return final_plan
 
         except Exception as exc:
-            disaster["status"] = "error"
-            disaster["error"] = str(exc)
-            self._emit(
-                "disaster_error",
-                {"disaster_id": disaster_id, "error": str(exc)},
-                room=disaster_id,
-            )
-            raise
+            # Agent processing failed - attempt fallback to cached data
+            self._log(f"❌ Agent processing failed: {exc}")
+            
+            # Check if we can use cached data as fallback
+            if is_july_2020_scenario(disaster.get('trigger', {})) and is_cached_data_available():
+                self._log("⚠️ Agent processing failed - falling back to cached data")
+                try:
+                    await self._load_cached_response(disaster_id, is_fallback=True)
+                    self._log("✓ Successfully loaded cached fallback data")
+                    return self.active_disasters[disaster_id].get("plan")
+                except Exception as cache_exc:
+                    self._log(f"❌ Cached fallback also failed: {cache_exc}")
+                    # Both real processing and cache failed - propagate original error
+                    disaster["status"] = "error"
+                    disaster["error"] = f"Agent processing failed: {exc}. Cache fallback failed: {cache_exc}"
+                    self._emit(
+                        "disaster_error",
+                        {"disaster_id": disaster_id, "error": disaster["error"]},
+                        room=disaster_id,
+                    )
+                    raise
+            else:
+                # No cached fallback available - propagate error
+                self._log("❌ No cached fallback available")
+                disaster["status"] = "error"
+                disaster["error"] = str(exc)
+                self._emit(
+                    "disaster_error",
+                    {"disaster_id": disaster_id, "error": str(exc)},
+                    room=disaster_id,
+                )
+                raise
 
     async def _fetch_all_data(self, disaster: Dict[str, Any]) -> Dict[str, Any]:
         location = disaster.get("location", {})
+        disaster_id = disaster.get("id")
 
-        tasks = {
-            "satellite": asyncio.create_task(
-                self.data_clients["satellite"].fetch_imagery(location)
-            ),
-            "weather_current": asyncio.create_task(
-                self.data_clients["weather"].fetch_current(location)
-            ),
-            "weather_forecast": asyncio.create_task(
-                self.data_clients["weather"].fetch_forecast(location)
-            ),
-            "population": asyncio.create_task(
-                self.data_clients["geohub"].fetch_population(location)
-            ),
-            "infrastructure": asyncio.create_task(
-                self.data_clients["geohub"].fetch_infrastructure(location)
-            ),
-            "roads": asyncio.create_task(self.data_clients["geohub"].fetch_roads(location)),
-        }
+        # Define API fetch order with progress reporting
+        fetch_sequence = [
+            ("satellite", "NASA FIRMS Satellite Data", 12,
+             self.data_clients["satellite"].fetch_imagery(location)),
+            ("weather_current", "OpenWeather Current Conditions", 14,
+             self.data_clients["weather"].fetch_current(location)),
+            ("weather_forecast", "OpenWeather 5-Day Forecast", 16,
+             self.data_clients["weather"].fetch_forecast(location)),
+            ("population", "Brampton GeoHub Population Data", 18,
+             self.data_clients["geohub"].fetch_population(location)),
+            ("infrastructure", "Brampton GeoHub Infrastructure", 20,
+             self.data_clients["geohub"].fetch_infrastructure(location)),
+            ("roads", "Brampton GeoHub Road Network", 22,
+             self.data_clients["geohub"].fetch_roads(location)),
+        ]
 
         results: Dict[str, Any] = {}
-        for key, task in tasks.items():
+        
+        for key, description, progress_pct, coro in fetch_sequence:
             try:
-                results[key] = await task
+                self._emit(
+                    "progress",
+                    {
+                        "disaster_id": disaster_id,
+                        "phase": "data_ingestion",
+                        "progress": progress_pct,
+                        "message": f"📡 Fetching {description}...",
+                        "api_status": {
+                            "name": description,
+                            "status": "fetching"
+                        }
+                    },
+                    room=disaster_id,
+                )
+                
+                results[key] = await coro
+                
+                self._emit(
+                    "progress",
+                    {
+                        "disaster_id": disaster_id,
+                        "phase": "data_ingestion",
+                        "progress": progress_pct + 1,
+                        "message": f"✅ {description} received",
+                        "api_status": {
+                            "name": description,
+                            "status": "success"
+                        }
+                    },
+                    room=disaster_id,
+                )
+                
             except Exception as exc:
                 results[key] = None
                 self._log(f"Failed to fetch {key} data: {exc}")
+                
+                self._emit(
+                    "progress",
+                    {
+                        "disaster_id": disaster_id,
+                        "phase": "data_ingestion",
+                        "progress": progress_pct + 1,
+                        "message": f"⚠️ {description} unavailable (using fallback)",
+                        "api_status": {
+                            "name": description,
+                            "status": "fallback",
+                            "error": str(exc)
+                        }
+                    },
+                    room=disaster_id,
+                )
+                
         return results
 
     async def _run_all_agents(
@@ -219,28 +295,85 @@ class DisasterOrchestrator:
         disaster: Dict[str, Any],
         data: Dict[str, Any],
     ) -> Dict[str, Any]:
+        disaster_id = disaster.get("id")
+        
+        # Agent 1: Damage Assessment
+        self._emit(
+            "progress",
+            {
+                "disaster_id": disaster_id,
+                "phase": "agent_processing",
+                "progress": 35,
+                "message": "🔍 Agent 1/5: Analyzing fire perimeter and damage...",
+            },
+            room=disaster_id,
+        )
         damage_result = await self.agents["damage"].analyze(
             data.get("satellite"),
             disaster.get("type", "unknown"),
         )
 
+        # Agent 2: Population Impact
+        self._emit(
+            "progress",
+            {
+                "disaster_id": disaster_id,
+                "phase": "agent_processing",
+                "progress": 45,
+                "message": "👥 Agent 2/5: Calculating population impact...",
+            },
+            room=disaster_id,
+        )
         population_result = await self.agents["population"].analyze(
             damage_result.get("fire_perimeter"),
             data.get("population"),
         )
 
+        # Agent 3: Evacuation Routing
+        self._emit(
+            "progress",
+            {
+                "disaster_id": disaster_id,
+                "phase": "agent_processing",
+                "progress": 55,
+                "message": "🚗 Agent 3/5: Planning evacuation routes...",
+            },
+            room=disaster_id,
+        )
         routing_result = await self.agents["routing"].analyze(
             data.get("roads"),
             data.get("infrastructure"),
             damage_result,
         )
 
+        # Agent 4: Resource Allocation
+        self._emit(
+            "progress",
+            {
+                "disaster_id": disaster_id,
+                "phase": "agent_processing",
+                "progress": 65,
+                "message": "🚒 Agent 4/5: Allocating emergency resources...",
+            },
+            room=disaster_id,
+        )
         resource_result = await self.agents["resource"].analyze(
             population_result,
             routing_result,
             data.get("infrastructure"),
         )
 
+        # Agent 5: Prediction & Timeline
+        self._emit(
+            "progress",
+            {
+                "disaster_id": disaster_id,
+                "phase": "agent_processing",
+                "progress": 75,
+                "message": "📊 Agent 5/5: Predicting fire spread timeline...",
+            },
+            room=disaster_id,
+        )
         prediction_context = {
             "type": disaster.get("type", "unknown"),
             "location": disaster.get("location", {}),
@@ -263,7 +396,7 @@ class DisasterOrchestrator:
             "prediction": prediction_result,
         }
 
-    def _create_standard_prompt(self, context: Dict[str, Any]) -> str:
+    def create_standard_prompt(self, context: Dict[str, Any]) -> str:
         """Build the standard prompt for the LLM synthesis step."""
         agent_results = context.get("agent_outputs", {})
         damage_data = json.dumps(agent_results.get("damage", {}), indent=2)
@@ -306,7 +439,7 @@ Generate the complete emergency response plan. The plan MUST be formatted EXACTL
 """
         return prompt
 
-    def _create_july_2020_prompt(self, context: Dict[str, Any]) -> str:
+    def create_july_2020_prompt(self, context: Dict[str, Any]) -> str:
         """Create prompt specifically engineered for July 2020 scenario with HWY 407 emphasis."""
         agent_outputs = context.get("agent_outputs", {})
 
@@ -489,6 +622,24 @@ Remember: Lives depend on this plan. Be specific, urgent, and actionable."""
                 "overview": "",
                 "templates": {},
             }
+        
+        # Emit progress for LLM API call
+        disaster_id = context.get('disaster_id')
+        if disaster_id:
+            self._emit(
+                "progress",
+                {
+                    "disaster_id": disaster_id,
+                    "phase": "synthesis",
+                    "progress": 85,
+                    "message": "🤖 Calling OpenRouter AI for plan synthesis...",
+                    "api_status": {
+                        "name": "OpenRouter LLM",
+                        "status": "fetching"
+                    }
+                },
+                room=disaster_id,
+            )
 
         # Check if this is July 2020 scenario and use specialized prompt
         agent_outputs = context.get('agent_outputs', {})
@@ -503,10 +654,10 @@ Remember: Lives depend on this plan. Be specific, urgent, and actionable."""
 
         if is_july_2020:
             self._log("Using July 2020 specialized prompt (HWY 407 emphasis)")
-            prompt = self._create_july_2020_prompt(context)
+            prompt = self.create_july_2020_prompt(context)
         else:
             self._log("Using standard prompt")
-            prompt = self._create_standard_prompt(context)
+            prompt = self.create_standard_prompt(context)
 
         url = os.getenv("OPENROUTER_URL", "https://openrouter.ai/api/v1/chat/completions")
         headers = {
@@ -569,7 +720,68 @@ Remember: Lives depend on this plan. Be specific, urgent, and actionable."""
                     flattened.append(str(block))
             content = "\n".join(flattened)
 
+        # Emit success for LLM API call
+        disaster_id = context.get('disaster_id')
+        if disaster_id:
+            self._emit(
+                "progress",
+                {
+                    "disaster_id": disaster_id,
+                    "phase": "synthesis",
+                    "progress": 95,
+                    "message": "✅ AI-generated emergency plan received",
+                    "api_status": {
+                        "name": "OpenRouter LLM",
+                        "status": "success"
+                    }
+                },
+                room=disaster_id,
+            )
+
         return self._parse_llm_response(content or "", is_july_2020=is_july_2020)
+
+    async def _load_cached_response(self, disaster_id: str, is_fallback: bool = False):
+        """Load cached response as fallback when agent processing fails"""
+        disaster = self.active_disasters[disaster_id]
+
+        # Update messaging based on whether this is a fallback
+        message_prefix = "Loading fallback" if is_fallback else "Loading demonstration"
+        phase_name = 'fallback_cached' if is_fallback else 'loading_cached'
+
+        # Simulate progress updates for realism
+        for progress in [20, 40, 60, 80, 100]:
+            await asyncio.sleep(0.3)  # Slightly faster for fallback
+            self._emit('progress', {
+                'disaster_id': disaster_id,
+                'progress': progress,
+                'phase': phase_name,
+                'message': f'{message_prefix} data... {progress}%',
+            }, room=disaster_id)
+
+        # Load cached data
+        cached = load_cached_july_2020()
+
+        if not cached:
+            raise Exception("Cached data not available")
+
+        # Update disaster with cached data
+        disaster.update(cached['disaster'])
+        disaster['agent_results'] = cached['agent_outputs']
+        disaster['plan'] = cached['plan']
+        disaster['status'] = 'complete'
+        
+        # Mark plan as from cache if it's a fallback
+        if is_fallback:
+            disaster['plan']['_source'] = 'cached_fallback'
+            disaster['plan']['_note'] = 'Agent processing failed, using cached data'
+
+        # Emit completion
+        self._emit('disaster_complete', {
+            'disaster_id': disaster_id,
+            'plan': cached['plan'],
+        }, room=disaster_id)
+
+        self._log(f"Cached response loaded as {'fallback' if is_fallback else 'demo'}")
 
     def _emit(self, event: str, payload: Dict[str, Any], room: Optional[str] = None) -> None:
         if self.socketio:

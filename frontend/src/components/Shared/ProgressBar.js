@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './ProgressBar.css';
 
-function ProgressBar({ progress = 0, message = '', estimatedTimeSeconds = 60 }) {
+function ProgressBar({ progress = 0, message = '', estimatedTimeSeconds = 60, apiStatus = {} }) {
   const [displayProgress, setDisplayProgress] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(estimatedTimeSeconds);
 
@@ -86,6 +86,30 @@ function ProgressBar({ progress = 0, message = '', estimatedTimeSeconds = 60 }) 
             <span className="phase-label">Plan Generation</span>
           </div>
         </div>
+        
+        {/* API Status Indicators */}
+        {Object.keys(apiStatus).length > 0 && (
+          <div className="api-status-container">
+            <h4>📡 API Status</h4>
+            <div className="api-status-grid">
+              {Object.entries(apiStatus).map(([name, status]) => (
+                <div key={name} className={`api-status-item ${status.status}`}>
+                  <span className="api-status-icon">
+                    {status.status === 'fetching' && '⏳'}
+                    {status.status === 'success' && '✅'}
+                    {status.status === 'fallback' && '⚠️'}
+                  </span>
+                  <span className="api-status-name">{name}</span>
+                  {status.status === 'fallback' && (
+                    <span className="api-status-error" title={status.error}>
+                      (fallback)
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import MapView from './Map/MapView';
 import PlanViewer from './EmergencyPlan/PlanViewer';
 import DisasterTrigger from './Controls/DisasterTrigger';
@@ -16,9 +16,21 @@ function Dashboard() {
     progress,
     error,
     statusMessage,
+    apiStatus,
     triggerDisaster,
     clearDisaster
   } = useDisaster();
+
+  const [isCachedMode, setIsCachedMode] = useState(false);
+
+  // Check if backend is in cached mode
+  useEffect(() => {
+    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+    fetch(`${apiUrl}/api/config`)
+      .then(res => res.json())
+      .then(data => setIsCachedMode(data.cached_mode))
+      .catch(() => setIsCachedMode(false));
+  }, []);
 
   return (
     <div className="dashboard">
@@ -46,12 +58,21 @@ function Dashboard() {
         </div>
       </div>
 
+      {/* Cached Mode Banner */}
+      {isCachedMode && (
+        <div className="cached-mode-banner">
+          <span className="banner-icon">💾</span>
+          <span className="banner-text">Demo Mode: Using cached responses for reliability</span>
+        </div>
+      )}
+
       {/* Progress Bar (shown during processing) */}
       {loading && (
         <ProgressBar
           progress={progress}
           message={statusMessage}
           estimatedTimeSeconds={60}
+          apiStatus={apiStatus || {}}
         />
       )}
 

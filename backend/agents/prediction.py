@@ -252,3 +252,13 @@ class PredictionAgent(BaseAgent):
             'confidence': 0.87,
             'outlook': 'worsening',
         }
+
+    async def _model_flood_spread(self, disaster: Dict, data: Dict) -> Dict:
+        """Placeholder for flood spread modeling."""
+        return {
+            'current_spread_rate_kmh': 0,
+            'predictions': {},
+            'critical_arrival_times': [],
+            'factors': {},
+            'outlook': 'stable'
+        }

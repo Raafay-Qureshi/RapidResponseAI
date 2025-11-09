@@ -25,376 +25,332 @@ def create_test_polygon():
     ])
 
 
+def create_damage_summary():
+    """Create a test damage summary dictionary"""
+    return {
+        "severity": "high",
+        "affected_area_km2": 0.5,
+        "fire_perimeter": {
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [[
+                    [-79.8650, 43.7320],
+                    [-79.8550, 43.7320],
+                    [-79.8550, 43.7380],
+                    [-79.8650, 43.7380],
+                    [-79.8650, 43.7320]
+                ]]
+            }
+        }
+    }
+
+
 @pytest.mark.asyncio
 async def test_routing_agent_initialization():
     """Test RoutingAgent initialization"""
     agent = RoutingAgent()
     
     assert agent.name == "RoutingAgent"
-    assert agent.osrm_url == "http://router.project-osrm.org"
     print("✓ RoutingAgent initialized correctly")
 
 
 @pytest.mark.asyncio
-async def test_identify_safe_zones():
-    """Test safe zone identification"""
-    agent = RoutingAgent()
-    location = {"lat": 43.7315, "lon": -79.8600}
-    danger_zone = create_test_polygon()
-    
-    safe_zones = agent._identify_safe_zones(location, danger_zone)
-    
-    assert len(safe_zones) == 2
-    assert safe_zones[0]['name'] == 'Brampton Soccer Centre'
-    assert safe_zones[1]['name'] == 'CAA Centre'
-    assert safe_zones[0]['capacity'] == 2000
-    assert safe_zones[1]['capacity'] == 5000
-    assert 'lat' in safe_zones[0]
-    assert 'lon' in safe_zones[0]
-    
-    print("✓ Safe zones identified correctly")
-
-
-@pytest.mark.asyncio
-async def test_get_evacuation_origins():
-    """Test evacuation origin extraction from danger zone"""
-    agent = RoutingAgent()
-    danger_zone = create_test_polygon()
-    
-    origins = agent._get_evacuation_origins(danger_zone)
-    
-    assert len(origins) == 1
-    assert origins[0]['name'] == 'Affected Area Centroid'
-    assert 'lat' in origins[0]
-    assert 'lon' in origins[0]
-    # Verify centroid is approximately correct
-    assert 43.730 < origins[0]['lat'] < 43.740
-    assert -79.870 < origins[0]['lon'] < -79.850
-    
-    print("✓ Evacuation origins extracted correctly")
-
-
-@pytest.mark.asyncio
-async def test_get_evacuation_origins_none():
-    """Test handling of None danger zone"""
+async def test_analyze_basic_flow():
+    """Test basic analyze flow with valid inputs"""
     agent = RoutingAgent()
     
-    origins = agent._get_evacuation_origins(None)
+    roads_data = None
+    infrastructure_data = None
+    damage_summary = create_damage_summary()
     
-    assert origins == []
-    print("✓ None danger zone handled gracefully")
-
-
-@pytest.mark.asyncio
-async def test_estimate_evacuation_time():
-    """Test evacuation time estimation"""
-    agent = RoutingAgent()
+    result = await agent.analyze(roads_data, infrastructure_data, damage_summary)
     
-    routes = [
-        {'time_minutes': 15.5},
-        {'time_minutes': 22.3},
-        {'time_minutes': 18.7}
-    ]
+    # Verify result structure
+    assert 'routes' in result
+    assert 'severity' in result
+    assert 'priority_routes' in result
+    assert 'infrastructure_used' in result
     
-    evac_time = agent._estimate_evacuation_time(routes)
+    # Verify severity matches input
+    assert result['severity'] == 'high'
     
-    assert evac_time == 22.3  # Maximum time
-    print("✓ Evacuation time estimated correctly")
-
-
-@pytest.mark.asyncio
-async def test_estimate_evacuation_time_empty():
-    """Test evacuation time estimation with empty routes"""
-    agent = RoutingAgent()
+    # Verify routes
+    assert isinstance(result['routes'], list)
+    assert len(result['routes']) > 0
     
-    evac_time = agent._estimate_evacuation_time([])
-    
-    assert evac_time == 0.0
-    print("✓ Empty routes handled correctly")
-
-
-@pytest.mark.asyncio
-async def test_calculate_best_route_success():
-    """Test route calculation with successful OSRM response"""
-    agent = RoutingAgent()
-    
-    origin = {'name': 'Test Origin', 'lat': 43.7320, 'lon': -79.8600}
-    safe_zones = [
-        {'name': 'Zone 1', 'lat': 43.7150, 'lon': -79.8400, 'capacity': 2000},
-        {'name': 'Zone 2', 'lat': 43.7300, 'lon': -79.7500, 'capacity': 5000}
-    ]
-    
-    # Mock OSRM response
-    mock_response_data = {
-        'routes': [{
-            'geometry': {
-                'type': 'LineString',
-                'coordinates': [[-79.8600, 43.7320], [-79.8400, 43.7150]]
-            },
-            'distance': 5000,  # meters
-            'duration': 600    # seconds
-        }]
-    }
-    
-    # Mock aiohttp session and response
-    mock_response = AsyncMock()
-    mock_response.status = 200
-    mock_response.json = AsyncMock(return_value=mock_response_data)
-    
-    mock_session = AsyncMock()
-    mock_session.get = MagicMock(return_value=mock_response)
-    mock_session.get.return_value.__aenter__ = AsyncMock(return_value=mock_response)
-    mock_session.get.return_value.__aexit__ = AsyncMock(return_value=None)
-    
-    route = await agent._calculate_best_route(mock_session, origin, safe_zones)
-    
-    assert route is not None
-    assert route['origin'] == origin
+    # Verify route structure
+    route = result['routes'][0]
+    assert 'id' in route
+    assert 'origin' in route
     assert 'destination' in route
     assert 'path' in route
     assert 'distance_km' in route
     assert 'time_minutes' in route
-    assert route['distance_km'] == 5.0
-    assert route['time_minutes'] == 10.0
+    assert 'status' in route
+    assert 'priority' in route
     
-    print("✓ Best route calculated successfully")
+    print("✓ Basic analyze flow completed successfully")
 
 
 @pytest.mark.asyncio
-async def test_calculate_best_route_api_error():
-    """Test route calculation with OSRM API error"""
+async def test_get_center_point():
+    """Test center point extraction from fire perimeter"""
     agent = RoutingAgent()
     
-    origin = {'name': 'Test Origin', 'lat': 43.7320, 'lon': -79.8600}
-    safe_zones = [
-        {'name': 'Zone 1', 'lat': 43.7150, 'lon': -79.8400, 'capacity': 2000}
-    ]
-    
-    # Mock failed response
-    mock_response = AsyncMock()
-    mock_response.status = 500
-    
-    mock_session = AsyncMock()
-    mock_session.get = MagicMock(return_value=mock_response)
-    mock_session.get.return_value.__aenter__ = AsyncMock(return_value=mock_response)
-    mock_session.get.return_value.__aexit__ = AsyncMock(return_value=None)
-    
-    route = await agent._calculate_best_route(mock_session, origin, safe_zones)
-    
-    assert route is None
-    print("✓ API error handled gracefully")
-
-
-@pytest.mark.asyncio
-async def test_calculate_best_route_exception():
-    """Test route calculation with exception"""
-    agent = RoutingAgent()
-    
-    origin = {'name': 'Test Origin', 'lat': 43.7320, 'lon': -79.8600}
-    safe_zones = [
-        {'name': 'Zone 1', 'lat': 43.7150, 'lon': -79.8400, 'capacity': 2000}
-    ]
-    
-    # Mock session that raises exception
-    mock_session = AsyncMock()
-    mock_session.get.side_effect = Exception("Network error")
-    
-    route = await agent._calculate_best_route(mock_session, origin, safe_zones)
-    
-    assert route is None
-    print("✓ Exception handled gracefully")
-
-
-@pytest.mark.asyncio
-async def test_analyze_full_flow():
-    """Test full analyze flow with mocked OSRM responses"""
-    agent = RoutingAgent()
-    
-    location = {"lat": 43.7315, "lon": -79.8600}
-    roads = {}  # Not used in current implementation
-    danger_zone = create_test_polygon()
-    
-    # Mock OSRM response
-    mock_route_data = {
-        'routes': [{
-            'geometry': {
-                'type': 'LineString',
-                'coordinates': [[-79.8600, 43.7350], [-79.8400, 43.7150]]
-            },
-            'distance': 3500,
-            'duration': 480
-        }]
+    fire_perimeter = {
+        "geometry": {
+            "type": "Polygon",
+            "coordinates": [[
+                [-79.8650, 43.7320],
+                [-79.8550, 43.7320],
+                [-79.8550, 43.7380],
+                [-79.8650, 43.7380],
+                [-79.8650, 43.7320]
+            ]]
+        }
     }
     
-    with patch('aiohttp.ClientSession') as mock_session_class:
-        mock_response = AsyncMock()
-        mock_response.status = 200
-        mock_response.json = AsyncMock(return_value=mock_route_data)
-        
-        mock_session = AsyncMock()
-        mock_session.get = MagicMock(return_value=mock_response)
-        mock_session.get.return_value.__aenter__ = AsyncMock(return_value=mock_response)
-        mock_session.get.return_value.__aexit__ = AsyncMock(return_value=None)
-        mock_session.__aenter__ = AsyncMock(return_value=mock_session)
-        mock_session.__aexit__ = AsyncMock(return_value=None)
-        
-        mock_session_class.return_value = mock_session
-        
-        result = await agent.analyze(location, roads, danger_zone)
-        
-        # Verify result structure
-        assert 'routes' in result
-        assert 'safe_zones' in result
-        assert 'estimated_evacuation_time_minutes' in result
-        assert 'primary_route' in result
-        assert 'alternate_routes' in result
-        
-        # Verify safe zones
-        assert len(result['safe_zones']) == 2
-        
-        # Verify routes
-        assert isinstance(result['routes'], list)
-        
-        # Verify evacuation time
-        assert isinstance(result['estimated_evacuation_time_minutes'], (int, float))
-        
-        print("✓ Full analyze flow completed successfully")
+    center = agent._get_center_point(fire_perimeter)
+    
+    assert len(center) == 2
+    # Center should be approximately in the middle of the polygon
+    assert 43.730 < center[1] < 43.740
+    assert -79.870 < center[0] < -79.850
+    
+    print("✓ Center point extracted correctly")
 
 
 @pytest.mark.asyncio
-async def test_analyze_no_routes_found():
-    """Test analyze when no routes can be calculated"""
+async def test_get_center_point_default():
+    """Test center point returns default when perimeter is invalid"""
     agent = RoutingAgent()
     
-    location = {"lat": 43.7315, "lon": -79.8600}
-    roads = {}
-    danger_zone = create_test_polygon()
+    # Test with None
+    center = agent._get_center_point(None)
+    assert center == [-79.8620, 43.7315]
     
-    with patch('aiohttp.ClientSession') as mock_session_class:
-        # Mock failed response
-        mock_response = AsyncMock()
-        mock_response.status = 500
-        
-        mock_session = AsyncMock()
-        mock_session.get = MagicMock(return_value=mock_response)
-        mock_session.get.return_value.__aenter__ = AsyncMock(return_value=mock_response)
-        mock_session.get.return_value.__aexit__ = AsyncMock(return_value=None)
-        mock_session.__aenter__ = AsyncMock(return_value=mock_session)
-        mock_session.__aexit__ = AsyncMock(return_value=None)
-        
-        mock_session_class.return_value = mock_session
-        
-        result = await agent.analyze(location, roads, danger_zone)
-        
-        assert result['routes'] == []
-        assert result['estimated_evacuation_time_minutes'] == 0.0
-        assert result['primary_route'] is None
-        assert result['alternate_routes'] == []
-        
-        print("✓ No routes scenario handled correctly")
+    # Test with empty dict
+    center = agent._get_center_point({})
+    assert center == [-79.8620, 43.7315]
+    
+    print("✓ Default center point handled correctly")
 
 
 @pytest.mark.asyncio
-async def test_best_route_selection():
-    """Test that the shortest route is selected"""
+async def test_calculate_distance():
+    """Test distance calculation using Haversine formula"""
     agent = RoutingAgent()
     
-    origin = {'name': 'Test Origin', 'lat': 43.7320, 'lon': -79.8600}
-    safe_zones = [
-        {'name': 'Far Zone', 'lat': 43.6000, 'lon': -79.9000, 'capacity': 1000},
-        {'name': 'Near Zone', 'lat': 43.7300, 'lon': -79.8500, 'capacity': 2000}
-    ]
+    # Test approximate distance between two known points
+    lat1, lon1 = 43.7320, -79.8600
+    lat2, lon2 = 43.7150, -79.8400
     
-    # Mock different response times for each zone
-    call_count = 0
+    distance = agent._calculate_distance(lat1, lon1, lat2, lon2)
     
-    async def mock_json():
-        nonlocal call_count
-        call_count += 1
-        if call_count == 1:  # Far zone - longer route
-            return {
-                'routes': [{
-                    'geometry': {'type': 'LineString', 'coordinates': []},
-                    'distance': 10000,
-                    'duration': 1200
-                }]
-            }
-        else:  # Near zone - shorter route
-            return {
-                'routes': [{
-                    'geometry': {'type': 'LineString', 'coordinates': []},
-                    'distance': 2000,
-                    'duration': 300
-                }]
-            }
+    # Distance should be approximately 2.5 km
+    assert 2.0 < distance < 3.5
     
-    mock_response = AsyncMock()
-    mock_response.status = 200
-    mock_response.json = mock_json
-    
-    mock_session = AsyncMock()
-    mock_session.get = MagicMock(return_value=mock_response)
-    mock_session.get.return_value.__aenter__ = AsyncMock(return_value=mock_response)
-    mock_session.get.return_value.__aexit__ = AsyncMock(return_value=None)
-    
-    route = await agent._calculate_best_route(mock_session, origin, safe_zones)
-    
-    # Should select the shorter route
-    assert route['destination']['name'] == 'Near Zone'
-    assert route['time_minutes'] == 5.0  # 300 seconds / 60
-    
-    print("✓ Best route selection works correctly")
+    print("✓ Distance calculated correctly")
 
 
 @pytest.mark.asyncio
-async def test_multiple_routes():
-    """Test that multiple routes are returned for multiple origins"""
+async def test_generate_route_path():
+    """Test route path generation"""
     agent = RoutingAgent()
     
-    # This test would require multiple origins, which isn't currently
-    # supported by the implementation (only returns centroid)
-    # But we can test the structure
+    start_lon, start_lat = -79.8600, 43.7320
+    end_lon, end_lat = -79.8400, 43.7150
     
-    location = {"lat": 43.7315, "lon": -79.8600}
-    roads = {}
-    danger_zone = create_test_polygon()
+    path = agent._generate_route_path(start_lon, start_lat, end_lon, end_lat)
     
-    mock_route_data = {
-        'routes': [{
-            'geometry': {
-                'type': 'LineString',
-                'coordinates': [[-79.8600, 43.7350], [-79.8400, 43.7150]]
-            },
-            'distance': 3500,
-            'duration': 480
-        }]
+    # Should have 11 points (0 to 10 inclusive)
+    assert len(path) == 11
+    
+    # First point should be start
+    assert path[0] == [start_lon, start_lat]
+    
+    # Last point should be end
+    assert path[-1] == [end_lon, end_lat]
+    
+    # All points should be lists with 2 elements
+    for point in path:
+        assert len(point) == 2
+        assert isinstance(point[0], float)
+        assert isinstance(point[1], float)
+    
+    print("✓ Route path generated correctly")
+
+
+@pytest.mark.asyncio
+async def test_generate_evacuation_routes():
+    """Test evacuation route generation"""
+    agent = RoutingAgent()
+    
+    origin = [-79.8600, 43.7320]
+    affected_area = 0.5
+    status = "monitor"
+    
+    routes = agent._generate_evacuation_routes(origin, affected_area, status)
+    
+    # Should generate 3 routes
+    assert len(routes) == 3
+    
+    # Check first route (primary)
+    primary_route = routes[0]
+    assert primary_route['priority'] == 'primary'
+    assert primary_route['id'] == 'route-1'
+    assert 'destination' in primary_route
+    assert 'path' in primary_route
+    assert primary_route['path']['type'] == 'Feature'
+    assert primary_route['path']['geometry']['type'] == 'LineString'
+    
+    # Check that destinations are different
+    destinations = [r['destination']['name'] for r in routes]
+    assert len(set(destinations)) == 3
+    
+    print("✓ Evacuation routes generated correctly")
+
+
+@pytest.mark.asyncio
+async def test_severity_status_mapping():
+    """Test that severity maps correctly to route status"""
+    agent = RoutingAgent()
+    
+    # Test low severity
+    damage_summary_low = {
+        "severity": "low",
+        "affected_area_km2": 0.1,
+        "fire_perimeter": {}
+    }
+    result = await agent.analyze(None, None, damage_summary_low)
+    # Primary route should be open for low severity
+    assert result['routes'][0]['status'] == 'open'
+    
+    # Test extreme severity
+    damage_summary_extreme = {
+        "severity": "extreme",
+        "affected_area_km2": 5.0,
+        "fire_perimeter": {}
+    }
+    result = await agent.analyze(None, None, damage_summary_extreme)
+    # Primary route should be closed for extreme severity
+    assert result['routes'][0]['status'] == 'closed'
+    
+    print("✓ Severity to status mapping works correctly")
+
+
+@pytest.mark.asyncio
+async def test_analyze_with_infrastructure_data():
+    """Test analyze with infrastructure data"""
+    agent = RoutingAgent()
+    
+    # Mock infrastructure data
+    import pandas as pd
+    infrastructure_df = pd.DataFrame({
+        'name': ['Road A', 'Road B', 'Road C'],
+        'type': ['highway', 'street', 'avenue']
+    })
+    
+    damage_summary = create_damage_summary()
+    
+    result = await agent.analyze(None, infrastructure_df, damage_summary)
+    
+    assert 'infrastructure_used' in result
+    assert isinstance(result['infrastructure_used'], list)
+    # Should extract up to 3 names
+    assert len(result['infrastructure_used']) <= 3
+    
+    print("✓ Infrastructure data processed correctly")
+
+
+@pytest.mark.asyncio
+async def test_analyze_returns_both_routes_keys():
+    """Test that analyze returns both 'routes' and 'priority_routes' for compatibility"""
+    agent = RoutingAgent()
+    
+    damage_summary = create_damage_summary()
+    result = await agent.analyze(None, None, damage_summary)
+    
+    # Both keys should exist for backward compatibility
+    assert 'routes' in result
+    assert 'priority_routes' in result
+    
+    # They should contain the same data
+    assert result['routes'] == result['priority_routes']
+    
+    print("✓ Both routes keys present for compatibility")
+
+
+@pytest.mark.asyncio
+async def test_route_time_estimation():
+    """Test that route time estimation is reasonable"""
+    agent = RoutingAgent()
+    
+    damage_summary = create_damage_summary()
+    result = await agent.analyze(None, None, damage_summary)
+    
+    for route in result['routes']:
+        distance_km = route['distance_km']
+        time_minutes = route['time_minutes']
+        
+        # Time should be positive
+        assert time_minutes > 0
+        
+        # Speed should be reasonable (assumes 30 km/h average)
+        # Time in minutes = (distance / speed) * 60
+        expected_time = (distance_km / 30.0) * 60
+        assert abs(time_minutes - expected_time) < 5  # Allow 5 minute variance
+    
+    print("✓ Route time estimation is reasonable")
+
+
+@pytest.mark.asyncio
+async def test_route_destinations_have_capacity():
+    """Test that all route destinations include capacity information"""
+    agent = RoutingAgent()
+    
+    damage_summary = create_damage_summary()
+    result = await agent.analyze(None, None, damage_summary)
+    
+    for route in result['routes']:
+        destination = route['destination']
+        assert 'capacity' in destination
+        assert isinstance(destination['capacity'], int)
+        assert destination['capacity'] > 0
+        assert 'name' in destination
+        assert 'lat' in destination
+        assert 'lon' in destination
+    
+    print("✓ Route destinations have capacity information")
+
+
+@pytest.mark.asyncio
+async def test_july_2020_scenario():
+    """Test July 2020 scenario routing"""
+    agent = RoutingAgent()
+    
+    scenario_config = {
+        'disaster': {
+            'scenario_id': 'july_2020_backtest',
+            'location': {'lat': 43.7315, 'lon': -79.8620}
+        }
     }
     
-    with patch('aiohttp.ClientSession') as mock_session_class:
-        mock_response = AsyncMock()
-        mock_response.status = 200
-        mock_response.json = AsyncMock(return_value=mock_route_data)
-        
-        mock_session = AsyncMock()
-        mock_session.get = MagicMock(return_value=mock_response)
-        mock_session.get.return_value.__aenter__ = AsyncMock(return_value=mock_response)
-        mock_session.get.return_value.__aexit__ = AsyncMock(return_value=None)
-        mock_session.__aenter__ = AsyncMock(return_value=mock_session)
-        mock_session.__aexit__ = AsyncMock(return_value=None)
-        
-        mock_session_class.return_value = mock_session
-        
-        result = await agent.analyze(location, roads, danger_zone)
-        
-        # Verify primary and alternate routes structure
-        if result['routes']:
-            assert result['primary_route'] == result['routes'][0]
-            if len(result['routes']) > 1:
-                assert result['alternate_routes'] == result['routes'][1:]
-            else:
-                assert result['alternate_routes'] == []
-        
-        print("✓ Multiple routes structure verified")
+    result = await agent.analyze(None, None, {}, scenario_config)
+    
+    # Verify July 2020 specific structure
+    assert 'routes' in result
+    assert 'estimated_evacuation_time_minutes' in result
+    assert 'traffic_management' in result
+    
+    # Should have 3 routes
+    assert len(result['routes']) == 3
+    
+    # Routes should have notes
+    for route in result['routes']:
+        assert 'notes' in route
+    
+    print("✓ July 2020 scenario routing works correctly")
 
 
 # Direct execution
@@ -406,18 +362,18 @@ if __name__ == "__main__":
         print()
         
         await test_routing_agent_initialization()
-        await test_identify_safe_zones()
-        await test_get_evacuation_origins()
-        await test_get_evacuation_origins_none()
-        await test_estimate_evacuation_time()
-        await test_estimate_evacuation_time_empty()
-        await test_calculate_best_route_success()
-        await test_calculate_best_route_api_error()
-        await test_calculate_best_route_exception()
-        await test_analyze_full_flow()
-        await test_analyze_no_routes_found()
-        await test_best_route_selection()
-        await test_multiple_routes()
+        await test_analyze_basic_flow()
+        await test_get_center_point()
+        await test_get_center_point_default()
+        await test_calculate_distance()
+        await test_generate_route_path()
+        await test_generate_evacuation_routes()
+        await test_severity_status_mapping()
+        await test_analyze_with_infrastructure_data()
+        await test_analyze_returns_both_routes_keys()
+        await test_route_time_estimation()
+        await test_route_destinations_have_capacity()
+        await test_july_2020_scenario()
         
         print()
         print("=" * 60)

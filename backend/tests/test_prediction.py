@@ -1,6 +1,7 @@
 import asyncio
 import os
 import sys
+import pytest
 from unittest.mock import patch, MagicMock
 
 # Add backend to the import path
@@ -9,6 +10,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from agents.prediction import PredictionAgent
 
 
+@pytest.mark.asyncio
 async def test_prediction_agent_wildfire():
     """Test PredictionAgent for wildfire disaster type."""
     agent = PredictionAgent()
@@ -54,6 +56,7 @@ async def test_prediction_agent_wildfire():
         print("PASS: PredictionAgent wildfire analysis works correctly")
 
 
+@pytest.mark.asyncio
 async def test_prediction_agent_flood():
     """Test PredictionAgent for flood disaster type (placeholder)."""
     agent = PredictionAgent()
@@ -63,10 +66,15 @@ async def test_prediction_agent_flood():
 
     result = await agent.analyze(disaster, data)
 
-    assert result == {'status': 'not_implemented'}
+    # Flood should return placeholder structure
+    assert 'current_spread_rate_kmh' in result
+    assert result['current_spread_rate_kmh'] == 0
+    assert 'outlook' in result
+    assert result['outlook'] == 'stable'
     print("PASS: PredictionAgent flood analysis returns placeholder")
 
 
+@pytest.mark.asyncio
 async def test_prediction_agent_unknown_disaster():
     """Test PredictionAgent raises error for unknown disaster type."""
     agent = PredictionAgent()

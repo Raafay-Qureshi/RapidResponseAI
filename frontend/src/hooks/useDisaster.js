@@ -16,6 +16,7 @@ function useDisaster() {
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState(null);
   const [statusMessage, setStatusMessage] = useState('');
+  const [apiStatus, setApiStatus] = useState(null); // For tracking API fetch status
 
   // WebSocket
   const { connected, on, subscribeToDisaster } = useWebSocket();
@@ -34,6 +35,7 @@ function useDisaster() {
       setError(null);
       setPlan(null);
       setStatusMessage('Initializing disaster simulation...');
+      setApiStatus(null); // Reset API status
 
       // Call backend API to trigger disaster
       const response = await disasterAPI.trigger(disasterData);
@@ -41,9 +43,12 @@ function useDisaster() {
       console.log('[useDisaster] Disaster triggered successfully:', response);
       setDisaster(response);
 
-      // Subscribe to WebSocket updates for this disaster
+      // Subscribe to WebSocket updates for this disaster with mode info
       if (response.disaster_id) {
-        subscribeToDisaster(response.disaster_id);
+        subscribeToDisaster(response.disaster_id, {
+          mode: disasterData.use_real_apis ? 'real_apis' : 'simulation',
+          trigger_data: disasterData
+        });
         setStatusMessage('Subscribed to real-time updates');
       }
 
@@ -82,6 +87,14 @@ function useDisaster() {
       console.log('[useDisaster] Progress update:', data);
       setProgress(data.progress || 0);
       setStatusMessage(data.message || getProgressMessage(data.progress, data.phase));
+      
+      // Track API status if provided
+      if (data.api_status) {
+        setApiStatus(prev => ({
+          ...prev,
+          [data.api_status.name]: data.api_status
+        }));
+      }
     });
 
     // Disaster processing complete
@@ -139,6 +152,7 @@ function useDisaster() {
     progress,
     error,
     statusMessage,
+    apiStatus,
 
     // Methods
     triggerDisaster,

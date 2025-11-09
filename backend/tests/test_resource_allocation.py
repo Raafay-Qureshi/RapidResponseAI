@@ -15,28 +15,40 @@ def agent():
 
 
 @pytest.fixture
-def sample_population_impact():
-    """Sample population impact data from PopulationImpactAgent"""
+def sample_population_summary():
+    """Sample population summary data from PopulationImpactAgent"""
     return {
         'total_affected': 10000,
         'vulnerable_population': {
             'elderly': 1500,
-            'disabled': 500,
             'children': 2000
         },
-        'evacuation_zones': ['Zone A', 'Zone B'],
-        'severity': 'high'
+        'critical_facilities': [
+            {'name': 'Hospital A', 'type': 'hospital'},
+            {'name': 'School B', 'type': 'school'}
+        ]
+    }
+
+
+@pytest.fixture
+def sample_routing_summary():
+    """Sample routing summary data from RoutingAgent"""
+    return {
+        'severity': 'high',
+        'routes': [
+            {'id': 'route-1', 'status': 'open'}
+        ]
     }
 
 
 @pytest.fixture
 def sample_infrastructure():
     """Sample infrastructure data"""
-    return {
-        'roads': [],
-        'buildings': [],
-        'critical_facilities': []
-    }
+    import pandas as pd
+    return pd.DataFrame({
+        'name': ['Fire Station A', 'Police Station B'],
+        'type': ['fire', 'police']
+    })
 
 
 @pytest.mark.asyncio
@@ -47,251 +59,297 @@ async def test_resource_allocation_agent_initialization(agent):
 
 
 @pytest.mark.asyncio
-async def test_analyze_returns_correct_structure(agent, sample_population_impact, sample_infrastructure):
-    """Test that analyze method returns the expected structure"""
-    result = await agent.analyze(sample_population_impact, sample_infrastructure)
+async def test_analyze_returns_correct_structure(agent, sample_population_summary, sample_routing_summary, sample_infrastructure):
+    """Test that analyze returns the correct structure"""
+    result = await agent.analyze(
+        sample_population_summary,
+        sample_routing_summary,
+        sample_infrastructure
+    )
     
-    assert 'required_resources' in result
-    assert 'available_resources' in result
-    
-    # Check required_resources structure
-    assert 'ambulances' in result['required_resources']
-    assert 'evacuation_buses' in result['required_resources']
-    assert 'personnel' in result['required_resources']
-    
-    # Check available_resources structure
-    assert 'fire_stations' in result['available_resources']
-    assert 'hospitals' in result['available_resources']
-    assert 'police_stations' in result['available_resources']
+    # Check expected keys
+    assert 'total_affected' in result
+    assert 'shelters_needed' in result
+    assert 'medical_units' in result
+    assert 'relief_kits' in result
+    assert 'critical_facilities' in result
+    assert 'route_status' in result
+    assert 'staging_sites' in result
 
 
 @pytest.mark.asyncio
-async def test_calculate_ambulances_correct_logic(agent):
-    """Test ambulance calculation: 1 per 100 vulnerable people"""
-    # Test case 1: 1500 elderly + 500 disabled = 2000 vulnerable
-    # Expected: 2000 // 100 = 20 ambulances
-    vulnerable_pop = {'elderly': 1500, 'disabled': 500}
-    result = agent._calculate_ambulances(vulnerable_pop)
-    assert result == 20
+async def test_shelters_calculation(agent, sample_routing_summary):
+    """Test shelter calculation: 1 shelter per 500 people"""
+    # 10000 people / 500 = 20 shelters
+    population_summary = {
+        'total_affected': 10000,
+        'vulnerable_population': {'elderly': 1500},
+        'critical_facilities': []
+    }
     
-    # Test case 2: Small numbers should return at least 1
-    vulnerable_pop = {'elderly': 50, 'disabled': 30}
-    result = agent._calculate_ambulances(vulnerable_pop)
-    assert result == 1
+    result = await agent.analyze(population_summary, sample_routing_summary, None)
+    assert result['shelters_needed'] == 20
     
-    # Test case 3: Exactly 100 vulnerable
-    vulnerable_pop = {'elderly': 60, 'disabled': 40}
-    result = agent._calculate_ambulances(vulnerable_pop)
-    assert result == 1
+    # Test with 2500 people
+    population_summary['total_affected'] = 2500
+    result = await agent.analyze(population_summary, sample_routing_summary, None)
+    assert result['shelters_needed'] == 5
     
-    # Test case 4: Missing disabled key
-    vulnerable_pop = {'elderly': 250}
-    result = agent._calculate_ambulances(vulnerable_pop)
-    assert result == 2
-    
-    # Test case 5: Empty dict
-    vulnerable_pop = {}
-    result = agent._calculate_ambulances(vulnerable_pop)
-    assert result == 1  # Minimum of 1
+    # Test with 0 people
+    population_summary['total_affected'] = 0
+    result = await agent.analyze(population_summary, sample_routing_summary, None)
+    assert result['shelters_needed'] == 0
 
 
 @pytest.mark.asyncio
-async def test_calculate_buses_correct_logic(agent):
-    """Test bus calculation: 20% of population, 1 bus per 50 people"""
-    # Test case 1: 10000 people
-    # 20% = 2000 people needing buses
-    # 2000 / 50 = 40 buses
-    result = agent._calculate_buses(10000)
-    assert result == 40
+async def test_medical_units_calculation(agent, sample_routing_summary):
+    """Test medical units calculation: 1 unit per 100 elderly"""
+    # 1500 elderly / 100 = 15 medical units
+    population_summary = {
+        'total_affected': 10000,
+        'vulnerable_population': {'elderly': 1500},
+        'critical_facilities': []
+    }
     
-    # Test case 2: 1000 people
-    # 20% = 200 people
-    # 200 / 50 = 4 buses
-    result = agent._calculate_buses(1000)
-    assert result == 4
+    result = await agent.analyze(population_summary, sample_routing_summary, None)
+    assert result['medical_units'] == 15
     
-    # Test case 3: Small population should return at least 1
-    result = agent._calculate_buses(100)
-    assert result == 1
+    # Test with 250 elderly
+    population_summary['vulnerable_population']['elderly'] = 250
+    result = await agent.analyze(population_summary, sample_routing_summary, None)
+    assert result['medical_units'] == 3  # ceil(250/100) = 3
     
-    # Test case 4: Zero population
-    result = agent._calculate_buses(0)
-    assert result == 1  # Minimum of 1
+    # Test with no vulnerable population
+    population_summary['vulnerable_population'] = {}
+    result = await agent.analyze(population_summary, sample_routing_summary, None)
+    assert result['medical_units'] == 0
 
 
 @pytest.mark.asyncio
-async def test_calculate_personnel_correct_logic(agent):
-    """Test personnel calculation: 1 responder per 200 affected people"""
-    # Test case 1: 10000 people
-    # 10000 / 200 = 50 personnel
-    result = agent._calculate_personnel(10000)
-    assert result == 50
+async def test_relief_kits_calculation(agent, sample_routing_summary):
+    """Test relief kits calculation: 1 kit per affected person"""
+    population_summary = {
+        'total_affected': 10000,
+        'vulnerable_population': {'elderly': 1500},
+        'critical_facilities': []
+    }
     
-    # Test case 2: 1000 people
-    # 1000 / 200 = 5 personnel
-    result = agent._calculate_personnel(1000)
-    assert result == 5
+    result = await agent.analyze(population_summary, sample_routing_summary, None)
+    assert result['relief_kits'] == 10000
     
-    # Test case 3: Small population should return at least 5
-    result = agent._calculate_personnel(100)
-    assert result == 5  # Minimum of 5
+    # Test with different numbers
+    population_summary['total_affected'] = 5000
+    result = await agent.analyze(population_summary, sample_routing_summary, None)
+    assert result['relief_kits'] == 5000
     
-    # Test case 4: Zero population
-    result = agent._calculate_personnel(0)
-    assert result == 5  # Minimum of 5
-
-
-@pytest.mark.asyncio
-async def test_map_current_resources_structure(agent):
-    """Test that _map_current_resources returns expected structure"""
-    resources = agent._map_current_resources()
-    
-    # Check top-level keys
-    assert 'fire_stations' in resources
-    assert 'hospitals' in resources
-    assert 'police_stations' in resources
-    
-    # Check fire stations structure
-    assert len(resources['fire_stations']) == 2
-    for station in resources['fire_stations']:
-        assert 'id' in station
-        assert 'lat' in station
-        assert 'lon' in station
-        assert 'trucks' in station
-    
-    # Check hospitals structure
-    assert len(resources['hospitals']) == 1
-    for hospital in resources['hospitals']:
-        assert 'id' in hospital
-        assert 'lat' in hospital
-        assert 'lon' in hospital
-        assert 'ambulances' in hospital
-    
-    # Check police stations structure
-    assert len(resources['police_stations']) == 1
-    for station in resources['police_stations']:
-        assert 'id' in station
-        assert 'lat' in station
-        assert 'lon' in station
-        assert 'units' in station
+    # Test with 0
+    population_summary['total_affected'] = 0
+    result = await agent.analyze(population_summary, sample_routing_summary, None)
+    assert result['relief_kits'] == 0
 
 
 @pytest.mark.asyncio
 async def test_analyze_with_minimal_data(agent):
-    """Test analyze with minimal/empty population impact data"""
-    minimal_impact = {
+    """Test analyze with minimal/empty population summary data"""
+    minimal_summary = {
         'total_affected': 0,
-        'vulnerable_population': {}
+        'vulnerable_population': {},
+        'critical_facilities': []
     }
-    infrastructure = {}
+    routing_summary = {'severity': 'low'}
     
-    result = await agent.analyze(minimal_impact, infrastructure)
+    result = await agent.analyze(minimal_summary, routing_summary, None)
     
-    # Should still return valid structure with minimum values
-    assert result['required_resources']['ambulances'] >= 1
-    assert result['required_resources']['evacuation_buses'] >= 1
-    assert result['required_resources']['personnel'] >= 5
-    assert 'available_resources' in result
+    # Should still return valid structure with zero/empty values
+    assert result['total_affected'] == 0
+    assert result['shelters_needed'] == 0
+    assert result['medical_units'] == 0
+    assert result['relief_kits'] == 0
+    assert result['critical_facilities'] == []
 
 
 @pytest.mark.asyncio
-async def test_analyze_with_large_population(agent):
+async def test_analyze_with_large_population(agent, sample_routing_summary):
     """Test analyze with large population numbers"""
-    large_impact = {
+    large_summary = {
         'total_affected': 50000,
         'vulnerable_population': {
             'elderly': 8000,
-            'disabled': 2000
-        }
+            'children': 12000
+        },
+        'critical_facilities': []
     }
-    infrastructure = {}
     
-    result = await agent.analyze(large_impact, infrastructure)
+    result = await agent.analyze(large_summary, sample_routing_summary, None)
     
-    # 10000 vulnerable / 100 = 100 ambulances
-    assert result['required_resources']['ambulances'] == 100
+    # 50000 / 500 = 100 shelters
+    assert result['shelters_needed'] == 100
     
-    # 50000 * 0.20 / 50 = 200 buses
-    assert result['required_resources']['evacuation_buses'] == 200
+    # 8000 / 100 = 80 medical units
+    assert result['medical_units'] == 80
     
-    # 50000 / 200 = 250 personnel
-    assert result['required_resources']['personnel'] == 250
+    # 50000 relief kits
+    assert result['relief_kits'] == 50000
 
 
 @pytest.mark.asyncio
-async def test_analyze_integration(agent, sample_population_impact, sample_infrastructure):
-    """Integration test for the full analyze workflow"""
-    result = await agent.analyze(sample_population_impact, sample_infrastructure)
+async def test_summarize_facilities(agent):
+    """Test critical facilities summarization"""
+    facilities = [
+        {'name': 'Hospital A', 'type': 'hospital'},
+        {'name': 'School B', 'type': 'school'},
+        {'name': 'Fire Station C', 'type': 'fire'}
+    ]
+    
+    result = agent._summarize_facilities(facilities)
+    
+    assert len(result) == 3
+    assert 'Hospital A' in result
+    assert 'School B' in result
+    assert 'Fire Station C' in result
+
+
+@pytest.mark.asyncio
+async def test_summarize_facilities_empty(agent):
+    """Test critical facilities summarization with empty list"""
+    result = agent._summarize_facilities([])
+    assert result == []
+
+
+@pytest.mark.asyncio
+async def test_candidate_sites_with_dataframe(agent):
+    """Test staging sites extraction from infrastructure DataFrame"""
+    import pandas as pd
+    
+    infrastructure_df = pd.DataFrame({
+        'name': ['Site A', 'Site B', 'Site C'],
+        'type': ['government', 'government', 'private']
+    })
+    
+    result = agent._candidate_sites(infrastructure_df)
+    
+    # Should return up to 2 government sites
+    assert isinstance(result, list)
+    assert len(result) <= 2
+
+
+@pytest.mark.asyncio
+async def test_candidate_sites_with_none(agent):
+    """Test staging sites extraction with None infrastructure"""
+    result = agent._candidate_sites(None)
+    assert result == []
+
+
+@pytest.mark.asyncio
+async def test_analyze_integration(agent, sample_population_summary, sample_routing_summary, sample_infrastructure):
+    """Test full analyze integration"""
+    result = await agent.analyze(
+        sample_population_summary,
+        sample_routing_summary,
+        sample_infrastructure
+    )
     
     # Verify calculations based on sample data
-    # 1500 elderly + 500 disabled = 2000 vulnerable
-    # 2000 / 100 = 20 ambulances
-    assert result['required_resources']['ambulances'] == 20
+    assert result['total_affected'] == 10000
+    assert result['shelters_needed'] == 20  # 10000 / 500
+    assert result['medical_units'] == 15  # 1500 / 100
+    assert result['relief_kits'] == 10000
     
-    # 10000 * 0.20 / 50 = 40 buses
-    assert result['required_resources']['evacuation_buses'] == 40
-    
-    # 10000 / 200 = 50 personnel
-    assert result['required_resources']['personnel'] == 50
-    
-    # Verify available resources are populated
-    assert len(result['available_resources']['fire_stations']) > 0
-    assert len(result['available_resources']['hospitals']) > 0
-    assert len(result['available_resources']['police_stations']) > 0
+    # Verify other fields exist
+    assert 'critical_facilities' in result
+    assert 'route_status' in result
+    assert result['route_status'] == 'high'
+    assert 'staging_sites' in result
 
 
 @pytest.mark.asyncio
-async def test_analyze_with_missing_vulnerable_keys(agent):
-    """Test analyze when vulnerable_population has missing keys"""
-    impact = {
-        'total_affected': 5000,
-        'vulnerable_population': {
-            'elderly': 800
-            # 'disabled' key is missing
+async def test_route_status_extraction(agent, sample_population_summary):
+    """Test that route_status is correctly extracted from routing_summary"""
+    routing_summary = {'severity': 'extreme', 'routes': []}
+    
+    result = await agent.analyze(sample_population_summary, routing_summary, None)
+    
+    assert result['route_status'] == 'extreme'
+
+
+@pytest.mark.asyncio
+async def test_resource_types_are_integers(agent, sample_population_summary, sample_routing_summary):
+    """Test that all resource counts are integers"""
+    result = await agent.analyze(sample_population_summary, sample_routing_summary, None)
+    
+    assert isinstance(result['total_affected'], int)
+    assert isinstance(result['shelters_needed'], int)
+    assert isinstance(result['medical_units'], int)
+    assert isinstance(result['relief_kits'], int)
+
+
+@pytest.mark.asyncio
+async def test_july_2020_scenario(agent):
+    """Test July 2020 scenario resource allocation"""
+    scenario_config = {
+        'disaster': {
+            'scenario_id': 'july_2020_backtest'
+        },
+        'population_estimate': {
+            'total_affected': 2000,
+            'immediate_danger': 800,
+            'evacuation_recommended': 1200,
+            'vulnerable_elderly': 285,
+            'vulnerable_children': 420
         }
     }
-    infrastructure = {}
     
-    result = await agent.analyze(impact, infrastructure)
+    result = await agent.analyze({}, {}, None, scenario_config)
     
-    # Should handle missing 'disabled' key gracefully
-    # 800 / 100 = 8 ambulances
-    assert result['required_resources']['ambulances'] == 8
-    assert isinstance(result['required_resources']['ambulances'], int)
+    # Verify July 2020 specific structure
+    assert 'required_resources' in result
+    assert 'available_resources' in result
+    assert 'deployment_plan' in result
+    assert 'mutual_aid_requests' in result
+    assert 'resource_gaps' in result
+    assert 'highway_coordination' in result
+    
+    # Check required resources
+    assert result['required_resources']['ambulances'] == 12
+    assert result['required_resources']['evacuation_buses'] == 8
+    assert result['required_resources']['personnel'] == 85
 
 
 @pytest.mark.asyncio
-async def test_resource_types_are_integers(agent, sample_population_impact, sample_infrastructure):
-    """Test that all resource counts are integers"""
-    result = await agent.analyze(sample_population_impact, sample_infrastructure)
+async def test_analyze_with_missing_vulnerable_keys(agent, sample_routing_summary):
+    """Test analyze when vulnerable_population has missing keys"""
+    summary = {
+        'total_affected': 5000,
+        'vulnerable_population': {
+            'children': 800
+            # 'elderly' key is missing
+        },
+        'critical_facilities': []
+    }
     
-    assert isinstance(result['required_resources']['ambulances'], int)
-    assert isinstance(result['required_resources']['evacuation_buses'], int)
-    assert isinstance(result['required_resources']['personnel'], int)
+    result = await agent.analyze(summary, sample_routing_summary, None)
+    
+    # Should handle missing 'elderly' key gracefully and return 0 medical units
+    assert result['medical_units'] == 0
+    assert isinstance(result['medical_units'], int)
 
 
 @pytest.mark.asyncio
-async def test_available_resources_coordinates(agent):
-    """Test that all available resources have valid coordinates"""
-    resources = agent._map_current_resources()
+async def test_critical_facilities_list(agent, sample_routing_summary):
+    """Test that critical_facilities are properly extracted"""
+    summary = {
+        'total_affected': 1000,
+        'vulnerable_population': {},
+        'critical_facilities': [
+            {'name': 'Hospital A'},
+            {'name': 'School B'},
+            {'name': 'Fire Station C'}
+        ]
+    }
     
-    # Check fire stations
-    for station in resources['fire_stations']:
-        assert isinstance(station['lat'], float)
-        assert isinstance(station['lon'], float)
-        assert -90 <= station['lat'] <= 90
-        assert -180 <= station['lon'] <= 180
+    result = await agent.analyze(summary, sample_routing_summary, None)
     
-    # Check hospitals
-    for hospital in resources['hospitals']:
-        assert isinstance(hospital['lat'], float)
-        assert isinstance(hospital['lon'], float)
-        assert -90 <= hospital['lat'] <= 90
-        assert -180 <= hospital['lon'] <= 180
-    
-    # Check police stations
-    for station in resources['police_stations']:
-        assert isinstance(station['lat'], float)
-        assert isinstance(station['lon'], float)
-        assert -90 <= station['lat'] <= 90
-        assert -180 <= station['lon'] <= 180
+    assert len(result['critical_facilities']) == 3
+    assert 'Hospital A' in result['critical_facilities']
+    assert 'School B' in result['critical_facilities']
+    assert 'Fire Station C' in result['critical_facilities']

@@ -6,6 +6,7 @@ function DisasterTrigger({ onTrigger, disabled }) {
   const [isTriggering, setIsTriggering] = useState(false);
   const [error, setError] = useState(null);
   const [showTooltip, setShowTooltip] = useState(false);
+  const [mode, setMode] = useState('simulation'); // 'simulation' or 'real_apis'
 
   const handleJuly2020Trigger = async () => {
     try {
@@ -22,11 +23,13 @@ function DisasterTrigger({ onTrigger, disabled }) {
           lon: -79.8620, // HWY 407/410 interchange
         },
         severity: 'high',
+        use_real_apis: mode === 'real_apis',
         metadata: {
           scenario: 'july_2020_backtest',
           description: 'July 2020 HWY 407/410 Fire',
           historical: true,
           date: '2020-07-15',
+          mode: mode,
         },
       };
 
@@ -62,6 +65,7 @@ function DisasterTrigger({ onTrigger, disabled }) {
           lon: -79.8620 + (Math.random() - 0.5) * 0.05,
         },
         severity: 'high',
+        use_real_apis: mode === 'real_apis',
       };
 
       const response = await disasterAPI.trigger(disasterData);
@@ -84,6 +88,30 @@ function DisasterTrigger({ onTrigger, disabled }) {
     <div className="disaster-trigger">
       <div className="trigger-header">
         <h3>🎮 Emergency Simulation</h3>
+        <div className="mode-selector">
+          <label>
+            <input
+              type="radio"
+              name="mode"
+              value="simulation"
+              checked={mode === 'simulation'}
+              onChange={(e) => setMode(e.target.value)}
+              disabled={isTriggering}
+            />
+            Simulation Mode
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="mode"
+              value="real_apis"
+              checked={mode === 'real_apis'}
+              onChange={(e) => setMode(e.target.value)}
+              disabled={isTriggering}
+            />
+            Real API Mode
+          </label>
+        </div>
         <button
           className="info-button"
           onMouseEnter={() => setShowTooltip(true)}
@@ -120,12 +148,18 @@ function DisasterTrigger({ onTrigger, disabled }) {
         <button
           onClick={handleJuly2020Trigger}
           disabled={disabled || isTriggering}
-          className="trigger-button july-2020"
+          className={`trigger-button july-2020 ${mode === 'real_apis' ? 'real-apis-mode' : ''}`}
         >
           <span className="button-icon">🔥</span>
           <span className="button-content">
-            <span className="button-title">Simulate July 2020 Fire</span>
-            <span className="button-subtitle">HWY 407/410 • 40 acres • Historical Backtest</span>
+            <span className="button-title">
+              {mode === 'real_apis' ? 'Trigger July 2020 Fire (Real APIs)' : 'Simulate July 2020 Fire'}
+            </span>
+            <span className="button-subtitle">
+              {mode === 'real_apis'
+                ? 'HWY 407/410 • Live Data • Real API Calls'
+                : 'HWY 407/410 • 40 acres • Historical Backtest'}
+            </span>
           </span>
           {isTriggering && <span className="button-spinner">⏳</span>}
         </button>
@@ -141,9 +175,9 @@ function DisasterTrigger({ onTrigger, disabled }) {
             <button
               onClick={handleGenericTrigger}
               disabled={disabled || isTriggering}
-              className="trigger-button generic"
+              className={`trigger-button generic ${mode === 'real_apis' ? 'real-apis-mode' : ''}`}
             >
-              🚨 Trigger Generic Event
+              {mode === 'real_apis' ? '📡 Trigger Real Event (APIs)' : '🚨 Trigger Generic Event'}
             </button>
           </div>
         </details>

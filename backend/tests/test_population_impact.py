@@ -1,6 +1,7 @@
 import asyncio
 import os
 import sys
+import pytest
 
 import geopandas as gpd
 from shapely.geometry import Polygon, mapping
@@ -41,6 +42,7 @@ def _build_population_gdf() -> gpd.GeoDataFrame:
     return gpd.GeoDataFrame(data, geometry="geometry", crs="EPSG:4326")
 
 
+@pytest.mark.asyncio
 async def test_population_summary():
     agent = PopulationImpactAgent()
     population_gdf = _build_population_gdf()
@@ -73,6 +75,7 @@ async def test_population_summary():
     print("✓ PopulationImpactAgent aggregates affected census blocks correctly")
 
 
+@pytest.mark.asyncio
 async def test_population_empty_inputs():
     agent = PopulationImpactAgent()
     empty_gdf = gpd.GeoDataFrame(

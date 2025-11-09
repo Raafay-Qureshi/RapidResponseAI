@@ -65,15 +65,22 @@ function useWebSocket() {
   /**
    * Subscribe to disaster updates for a specific disaster ID
    * @param {string} disasterId - Disaster ID to subscribe to
+   * @param {Object} options - Additional subscription options
    */
-  const subscribeToDisaster = useCallback((disasterId) => {
+  const subscribeToDisaster = useCallback((disasterId, options = {}) => {
     if (!disasterId) {
       console.warn('[useWebSocket] No disaster ID provided for subscription');
       return;
     }
 
-    console.log(`[useWebSocket] Subscribing to disaster: ${disasterId}`);
-    emit('subscribe_disaster', { disaster_id: disasterId });
+    const subscriptionData = {
+      disaster_id: disasterId,
+      mode: options.mode || 'simulation',
+      trigger_data: options.trigger_data
+    };
+
+    console.log(`[useWebSocket] Subscribing to disaster: ${disasterId}`, subscriptionData);
+    emit('subscribe_disaster', subscriptionData);
   }, [emit]);
 
   /**

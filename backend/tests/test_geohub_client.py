@@ -11,6 +11,7 @@ Run this test with:
 import sys
 import os
 import asyncio
+import pytest
 
 # Add backend directory to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
@@ -18,6 +19,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from data.geohub_client import GeoHubClient
 
 
+@pytest.mark.asyncio
 async def test_infrastructure():
     """Test loading infrastructure data"""
     print("\n" + "="*60)
@@ -52,6 +54,7 @@ async def test_infrastructure():
         traceback.print_exc()
 
 
+@pytest.mark.asyncio
 async def test_population():
     """Test loading population data"""
     print("\n" + "="*60)
@@ -95,6 +98,7 @@ async def test_population():
         traceback.print_exc()
 
 
+@pytest.mark.asyncio
 async def test_roads():
     """Test loading roads data"""
     print("\n" + "="*60)
@@ -142,6 +146,7 @@ async def test_roads():
         traceback.print_exc()
 
 
+@pytest.mark.asyncio
 async def test_location_filtering():
     """Test location-based filtering"""
     print("\n" + "="*60)
@@ -176,6 +181,7 @@ async def test_location_filtering():
         traceback.print_exc()
 
 
+@pytest.mark.asyncio
 async def test_data_cache():
     """Test data caching mechanism"""
     print("\n" + "="*60)
@@ -218,6 +224,7 @@ async def test_data_cache():
         traceback.print_exc()
 
 
+@pytest.mark.asyncio
 async def test_data_structure():
     """Test that returned data has correct structure"""
     print("\n" + "="*60)

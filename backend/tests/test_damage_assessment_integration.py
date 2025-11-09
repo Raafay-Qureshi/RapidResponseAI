@@ -4,11 +4,13 @@ Integration test for DamageAssessmentAgent with SatelliteClient
 import asyncio
 import sys
 import os
+import pytest
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from agents.damage_assessment import DamageAssessmentAgent
 
 
+@pytest.mark.asyncio
 async def test_with_satellite_client_data():
     """Test DamageAssessmentAgent with sample SatelliteClient output"""
     agent = DamageAssessmentAgent()

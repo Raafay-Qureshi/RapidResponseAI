@@ -205,6 +205,83 @@
   }
 }
 
+/* API Status Indicators */
+.api-status-container {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.api-status-container h4 {
+  margin: 0 0 1rem 0;
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.api-status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 0.75rem;
+}
+
+.api-status-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.875rem;
+}
+
+.api-status-item.fetching {
+  border-color: rgba(102, 126, 234, 0.5);
+  background: rgba(102, 126, 234, 0.1);
+}
+
+.api-status-item.success {
+  border-color: var(--safe-green);
+  background: rgba(76, 175, 80, 0.1);
+}
+
+.api-status-item.fallback {
+  border-color: var(--warning-yellow);
+  background: rgba(255, 235, 59, 0.1);
+}
+
+.api-status-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.api-status-name {
+  flex: 1;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.api-status-error {
+  color: var(--warning-yellow);
+  font-size: 0.75rem;
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .api-status-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .api-status-item {
+    font-size: 0.8rem;
+  }
+}
+
 /* Responsive */
 @media (max-width: 1200px) {
   .progress-phases {

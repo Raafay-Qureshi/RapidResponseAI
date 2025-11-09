@@ -11,6 +11,43 @@
   align-items: center;
   margin-bottom: 1rem;
   position: relative;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.mode-selector {
+  display: flex;
+  gap: 1rem;
+  background: rgba(102, 126, 234, 0.1);
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid rgba(102, 126, 234, 0.3);
+}
+
+.mode-selector label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.mode-selector label:hover {
+  background: rgba(102, 126, 234, 0.2);
+  color: var(--text-primary);
+}
+
+.mode-selector input[type="radio"] {
+  accent-color: #667eea;
+}
+
+.mode-selector input[type="radio"]:checked + span {
+  color: #667eea;
+  font-weight: 500;
 }
 
 .trigger-header h3 {
@@ -148,8 +185,17 @@
   background: linear-gradient(135deg, #f44336, #ff9800);
 }
 
+.trigger-button.july-2020.real-apis-mode {
+  background: linear-gradient(135deg, #f44336, #9c27b0);
+  border: 2px solid #ffeb3b;
+}
+
 .trigger-button.july-2020:hover:not(:disabled) {
   box-shadow: 0 8px 24px rgba(244, 67, 54, 0.4);
+}
+
+.trigger-button.july-2020.real-apis-mode:hover:not(:disabled) {
+  box-shadow: 0 8px 24px rgba(244, 67, 54, 0.6);
 }
 
 .button-icon {
@@ -226,6 +272,11 @@
   background: linear-gradient(135deg, #607D8B, #455A64);
   font-size: 0.875rem;
   padding: 0.75rem 1rem;
+}
+
+.trigger-button.generic.real-apis-mode {
+  background: linear-gradient(135deg, #00bcd4, #009688);
+  border: 2px solid #ffeb3b;
 }
 
 /* Disclaimer */

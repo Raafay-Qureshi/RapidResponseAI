@@ -1,0 +1,1493 @@
+{
+  "disaster": {
+    "disaster_id": "july-2020-cached-demo",
+    "type": "wildfire",
+    "location": {
+      "lat": 43.7315,
+      "lon": -79.862,
+      "description": "HWY 407/410 interchange, northwest Brampton",
+      "address": "Highway 407 & Highway 410, Brampton, ON L6T"
+    },
+    "severity": "high",
+    "status": "complete",
+    "created_at": "2020-07-15T14:30:00Z",
+    "metadata": {
+      "scenario": "july_2020_backtest",
+      "cached": true,
+      "historical": true
+    },
+    "data": {
+      "fire_perimeter": {
+        "type": "Feature",
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                -79.868,
+                43.7285
+              ],
+              [
+                -79.856,
+                43.7285
+              ],
+              [
+                -79.856,
+                43.7345
+              ],
+              [
+                -79.868,
+                43.7345
+              ],
+              [
+                -79.868,
+                43.7285
+              ]
+            ]
+          ]
+        },
+        "properties": {
+          "size_acres": 40,
+          "size_km2": 0.162,
+          "perimeter_km": 1.8
+        }
+      },
+      "weather": {
+        "temperature_c": 32,
+        "humidity_percent": 18,
+        "wind_speed_kmh": 25,
+        "wind_direction_deg": 270,
+        "conditions": "clear",
+        "fire_weather_index": "extreme",
+        "description": "Extreme fire weather - hot, dry, windy"
+      }
+    }
+  },
+  "plan": {
+    "disaster_id": "july-2020-cached-demo",
+    "generated_at": "2020-07-15T14:31:00Z",
+    "confidence": 0.89,
+    "executive_summary": "CRITICAL WUI FIRE AT HWY 407/410 INTERCHANGE. 40-acre grass fire spreading at 3.8 km/h threatening 2,000 residents and major highway infrastructure. RECOMMEND IMMEDIATE PROACTIVE CLOSURE OF HWY 407 EASTBOUND LANES within 2.5 hours to prevent evacuation gridlock. Request mutual aid from Mississauga Fire and Caledon Fire immediately - Brampton resources insufficient for WUI fire of this scale.",
+    "situation_overview": "A rapidly spreading 40-acre wildland-urban interface fire has been detected via satellite at the Highway 407/410 interchange in northwest Brampton. Current weather conditions are extreme: 32°C temperature, 18% humidity, and 25 km/h westerly winds driving the fire directly toward Highway 407 eastbound lanes. The fire is spreading at 3.8 km/h through grass and brush fuel with high intensity. Approximately 2,000 residents are in the immediate impact zone, including 280 elderly residents and 420 children requiring priority evacuation assistance. Multiple critical facilities are at risk including Mayfield Secondary School (850 students) and Williams Parkway Seniors Center (95 residents). Highway 407, which carries 400,000 vehicles daily, faces closure within 2.5 hours if fire continues current trajectory, creating potential for catastrophic traffic gridlock during evacuation. Immediate action required to prevent loss of life and infrastructure.",
+    "affected_areas": {
+      "affected_area_km2": 0.162,
+      "affected_area_acres": 40,
+      "fire_perimeter": {
+        "type": "Feature",
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                -79.868,
+                43.7285
+              ],
+              [
+                -79.856,
+                43.7285
+              ],
+              [
+                -79.856,
+                43.7345
+              ],
+              [
+                -79.868,
+                43.7345
+              ],
+              [
+                -79.868,
+                43.7285
+              ]
+            ]
+          ]
+        },
+        "properties": {
+          "size_acres": 40,
+          "size_km2": 0.162,
+          "perimeter_km": 1.8
+        }
+      },
+      "fire_type": "WUI",
+      "fuel_type": "grass_brush",
+      "severity": "high",
+      "spread_potential": "extreme",
+      "confidence": 0.92,
+      "analysis_notes": "Fast-moving grass fire near major infrastructure",
+      "analysis_time": "2025-11-08T22:40:27.259742"
+    },
+    "population_impact": {
+      "total_affected": 2000,
+      "immediate_danger": 800,
+      "evacuation_recommended": 1200,
+      "vulnerable_population": {
+        "elderly": 280,
+        "children": 420,
+        "disabled": 65
+      },
+      "languages": {
+        "english": 1240,
+        "punjabi": 360,
+        "hindi": 180,
+        "other": 220
+      },
+      "critical_facilities": [
+        {
+          "type": "elementary_school",
+          "name": "Mayfield Secondary School",
+          "location": {
+            "lat": 43.729,
+            "lon": -79.865
+          },
+          "population": 850,
+          "distance_from_fire_km": 0.8
+        },
+        {
+          "type": "senior_center",
+          "name": "Williams Parkway Seniors Center",
+          "location": {
+            "lat": 43.734,
+            "lon": -79.859
+          },
+          "population": 95,
+          "distance_from_fire_km": 0.6
+        },
+        {
+          "type": "hospital",
+          "name": "Brampton Civic Hospital",
+          "location": {
+            "lat": 43.731,
+            "lon": -79.762
+          },
+          "population": 800,
+          "distance_from_fire_km": 7.2
+        }
+      ],
+      "affected_neighborhoods": [
+        "Heart Lake",
+        "Sandalwood Heights",
+        "Central Park",
+        "Fletcher's Meadow"
+      ],
+      "economic_impact_estimate_usd": 2500000,
+      "confidence": 0.88
+    },
+    "evacuation_plan": {
+      "severity": "high",
+      "routes": [
+        {
+          "id": "route-1",
+          "origin": {
+            "lat": 43.7315,
+            "lon": -79.862
+          },
+          "destination": {
+            "name": "Brampton Soccer Centre",
+            "lat": 43.715,
+            "lon": -79.84,
+            "capacity": 2000
+          },
+          "path": {
+            "type": "Feature",
+            "geometry": {
+              "type": "LineString",
+              "coordinates": [
+                [
+                  -79.862,
+                  43.7315
+                ],
+                [
+                  -79.85979999999999,
+                  43.72985
+                ],
+                [
+                  -79.85759999999999,
+                  43.7282
+                ],
+                [
+                  -79.8554,
+                  43.726549999999996
+                ],
+                [
+                  -79.8532,
+                  43.7249
+                ],
+                [
+                  -79.851,
+                  43.72325
+                ],
+                [
+                  -79.8488,
+                  43.7216
+                ],
+                [
+                  -79.8466,
+                  43.719950000000004
+                ],
+                [
+                  -79.84440000000001,
+                  43.7183
+                ],
+                [
+                  -79.8422,
+                  43.71665
+                ],
+                [
+                  -79.84,
+                  43.715
+                ]
+              ]
+            }
+          },
+          "distance_km": 2.3,
+          "time_minutes": 8,
+          "status": "open",
+          "priority": "primary",
+          "notes": "Primary evacuation route via Williams Parkway"
+        },
+        {
+          "id": "route-2",
+          "origin": {
+            "lat": 43.7315,
+            "lon": -79.862
+          },
+          "destination": {
+            "name": "CAA Centre",
+            "lat": 43.73,
+            "lon": -79.75,
+            "capacity": 5000
+          },
+          "path": {
+            "type": "Feature",
+            "geometry": {
+              "type": "LineString",
+              "coordinates": [
+                [
+                  -79.862,
+                  43.7315
+                ],
+                [
+                  -79.85079999999999,
+                  43.73135
+                ],
+                [
+                  -79.83959999999999,
+                  43.731199999999994
+                ],
+                [
+                  -79.8284,
+                  43.731049999999996
+                ],
+                [
+                  -79.8172,
+                  43.7309
+                ],
+                [
+                  -79.806,
+                  43.73075
+                ],
+                [
+                  -79.7948,
+                  43.730599999999995
+                ],
+                [
+                  -79.78359999999999,
+                  43.73045
+                ],
+                [
+                  -79.7724,
+                  43.7303
+                ],
+                [
+                  -79.7612,
+                  43.730149999999995
+                ],
+                [
+                  -79.75,
+                  43.73
+                ]
+              ]
+            }
+          },
+          "distance_km": 8.5,
+          "time_minutes": 18,
+          "status": "open",
+          "priority": "alternate",
+          "notes": "Secondary route via Bovaird Drive"
+        },
+        {
+          "id": "route-3",
+          "origin": {
+            "lat": 43.7315,
+            "lon": -79.862
+          },
+          "destination": {
+            "name": "Cassie Campbell Community Centre",
+            "lat": 43.71,
+            "lon": -79.78,
+            "capacity": 1500
+          },
+          "path": {
+            "type": "Feature",
+            "geometry": {
+              "type": "LineString",
+              "coordinates": [
+                [
+                  -79.862,
+                  43.7315
+                ],
+                [
+                  -79.85379999999999,
+                  43.72935
+                ],
+                [
+                  -79.84559999999999,
+                  43.727199999999996
+                ],
+                [
+                  -79.8374,
+                  43.725049999999996
+                ],
+                [
+                  -79.8292,
+                  43.722899999999996
+                ],
+                [
+                  -79.821,
+                  43.720749999999995
+                ],
+                [
+                  -79.8128,
+                  43.7186
+                ],
+                [
+                  -79.8046,
+                  43.71645
+                ],
+                [
+                  -79.7964,
+                  43.7143
+                ],
+                [
+                  -79.7882,
+                  43.71215
+                ],
+                [
+                  -79.78,
+                  43.71
+                ]
+              ]
+            }
+          },
+          "distance_km": 6.2,
+          "time_minutes": 15,
+          "status": "open",
+          "priority": "alternate",
+          "notes": "Alternate route via Sandalwood Parkway"
+        }
+      ],
+      "priority_routes": [
+        {
+          "id": "route-1",
+          "origin": {
+            "lat": 43.7315,
+            "lon": -79.862
+          },
+          "destination": {
+            "name": "Brampton Soccer Centre",
+            "lat": 43.715,
+            "lon": -79.84,
+            "capacity": 2000
+          },
+          "path": {
+            "type": "Feature",
+            "geometry": {
+              "type": "LineString",
+              "coordinates": [
+                [
+                  -79.862,
+                  43.7315
+                ],
+                [
+                  -79.85979999999999,
+                  43.72985
+                ],
+                [
+                  -79.85759999999999,
+                  43.7282
+                ],
+                [
+                  -79.8554,
+                  43.726549999999996
+                ],
+                [
+                  -79.8532,
+                  43.7249
+                ],
+                [
+                  -79.851,
+                  43.72325
+                ],
+                [
+                  -79.8488,
+                  43.7216
+                ],
+                [
+                  -79.8466,
+                  43.719950000000004
+                ],
+                [
+                  -79.84440000000001,
+                  43.7183
+                ],
+                [
+                  -79.8422,
+                  43.71665
+                ],
+                [
+                  -79.84,
+                  43.715
+                ]
+              ]
+            }
+          },
+          "distance_km": 2.3,
+          "time_minutes": 8,
+          "status": "open",
+          "priority": "primary",
+          "notes": "Primary evacuation route via Williams Parkway"
+        },
+        {
+          "id": "route-2",
+          "origin": {
+            "lat": 43.7315,
+            "lon": -79.862
+          },
+          "destination": {
+            "name": "CAA Centre",
+            "lat": 43.73,
+            "lon": -79.75,
+            "capacity": 5000
+          },
+          "path": {
+            "type": "Feature",
+            "geometry": {
+              "type": "LineString",
+              "coordinates": [
+                [
+                  -79.862,
+                  43.7315
+                ],
+                [
+                  -79.85079999999999,
+                  43.73135
+                ],
+                [
+                  -79.83959999999999,
+                  43.731199999999994
+                ],
+                [
+                  -79.8284,
+                  43.731049999999996
+                ],
+                [
+                  -79.8172,
+                  43.7309
+                ],
+                [
+                  -79.806,
+                  43.73075
+                ],
+                [
+                  -79.7948,
+                  43.730599999999995
+                ],
+                [
+                  -79.78359999999999,
+                  43.73045
+                ],
+                [
+                  -79.7724,
+                  43.7303
+                ],
+                [
+                  -79.7612,
+                  43.730149999999995
+                ],
+                [
+                  -79.75,
+                  43.73
+                ]
+              ]
+            }
+          },
+          "distance_km": 8.5,
+          "time_minutes": 18,
+          "status": "open",
+          "priority": "alternate",
+          "notes": "Secondary route via Bovaird Drive"
+        },
+        {
+          "id": "route-3",
+          "origin": {
+            "lat": 43.7315,
+            "lon": -79.862
+          },
+          "destination": {
+            "name": "Cassie Campbell Community Centre",
+            "lat": 43.71,
+            "lon": -79.78,
+            "capacity": 1500
+          },
+          "path": {
+            "type": "Feature",
+            "geometry": {
+              "type": "LineString",
+              "coordinates": [
+                [
+                  -79.862,
+                  43.7315
+                ],
+                [
+                  -79.85379999999999,
+                  43.72935
+                ],
+                [
+                  -79.84559999999999,
+                  43.727199999999996
+                ],
+                [
+                  -79.8374,
+                  43.725049999999996
+                ],
+                [
+                  -79.8292,
+                  43.722899999999996
+                ],
+                [
+                  -79.821,
+                  43.720749999999995
+                ],
+                [
+                  -79.8128,
+                  43.7186
+                ],
+                [
+                  -79.8046,
+                  43.71645
+                ],
+                [
+                  -79.7964,
+                  43.7143
+                ],
+                [
+                  -79.7882,
+                  43.71215
+                ],
+                [
+                  -79.78,
+                  43.71
+                ]
+              ]
+            }
+          },
+          "distance_km": 6.2,
+          "time_minutes": 15,
+          "status": "open",
+          "priority": "alternate",
+          "notes": "Alternate route via Sandalwood Parkway"
+        }
+      ],
+      "infrastructure_used": [
+        "HWY 410 South",
+        "Williams Parkway",
+        "Bovaird Drive"
+      ],
+      "estimated_evacuation_time_minutes": 45,
+      "traffic_management": "Police escort recommended for vulnerable populations"
+    },
+    "resource_deployment": {
+      "required_resources": {
+        "ambulances": 12,
+        "evacuation_buses": 8,
+        "fire_apparatus": 15,
+        "police_units": 10,
+        "personnel": 85
+      },
+      "available_resources": {
+        "fire_stations": [
+          {
+            "id": "Brampton FS-202",
+            "lat": 43.72,
+            "lon": -79.84,
+            "trucks": 4
+          },
+          {
+            "id": "Brampton FS-205",
+            "lat": 43.735,
+            "lon": -79.875,
+            "trucks": 3
+          },
+          {
+            "id": "Brampton FS-201",
+            "lat": 43.718,
+            "lon": -79.78,
+            "trucks": 4
+          }
+        ],
+        "hospitals": [
+          {
+            "id": "Brampton Civic Hospital",
+            "lat": 43.731,
+            "lon": -79.762,
+            "ambulances": 8
+          }
+        ],
+        "police_stations": [
+          {
+            "id": "Peel Police 21 Division",
+            "lat": 43.728,
+            "lon": -79.83,
+            "units": 12
+          }
+        ]
+      },
+      "deployment_plan": {
+        "primary_staging": {
+          "lat": 43.725,
+          "lon": -79.85,
+          "name": "HWY 407/410 Service Road"
+        },
+        "command_post": {
+          "lat": 43.728,
+          "lon": -79.845,
+          "name": "Emergency Command Center"
+        },
+        "evacuation_center": {
+          "lat": 43.715,
+          "lon": -79.84,
+          "name": "Brampton Soccer Centre"
+        }
+      },
+      "mutual_aid_requests": [
+        {
+          "municipality": "Mississauga Fire",
+          "requested": "3 pumpers, 1 aerial ladder",
+          "eta_minutes": 15,
+          "justification": "Brampton resources insufficient for 40-acre fire"
+        },
+        {
+          "municipality": "Caledon Fire",
+          "requested": "2 pumpers, 1 tanker",
+          "eta_minutes": 20,
+          "justification": "Grass fire expertise and water supply"
+        },
+        {
+          "municipality": "Toronto Fire (Standby)",
+          "requested": "Available if needed",
+          "eta_minutes": 25,
+          "justification": "Backup if situation escalates"
+        }
+      ],
+      "resource_gaps": [
+        {
+          "resource": "Fire apparatus",
+          "description": "Need 15 units, have 11 local. Requesting 4 from mutual aid."
+        },
+        {
+          "resource": "Evacuation buses",
+          "description": "Need 8 buses for 20% of population without vehicles."
+        }
+      ],
+      "highway_coordination": {
+        "mto_notification": "required",
+        "opp_notification": "required",
+        "closure_plan": "HWY 407 eastbound closure recommended within 2 hours",
+        "detour_routes": [
+          "HWY 410 south to HWY 401",
+          "Bovaird Dr alternate route"
+        ]
+      },
+      "confidence": 0.9
+    },
+    "timeline_predictions": {
+      "current_spread_rate_kmh": 9.76,
+      "spread_direction": "east-northeast (toward HWY 407)",
+      "critical_arrival_times": [
+        {
+          "location": "HWY 407 Eastbound Lanes",
+          "hours_until_arrival": 2.5,
+          "confidence": "high",
+          "impact": "CRITICAL - Highway closure required"
+        },
+        {
+          "location": "Residential Area (Sandalwood Heights)",
+          "hours_until_arrival": 3.8,
+          "confidence": "high",
+          "impact": "Mandatory evacuation required"
+        },
+        {
+          "location": "HWY 410 On-ramps",
+          "hours_until_arrival": 4.5,
+          "confidence": "medium",
+          "impact": "Potential closure if wind shifts"
+        }
+      ],
+      "predictions": {
+        "hour_1": {
+          "area_km2": 0.24,
+          "confidence": 0.9
+        },
+        "hour_3": {
+          "area_km2": 0.58,
+          "confidence": 0.82
+        },
+        "hour_6": {
+          "area_km2": 1.2,
+          "confidence": 0.7
+        }
+      },
+      "factors": {
+        "wind_speed_kmh": 25,
+        "wind_direction_deg": 270,
+        "temperature_c": 32,
+        "humidity_percent": 18,
+        "fire_weather_index": "extreme"
+      },
+      "infrastructure_threats": [
+        {
+          "asset": "Highway 407",
+          "threat_level": "critical",
+          "time_to_impact_hours": 2.5,
+          "economic_impact_per_hour_usd": 50000,
+          "daily_traffic_volume": 400000
+        }
+      ],
+      "confidence": 0.87,
+      "outlook": "worsening"
+    },
+    "communication_templates": {
+      "en": "EMERGENCY: Wildfire at HWY 407/410. Mandatory evacuation for residents within 2km. Proceed immediately to Brampton Soccer Centre via Bovaird Dr. Highway 407 closing soon. Follow official instructions. DO NOT RETURN.",
+      "pa": "ਐਮਰਜੈਂਸੀ: ਹਾਈਵੇਅ 407/410 ਤੇ ਜੰਗਲ ਦੀ ਅੱਗ। 2km ਦੇ ਅੰਦਰ ਵਸਨੀਕਾਂ ਲਈ ਲਾਜ਼ਮੀ ਨਿਕਾਸੀ। ਤੁਰੰਤ ਬੋਵੇਅਰਡ ਡਰਾਈਵ ਰਾਹੀਂ ਬ੍ਰੈਂਪਟਨ ਸੌਕਰ ਸੈਂਟਰ ਜਾਓ। ਹਾਈਵੇਅ 407 ਜਲਦੀ ਬੰਦ ਹੋ ਰਿਹਾ ਹੈ। ਵਾਪਸ ਨਾ ਆਉ।",
+      "hi": "आपातकाल: HWY 407/410 पर जंगल की आग। 2km के भीतर निवासियों के लिए अनिवार्य निकासी। तुरंत बोवेयर्ड ड्राइव के माध्यम से ब्रैम्पटन सॉकर सेंटर जाएं। हाईवे 407 जल्द बंद हो रहा है। वापस न लौटें।"
+    },
+    "maps": [
+      {
+        "title": "Fire Perimeter and Danger Zone",
+        "type": "danger_zone"
+      },
+      {
+        "title": "Evacuation Routes",
+        "type": "evacuation_routes"
+      }
+    ],
+    "metadata": {
+      "scenario": "july_2020_backtest",
+      "cached": true,
+      "generation_time_seconds": 0.5
+    }
+  },
+  "agent_outputs": {
+    "damage_assessment": {
+      "affected_area_km2": 0.162,
+      "affected_area_acres": 40,
+      "fire_perimeter": {
+        "type": "Feature",
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                -79.868,
+                43.7285
+              ],
+              [
+                -79.856,
+                43.7285
+              ],
+              [
+                -79.856,
+                43.7345
+              ],
+              [
+                -79.868,
+                43.7345
+              ],
+              [
+                -79.868,
+                43.7285
+              ]
+            ]
+          ]
+        },
+        "properties": {
+          "size_acres": 40,
+          "size_km2": 0.162,
+          "perimeter_km": 1.8
+        }
+      },
+      "fire_type": "WUI",
+      "fuel_type": "grass_brush",
+      "severity": "high",
+      "spread_potential": "extreme",
+      "confidence": 0.92,
+      "analysis_notes": "Fast-moving grass fire near major infrastructure",
+      "analysis_time": "2025-11-08T22:40:27.259742"
+    },
+    "population_impact": {
+      "total_affected": 2000,
+      "immediate_danger": 800,
+      "evacuation_recommended": 1200,
+      "vulnerable_population": {
+        "elderly": 280,
+        "children": 420,
+        "disabled": 65
+      },
+      "languages": {
+        "english": 1240,
+        "punjabi": 360,
+        "hindi": 180,
+        "other": 220
+      },
+      "critical_facilities": [
+        {
+          "type": "elementary_school",
+          "name": "Mayfield Secondary School",
+          "location": {
+            "lat": 43.729,
+            "lon": -79.865
+          },
+          "population": 850,
+          "distance_from_fire_km": 0.8
+        },
+        {
+          "type": "senior_center",
+          "name": "Williams Parkway Seniors Center",
+          "location": {
+            "lat": 43.734,
+            "lon": -79.859
+          },
+          "population": 95,
+          "distance_from_fire_km": 0.6
+        },
+        {
+          "type": "hospital",
+          "name": "Brampton Civic Hospital",
+          "location": {
+            "lat": 43.731,
+            "lon": -79.762
+          },
+          "population": 800,
+          "distance_from_fire_km": 7.2
+        }
+      ],
+      "affected_neighborhoods": [
+        "Heart Lake",
+        "Sandalwood Heights",
+        "Central Park",
+        "Fletcher's Meadow"
+      ],
+      "economic_impact_estimate_usd": 2500000,
+      "confidence": 0.88
+    },
+    "routing": {
+      "severity": "high",
+      "routes": [
+        {
+          "id": "route-1",
+          "origin": {
+            "lat": 43.7315,
+            "lon": -79.862
+          },
+          "destination": {
+            "name": "Brampton Soccer Centre",
+            "lat": 43.715,
+            "lon": -79.84,
+            "capacity": 2000
+          },
+          "path": {
+            "type": "Feature",
+            "geometry": {
+              "type": "LineString",
+              "coordinates": [
+                [
+                  -79.862,
+                  43.7315
+                ],
+                [
+                  -79.85979999999999,
+                  43.72985
+                ],
+                [
+                  -79.85759999999999,
+                  43.7282
+                ],
+                [
+                  -79.8554,
+                  43.726549999999996
+                ],
+                [
+                  -79.8532,
+                  43.7249
+                ],
+                [
+                  -79.851,
+                  43.72325
+                ],
+                [
+                  -79.8488,
+                  43.7216
+                ],
+                [
+                  -79.8466,
+                  43.719950000000004
+                ],
+                [
+                  -79.84440000000001,
+                  43.7183
+                ],
+                [
+                  -79.8422,
+                  43.71665
+                ],
+                [
+                  -79.84,
+                  43.715
+                ]
+              ]
+            }
+          },
+          "distance_km": 2.3,
+          "time_minutes": 8,
+          "status": "open",
+          "priority": "primary",
+          "notes": "Primary evacuation route via Williams Parkway"
+        },
+        {
+          "id": "route-2",
+          "origin": {
+            "lat": 43.7315,
+            "lon": -79.862
+          },
+          "destination": {
+            "name": "CAA Centre",
+            "lat": 43.73,
+            "lon": -79.75,
+            "capacity": 5000
+          },
+          "path": {
+            "type": "Feature",
+            "geometry": {
+              "type": "LineString",
+              "coordinates": [
+                [
+                  -79.862,
+                  43.7315
+                ],
+                [
+                  -79.85079999999999,
+                  43.73135
+                ],
+                [
+                  -79.83959999999999,
+                  43.731199999999994
+                ],
+                [
+                  -79.8284,
+                  43.731049999999996
+                ],
+                [
+                  -79.8172,
+                  43.7309
+                ],
+                [
+                  -79.806,
+                  43.73075
+                ],
+                [
+                  -79.7948,
+                  43.730599999999995
+                ],
+                [
+                  -79.78359999999999,
+                  43.73045
+                ],
+                [
+                  -79.7724,
+                  43.7303
+                ],
+                [
+                  -79.7612,
+                  43.730149999999995
+                ],
+                [
+                  -79.75,
+                  43.73
+                ]
+              ]
+            }
+          },
+          "distance_km": 8.5,
+          "time_minutes": 18,
+          "status": "open",
+          "priority": "alternate",
+          "notes": "Secondary route via Bovaird Drive"
+        },
+        {
+          "id": "route-3",
+          "origin": {
+            "lat": 43.7315,
+            "lon": -79.862
+          },
+          "destination": {
+            "name": "Cassie Campbell Community Centre",
+            "lat": 43.71,
+            "lon": -79.78,
+            "capacity": 1500
+          },
+          "path": {
+            "type": "Feature",
+            "geometry": {
+              "type": "LineString",
+              "coordinates": [
+                [
+                  -79.862,
+                  43.7315
+                ],
+                [
+                  -79.85379999999999,
+                  43.72935
+                ],
+                [
+                  -79.84559999999999,
+                  43.727199999999996
+                ],
+                [
+                  -79.8374,
+                  43.725049999999996
+                ],
+                [
+                  -79.8292,
+                  43.722899999999996
+                ],
+                [
+                  -79.821,
+                  43.720749999999995
+                ],
+                [
+                  -79.8128,
+                  43.7186
+                ],
+                [
+                  -79.8046,
+                  43.71645
+                ],
+                [
+                  -79.7964,
+                  43.7143
+                ],
+                [
+                  -79.7882,
+                  43.71215
+                ],
+                [
+                  -79.78,
+                  43.71
+                ]
+              ]
+            }
+          },
+          "distance_km": 6.2,
+          "time_minutes": 15,
+          "status": "open",
+          "priority": "alternate",
+          "notes": "Alternate route via Sandalwood Parkway"
+        }
+      ],
+      "priority_routes": [
+        {
+          "id": "route-1",
+          "origin": {
+            "lat": 43.7315,
+            "lon": -79.862
+          },
+          "destination": {
+            "name": "Brampton Soccer Centre",
+            "lat": 43.715,
+            "lon": -79.84,
+            "capacity": 2000
+          },
+          "path": {
+            "type": "Feature",
+            "geometry": {
+              "type": "LineString",
+              "coordinates": [
+                [
+                  -79.862,
+                  43.7315
+                ],
+                [
+                  -79.85979999999999,
+                  43.72985
+                ],
+                [
+                  -79.85759999999999,
+                  43.7282
+                ],
+                [
+                  -79.8554,
+                  43.726549999999996
+                ],
+                [
+                  -79.8532,
+                  43.7249
+                ],
+                [
+                  -79.851,
+                  43.72325
+                ],
+                [
+                  -79.8488,
+                  43.7216
+                ],
+                [
+                  -79.8466,
+                  43.719950000000004
+                ],
+                [
+                  -79.84440000000001,
+                  43.7183
+                ],
+                [
+                  -79.8422,
+                  43.71665
+                ],
+                [
+                  -79.84,
+                  43.715
+                ]
+              ]
+            }
+          },
+          "distance_km": 2.3,
+          "time_minutes": 8,
+          "status": "open",
+          "priority": "primary",
+          "notes": "Primary evacuation route via Williams Parkway"
+        },
+        {
+          "id": "route-2",
+          "origin": {
+            "lat": 43.7315,
+            "lon": -79.862
+          },
+          "destination": {
+            "name": "CAA Centre",
+            "lat": 43.73,
+            "lon": -79.75,
+            "capacity": 5000
+          },
+          "path": {
+            "type": "Feature",
+            "geometry": {
+              "type": "LineString",
+              "coordinates": [
+                [
+                  -79.862,
+                  43.7315
+                ],
+                [
+                  -79.85079999999999,
+                  43.73135
+                ],
+                [
+                  -79.83959999999999,
+                  43.731199999999994
+                ],
+                [
+                  -79.8284,
+                  43.731049999999996
+                ],
+                [
+                  -79.8172,
+                  43.7309
+                ],
+                [
+                  -79.806,
+                  43.73075
+                ],
+                [
+                  -79.7948,
+                  43.730599999999995
+                ],
+                [
+                  -79.78359999999999,
+                  43.73045
+                ],
+                [
+                  -79.7724,
+                  43.7303
+                ],
+                [
+                  -79.7612,
+                  43.730149999999995
+                ],
+                [
+                  -79.75,
+                  43.73
+                ]
+              ]
+            }
+          },
+          "distance_km": 8.5,
+          "time_minutes": 18,
+          "status": "open",
+          "priority": "alternate",
+          "notes": "Secondary route via Bovaird Drive"
+        },
+        {
+          "id": "route-3",
+          "origin": {
+            "lat": 43.7315,
+            "lon": -79.862
+          },
+          "destination": {
+            "name": "Cassie Campbell Community Centre",
+            "lat": 43.71,
+            "lon": -79.78,
+            "capacity": 1500
+          },
+          "path": {
+            "type": "Feature",
+            "geometry": {
+              "type": "LineString",
+              "coordinates": [
+                [
+                  -79.862,
+                  43.7315
+                ],
+                [
+                  -79.85379999999999,
+                  43.72935
+                ],
+                [
+                  -79.84559999999999,
+                  43.727199999999996
+                ],
+                [
+                  -79.8374,
+                  43.725049999999996
+                ],
+                [
+                  -79.8292,
+                  43.722899999999996
+                ],
+                [
+                  -79.821,
+                  43.720749999999995
+                ],
+                [
+                  -79.8128,
+                  43.7186
+                ],
+                [
+                  -79.8046,
+                  43.71645
+                ],
+                [
+                  -79.7964,
+                  43.7143
+                ],
+                [
+                  -79.7882,
+                  43.71215
+                ],
+                [
+                  -79.78,
+                  43.71
+                ]
+              ]
+            }
+          },
+          "distance_km": 6.2,
+          "time_minutes": 15,
+          "status": "open",
+          "priority": "alternate",
+          "notes": "Alternate route via Sandalwood Parkway"
+        }
+      ],
+      "infrastructure_used": [
+        "HWY 410 South",
+        "Williams Parkway",
+        "Bovaird Drive"
+      ],
+      "estimated_evacuation_time_minutes": 45,
+      "traffic_management": "Police escort recommended for vulnerable populations"
+    },
+    "resource_allocation": {
+      "required_resources": {
+        "ambulances": 12,
+        "evacuation_buses": 8,
+        "fire_apparatus": 15,
+        "police_units": 10,
+        "personnel": 85
+      },
+      "available_resources": {
+        "fire_stations": [
+          {
+            "id": "Brampton FS-202",
+            "lat": 43.72,
+            "lon": -79.84,
+            "trucks": 4
+          },
+          {
+            "id": "Brampton FS-205",
+            "lat": 43.735,
+            "lon": -79.875,
+            "trucks": 3
+          },
+          {
+            "id": "Brampton FS-201",
+            "lat": 43.718,
+            "lon": -79.78,
+            "trucks": 4
+          }
+        ],
+        "hospitals": [
+          {
+            "id": "Brampton Civic Hospital",
+            "lat": 43.731,
+            "lon": -79.762,
+            "ambulances": 8
+          }
+        ],
+        "police_stations": [
+          {
+            "id": "Peel Police 21 Division",
+            "lat": 43.728,
+            "lon": -79.83,
+            "units": 12
+          }
+        ]
+      },
+      "deployment_plan": {
+        "primary_staging": {
+          "lat": 43.725,
+          "lon": -79.85,
+          "name": "HWY 407/410 Service Road"
+        },
+        "command_post": {
+          "lat": 43.728,
+          "lon": -79.845,
+          "name": "Emergency Command Center"
+        },
+        "evacuation_center": {
+          "lat": 43.715,
+          "lon": -79.84,
+          "name": "Brampton Soccer Centre"
+        }
+      },
+      "mutual_aid_requests": [
+        {
+          "municipality": "Mississauga Fire",
+          "requested": "3 pumpers, 1 aerial ladder",
+          "eta_minutes": 15,
+          "justification": "Brampton resources insufficient for 40-acre fire"
+        },
+        {
+          "municipality": "Caledon Fire",
+          "requested": "2 pumpers, 1 tanker",
+          "eta_minutes": 20,
+          "justification": "Grass fire expertise and water supply"
+        },
+        {
+          "municipality": "Toronto Fire (Standby)",
+          "requested": "Available if needed",
+          "eta_minutes": 25,
+          "justification": "Backup if situation escalates"
+        }
+      ],
+      "resource_gaps": [
+        {
+          "resource": "Fire apparatus",
+          "description": "Need 15 units, have 11 local. Requesting 4 from mutual aid."
+        },
+        {
+          "resource": "Evacuation buses",
+          "description": "Need 8 buses for 20% of population without vehicles."
+        }
+      ],
+      "highway_coordination": {
+        "mto_notification": "required",
+        "opp_notification": "required",
+        "closure_plan": "HWY 407 eastbound closure recommended within 2 hours",
+        "detour_routes": [
+          "HWY 410 south to HWY 401",
+          "Bovaird Dr alternate route"
+        ]
+      },
+      "confidence": 0.9
+    },
+    "predictions": {
+      "current_spread_rate_kmh": 9.76,
+      "spread_direction": "east-northeast (toward HWY 407)",
+      "critical_arrival_times": [
+        {
+          "location": "HWY 407 Eastbound Lanes",
+          "hours_until_arrival": 2.5,
+          "confidence": "high",
+          "impact": "CRITICAL - Highway closure required"
+        },
+        {
+          "location": "Residential Area (Sandalwood Heights)",
+          "hours_until_arrival": 3.8,
+          "confidence": "high",
+          "impact": "Mandatory evacuation required"
+        },
+        {
+          "location": "HWY 410 On-ramps",
+          "hours_until_arrival": 4.5,
+          "confidence": "medium",
+          "impact": "Potential closure if wind shifts"
+        }
+      ],
+      "predictions": {
+        "hour_1": {
+          "area_km2": 0.24,
+          "confidence": 0.9
+        },
+        "hour_3": {
+          "area_km2": 0.58,
+          "confidence": 0.82
+        },
+        "hour_6": {
+          "area_km2": 1.2,
+          "confidence": 0.7
+        }
+      },
+      "factors": {
+        "wind_speed_kmh": 25,
+        "wind_direction_deg": 270,
+        "temperature_c": 32,
+        "humidity_percent": 18,
+        "fire_weather_index": "extreme"
+      },
+      "infrastructure_threats": [
+        {
+          "asset": "Highway 407",
+          "threat_level": "critical",
+          "time_to_impact_hours": 2.5,
+          "economic_impact_per_hour_usd": 50000,
+          "daily_traffic_volume": 400000
+        }
+      ],
+      "confidence": 0.87,
+      "outlook": "worsening"
+    }
+  },
+  "cached_metadata": {
+    "generated_at": "2025-11-08T22:40:27.260789",
+    "purpose": "demo_backup",
+    "scenario": "july_2020_backtest",
+    "version": "1.0"
+  }
+}

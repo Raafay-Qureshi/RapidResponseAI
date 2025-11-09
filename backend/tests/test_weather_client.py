@@ -2,6 +2,7 @@ import asyncio
 import os
 import sys
 import json
+import pytest
 from dotenv import load_dotenv
 
 # Add the backend directory to the path
@@ -13,6 +14,7 @@ load_dotenv()
 from data.weather_client import WeatherClient
 
 
+@pytest.mark.asyncio
 async def test_weather_client():
     """Test the WeatherClient with multiple sample locations"""
     
