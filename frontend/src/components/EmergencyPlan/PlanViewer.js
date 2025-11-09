@@ -3,6 +3,7 @@ import './PlanViewer.css';
 import ExecutiveSummary from './ExecutiveSummary';
 import Timeline from './Timeline';
 import ResourceTable from './ResourceTable';
+import PopulationImpact from './PopulationImpact';
 import CommunicationTemplates from './CommunicationTemplates';
 
 function PlanViewer({ plan, loading }) {
@@ -69,6 +70,11 @@ function PlanViewer({ plan, loading }) {
         {/* ResourceTable component */}
         <ResourceTable allocation={plan.resource_deployment} />
         
+        {/* Communication templates will go here (Task 7.5) */}
+        <PopulationImpact
+          populationImpact={plan.population_impact}
+          affectedAreas={plan.affected_areas}
+        />
         <CommunicationTemplates templates={plan.communication_templates} />
         {/* Population impact will go here (Task 7.6) */}
         

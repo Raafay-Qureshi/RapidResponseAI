@@ -1,0 +1,336 @@
+.population-section {
+  background: linear-gradient(to bottom, rgba(33, 150, 243, 0.05), transparent);
+}
+
+.impact-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.total-affected-card,
+.affected-area-card,
+.vulnerable-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: var(--card-bg);
+  border-radius: 8px;
+  border-left: 4px solid;
+}
+
+.total-affected-card {
+  border-left-color: var(--info-blue);
+  background: linear-gradient(135deg, rgba(33, 150, 243, 0.1), var(--card-bg));
+}
+
+.affected-area-card {
+  border-left-color: var(--warning-orange);
+  background: linear-gradient(135deg, rgba(255, 149, 0, 0.1), var(--card-bg));
+}
+
+.vulnerable-card {
+  border-left-color: var(--danger-red);
+  background: linear-gradient(135deg, rgba(255, 68, 68, 0.1), var(--card-bg));
+}
+
+.total-icon,
+.area-icon,
+.vulnerable-icon {
+  font-size: 2.5rem;
+  flex-shrink: 0;
+}
+
+.total-content,
+.area-content,
+.vulnerable-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.total-value,
+.area-value,
+.vulnerable-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.total-label,
+.area-label,
+.vulnerable-label {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.vulnerable-percentage {
+  font-size: 0.75rem;
+  color: var(--danger-red);
+  font-weight: 600;
+}
+
+.vulnerable-breakdown,
+.language-demographics,
+.critical-facilities,
+.affected-neighborhoods,
+.response-priorities {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border);
+}
+
+.subsection-title {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.subsection-description {
+  margin: 0 0 1.5rem 0;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.vulnerable-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.vulnerable-item {
+  padding: 1.5rem;
+  background: var(--card-bg);
+  border-radius: 8px;
+  border-left: 4px solid;
+  transition: transform 0.2s ease;
+}
+
+.vulnerable-item:hover {
+  transform: translateY(-2px);
+}
+
+.vulnerable-item.elderly {
+  border-left-color: #9c27b0;
+}
+
+.vulnerable-item.children {
+  border-left-color: #ff9800;
+}
+
+.vulnerable-item.disabled {
+  border-left-color: #2196f3;
+}
+
+.vulnerable-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.vulnerable-item-icon {
+  font-size: 2rem;
+}
+
+.vulnerable-item-count {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.vulnerable-item-title {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.vulnerable-item-note {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.language-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.language-bar-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.language-bar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.language-bar-name {
+  font-weight: 600;
+  color: var(--text-primary);
+  text-transform: capitalize;
+}
+
+.language-bar-stats {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.language-bar-track {
+  height: 24px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.language-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  border-radius: 12px;
+  transition: width 0.8s ease-out;
+}
+
+.facilities-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.facility-card {
+  display: flex;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: var(--card-bg);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.facility-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--warning-orange);
+}
+
+.facility-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.facility-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.facility-name {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.facility-type {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--warning-orange);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.facility-population {
+  margin: 0.25rem 0 0 0;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+}
+
+.facility-coords {
+  margin: 0.25rem 0 0 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-family: 'Roboto Mono', monospace;
+}
+
+.neighborhoods-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.neighborhood-badge {
+  padding: 0.5rem 1rem;
+  background: rgba(102, 126, 234, 0.2);
+  border: 1px solid #667eea;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #667eea;
+}
+
+.priorities-title {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.priorities-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.priority-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--card-bg);
+  border-radius: 6px;
+  border-left: 3px solid var(--info-blue);
+}
+
+.priority-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: var(--info-blue);
+  color: #fff;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.priority-text {
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+@media (max-width: 1400px) {
+  .impact-summary,
+  .vulnerable-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .facilities-grid {
+    grid-template-columns: 1fr;
+  }
+}
