@@ -1,0 +1,201 @@
+.communication-section {
+  background: linear-gradient(to bottom, rgba(102, 126, 234, 0.05), transparent);
+}
+
+.section-description {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+/* Templates Grid */
+.templates-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.template-card {
+  padding: 1.5rem;
+  background: var(--card-bg);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.template-card:hover {
+  transform: translateY(-2px);
+  border-color: #667eea;
+}
+
+/* Language-specific font support */
+.template-card.punjabi .template-content {
+  font-family: 'Noto Sans Gurmukhi', 'Segoe UI', sans-serif;
+  font-size: 1.1rem;
+  line-height: 1.8;
+}
+
+.template-card.hindi .template-content {
+  font-family: 'Noto Sans Devanagari', 'Segoe UI', sans-serif;
+  font-size: 1.1rem;
+  line-height: 1.8;
+}
+
+.template-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.language-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.language-flag {
+  font-size: 1.75rem;
+}
+
+.language-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.template-content {
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  border-left: 3px solid #667eea;
+  color: var(--text-primary);
+  line-height: 1.6;
+  margin-bottom: 1rem;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+}
+
+.template-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+}
+
+.character-count {
+  color: var(--text-secondary);
+}
+
+.sms-status {
+  padding: 0.25rem 0.5rem;
+  border-radius: 3px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sms-status.ready {
+  background: rgba(76, 175, 80, 0.2);
+  color: var(--safe-green);
+}
+
+.sms-status.long {
+  background: rgba(255, 149, 0, 0.2);
+  color: var(--warning-orange);
+}
+
+/* Deployment Channels */
+.deployment-channels {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+}
+
+.deployment-title {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.channels-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+.channel-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--card-bg);
+  border-radius: 4px;
+  border-left: 3px solid #667eea;
+  transition: transform 0.2s ease;
+}
+
+.channel-item:hover {
+  transform: translateX(4px);
+}
+
+.channel-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.channel-name {
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+/* Communication Note */
+.communication-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: rgba(102, 126, 234, 0.1);
+  border-left: 3px solid var(--info-blue);
+  border-radius: 4px;
+  margin-top: 1.5rem;
+}
+
+.note-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.communication-note p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .channels-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .channels-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .template-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+}

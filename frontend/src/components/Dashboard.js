@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useWebSocketContext } from '../services/websocket';
 import MapView from './Map/MapView';
 import DisasterTrigger from './Controls/DisasterTrigger';
+import PlanViewer from './EmergencyPlan/PlanViewer';
 import WebSocketTest from './Test/WebSocketTest';
 import './Dashboard.css';
 
@@ -24,15 +25,103 @@ function Dashboard() {
           if (prev >= 100) {
             clearInterval(interval);
             setLoading(false);
-            // Mock plan completion
+            // Mock comprehensive plan data for Epic 7 testing
             setPlan({
               disaster_id: disaster.disaster_id,
-              executive_summary: "40-acre wildfire detected at HWY 407/410 interchange. High-risk WUI area with immediate evacuation needed.",
-              situation_overview: "Satellite imagery confirms active wildfire spreading at 2.5 km/h towards residential areas. Wind conditions are favorable for rapid spread. Population impact assessment shows 2,500 residents in immediate danger zone.",
+              disaster_type: 'WILDFIRE',
+              generated_at: new Date().toISOString(),
+              confidence: 0.92,
+              executive_summary: "Critical WUI wildfire detected at HWY 407/410 interchange. 40-acre active fire spreading at 2.5 km/h towards residential areas. Immediate evacuation of 2,500+ residents required. High wind conditions creating extreme fire behavior.",
+              timeline_predictions: {
+                current_spread_rate_kmh: 2.5,
+                critical_arrival_times: [
+                  {
+                    location: 'HWY 407 Eastbound Lanes',
+                    hours_until_arrival: 2.5,
+                    confidence: 'high'
+                  },
+                  {
+                    location: 'Residential Zone - Sector 3',
+                    hours_until_arrival: 4.0,
+                    confidence: 'high'
+                  },
+                  {
+                    location: 'Peel Memorial Hospital Access',
+                    hours_until_arrival: 6.5,
+                    confidence: 'medium'
+                  }
+                ],
+                factors: {
+                  wind_speed_kmh: 35,
+                  wind_direction_deg: 270,
+                  temperature_c: 32,
+                  humidity_percent: 18
+                }
+              },
+              resource_deployment: {
+                required_resources: {
+                  personnel: 120,
+                  ambulances: 15,
+                  evacuation_buses: 8
+                },
+                resource_gaps: [
+                  {
+                    resource: 'Fire Trucks',
+                    description: 'Need 6 additional pumpers for perimeter control'
+                  },
+                  {
+                    resource: 'Ambulances',
+                    description: 'Medical capacity stretched, request 5 more units'
+                  }
+                ]
+              },
               communication_templates: {
                 en: "🚨 WILDFIRE ALERT: Evacuate immediately from HWY 407/410 area. Fire spreading rapidly. Follow emergency routes. Stay tuned for updates.",
-                pa: "🚨 ਅग्नि ਸੰਕਟ ਚੇਤਾਵਨੀ: HWY 407/410 ਖੇਤਰ ਤੋਂ ਤੁਰੰਤ ਖਾਲੀ ਕਰੋ। ਅੱਗ ਤੇਜ਼ੀ ਨਾਲ ਫੈਲ ਰਹੀ ਹੈ। ਐਮਰਜੈਂਸੀ ਰੂਟਾਂ ਦਾ ਪਾਲਣ ਕਰੋ। ਅਪਡੇਟਾਂ ਲਈ ਟਿਊਨਡ ਰਹੋ।",
-                hi: "🚨 अग्नि संकट चेतावनी: HWY 407/410 क्षेत्र से तुरंत खाली करें। आग तेजी से फैल रही है। आपातकालीन मार्गों का पालन करें। अपडेट के लिए ट्यून रहें।"
+                pa: "🚨 ਅੱਗ ਦੀ ਚੇਤਾਵਨੀ: HWY 407/410 ਖੇਤਰ ਤੋਂ ਤੁਰੰਤ ਖਾਲੀ ਕਰੋ। ਅੱਗ ਤੇਜ਼ੀ ਨਾਲ ਫੈਲ ਰਹੀ ਹੈ। ਐਮਰਜੈਂਸੀ ਰੂਟਾਂ ਦਾ ਪਾਲਣ ਕਰੋ।",
+                hi: "🚨 अग्नि चेतावनी: HWY 407/410 क्षेत्र से तुरंत खाली करें। आग तेजी से फैल रही है। आपातकालीन मार्गों का पालन करें।"
+              },
+              population_impact: {
+                total_affected: 2500,
+                vulnerable_population: {
+                  elderly: 450,
+                  children: 680,
+                  disabled: 125
+                },
+                languages: {
+                  English: 1250,
+                  Punjabi: 625,
+                  Hindi: 250,
+                  Urdu: 200,
+                  Other: 175
+                },
+                critical_facilities: [
+                  {
+                    name: 'Spring Dale Elementary School',
+                    type: 'elementary_school',
+                    location: { lat: 43.7285, lon: -79.8156 },
+                    population: 450
+                  },
+                  {
+                    name: 'Brampton Senior Care Center',
+                    type: 'senior_center',
+                    location: { lat: 43.7312, lon: -79.8201 },
+                    population: 85
+                  },
+                  {
+                    name: 'Little Angels Daycare',
+                    type: 'daycare',
+                    location: { lat: 43.7298, lon: -79.8178 },
+                    population: 45
+                  }
+                ],
+                affected_neighborhoods: [
+                  'Heart Lake East',
+                  'Sandalwood Heights',
+                  'Fletcher\'s Creek South'
+                ]
+              },
+              affected_areas: {
+                affected_area_km2: 4.2
               }
             });
             return 100;
@@ -102,46 +191,9 @@ function Dashboard() {
 
         {/* Right Panel: Emergency Plan */}
         <div className="plan-panel">
-          {plan ? (
-            <div className="plan-content">
-              <h2>📋 Emergency Response Plan</h2>
-
-              <div className="plan-section">
-                <h3>🚨 Executive Summary</h3>
-                <p>{plan.executive_summary}</p>
-              </div>
-
-              <div className="plan-section">
-                <h3>📊 Situation Overview</h3>
-                <p>{plan.situation_overview}</p>
-              </div>
-
-              <div className="plan-section">
-                <h3>📢 Public Communications</h3>
-
-                <div className="communication-template">
-                  <h4>🇬🇧 English</h4>
-                  <div className="template-content">
-                    {plan.communication_templates?.en}
-                  </div>
-                </div>
-
-                <div className="communication-template">
-                  <h4>🇮🇳 Punjabi</h4>
-                  <div className="template-content">
-                    {plan.communication_templates?.pa}
-                  </div>
-                </div>
-
-                <div className="communication-template">
-                  <h4>🇮🇳 Hindi</h4>
-                  <div className="template-content">
-                    {plan.communication_templates?.hi}
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
+          <PlanViewer plan={plan} loading={loading} />
+          
+          {!plan && !loading && (
             <div className="empty-state">
               <div className="empty-state-icon">🚨</div>
               <h2>No Active Emergency</h2>

@@ -119,64 +119,17 @@
   position: relative;
   overflow-y: auto;
   background: var(--panel-bg);
-  padding: 2rem;
+  padding: 0;
 }
 
-.plan-content h2 {
-  color: var(--text-primary);
-  margin-bottom: 1.5rem;
-  font-size: 1.25rem;
-}
-
-.plan-section {
-  margin-bottom: 2rem;
-  padding: 1rem;
-  background: rgba(255, 255, 255, 0.02);
-  border-radius: 6px;
-  border-left: 4px solid var(--accent-blue);
-}
-
-.plan-section h3 {
-  color: var(--text-primary);
-  margin-bottom: 0.75rem;
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-
-.plan-section p {
-  color: var(--text-secondary);
-  line-height: 1.6;
-  margin: 0;
-}
-
-.communication-template {
-  margin-bottom: 1.5rem;
-}
-
-.communication-template h4 {
-  color: var(--text-primary);
-  margin-bottom: 0.5rem;
-  font-size: 1rem;
-  font-weight: 500;
-}
-
-.template-content {
-  background: rgba(0, 0, 0, 0.2);
-  padding: 1rem;
-  border-radius: 4px;
-  border: 1px solid var(--border-color);
-  color: var(--text-secondary);
-  font-size: 0.9rem;
-  line-height: 1.5;
-}
 
 /* Empty State */
-.empty-state {
+.plan-panel .empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100%;
+  min-height: 600px;
   text-align: center;
   padding: 2rem;
 }
@@ -224,6 +177,22 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--text-secondary);
+}
+
+.websocket-ready-badge {
+  margin-top: 2rem;
+  padding: 0.75rem 1.5rem;
+  background: rgba(76, 175, 80, 0.2);
+  border: 1px solid var(--safe-green);
+  border-radius: 4px;
+  color: var(--safe-green);
+  font-weight: 500;
+}
+
+.socket-id {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-family: 'Roboto Mono', monospace;
 }
 
 /* Responsive */
