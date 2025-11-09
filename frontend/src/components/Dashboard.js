@@ -2,6 +2,7 @@ import React from 'react';
 import MapView from './Map/MapView';
 import PlanViewer from './EmergencyPlan/PlanViewer';
 import DisasterTrigger from './Controls/DisasterTrigger';
+import ProgressBar from './Shared/ProgressBar';
 import useDisaster from '../hooks/useDisaster';
 import useWebSocket from '../hooks/useWebSocket';
 import './Dashboard.css';
@@ -48,15 +49,11 @@ function Dashboard() {
 
       {/* Progress Bar (shown during processing) */}
       {loading && (
-        <div className="progress-bar-container">
-          <div className="progress-bar">
-            <div 
-              className="progress-fill" 
-              style={{ width: `${progress}%` }}
-            ></div>
-          </div>
-          <p className="progress-text">{statusMessage}</p>
-        </div>
+        <ProgressBar
+          progress={progress}
+          message={statusMessage}
+          estimatedTimeSeconds={60}
+        />
       )}
 
       {/* Error Display */}
