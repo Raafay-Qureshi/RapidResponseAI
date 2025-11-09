@@ -109,6 +109,19 @@ def handle_test_message(data):
     print('[Backend] Test message received:', data, flush=True)
     emit('test_response', {'status': 'received', 'data': data})
 
+@socketio.on('subscribe_disaster')
+def handle_subscribe_disaster(data):
+    """Handle disaster subscription from frontend"""
+    disaster_id = data.get('disaster_id')
+    if disaster_id:
+        print(f'[WebSocket] Client subscribed to disaster: {disaster_id}')
+        join_room(disaster_id)
+        emit('subscribed', {'disaster_id': disaster_id})
+        
+        # For testing: Simulate progress updates since orchestrator is not active
+        # Remove this when orchestrator is integrated
+        socketio.start_background_task(simulate_disaster_processing, disaster_id)
+
 @socketio.on('join_disaster')
 def handle_join_disaster(data):
     disaster_id = data.get('disaster_id')
@@ -122,6 +135,68 @@ def handle_start_processing(data):
     if disaster_id and orchestrator:
         # Run async processing in background
         socketio.start_background_task(process_disaster_async, disaster_id)
+
+def simulate_disaster_processing(disaster_id):
+    """
+    Simulate disaster processing with progress updates
+    This is a temporary function for testing until the orchestrator is integrated
+    """
+    import time
+    
+    phases = [
+        (20, 'data_ingestion', 'Fetching satellite and weather data...'),
+        (40, 'agent_processing', 'Analyzing fire perimeter and damage...'),
+        (60, 'agent_processing', 'Calculating population impact...'),
+        (80, 'synthesis', 'Running fire spread predictions...'),
+        (95, 'synthesis', 'Generating emergency response plan...'),
+        (100, 'complete', 'Finalizing plan and preparing deployment...')
+    ]
+    
+    for progress, phase, message in phases:
+        time.sleep(2)  # Simulate processing time
+        socketio.emit('progress', {
+            'disaster_id': disaster_id,
+            'progress': progress,
+            'phase': phase,
+            'message': message
+        }, room=disaster_id)
+        print(f'[WebSocket] Progress update sent: {progress}% - {phase}')
+    
+    # Send completion with mock plan
+    mock_plan = {
+        'disaster_id': disaster_id,
+        'executive_summary': '40-acre wildfire detected at HWY 407/410 interchange. High-risk WUI area with immediate evacuation needed.',
+        'situation_overview': {
+            'fire_size': '40 acres',
+            'spread_rate': '2.5 km/h',
+            'wind_conditions': 'SW 15-20 km/h, gusts to 30 km/h',
+            'population_at_risk': '2,500 residents',
+            'structures_threatened': '150 homes'
+        },
+        'timeline': [
+            {'time': 'T+0:00', 'action': 'Initial alert and evacuation order issued'},
+            {'time': 'T+0:15', 'action': 'First responders dispatched to perimeter'},
+            {'time': 'T+0:30', 'action': 'Aerial water drops commence'},
+            {'time': 'T+1:00', 'action': 'Secondary evacuation zone established'}
+        ],
+        'resources': [
+            {'type': 'Fire Trucks', 'quantity': 8, 'status': 'En Route'},
+            {'type': 'Water Bombers', 'quantity': 2, 'status': 'Active'},
+            {'type': 'Ambulances', 'quantity': 4, 'status': 'Standby'}
+        ],
+        'communication_templates': {
+            'en': '🚨 WILDFIRE ALERT: Evacuate immediately from HWY 407/410 area. Fire spreading rapidly. Follow emergency routes. Stay tuned for updates.',
+            'pa': '🚨 ਅੱਗ ਸੰਕਟ ਚੇਤਾਵਨੀ: HWY 407/410 ਖੇਤਰ ਤੋਂ ਤੁਰੰਤ ਖਾਲੀ ਕਰੋ। ਅੱਗ ਤੇਜ਼ੀ ਨਾਲ ਫੈਲ ਰਹੀ ਹੈ।',
+            'hi': '🚨 अग्नि संकट चेतावनी: HWY 407/410 क्षेत्र से तुरंत खाली करें। आग तेजी से फैल रही है।'
+        }
+    }
+    
+    time.sleep(1)
+    socketio.emit('disaster_complete', {
+        'disaster_id': disaster_id,
+        'plan': mock_plan
+    }, room=disaster_id)
+    print(f'[WebSocket] Disaster processing complete for {disaster_id}')
 
 async def process_disaster_async(disaster_id):
     if not orchestrator:

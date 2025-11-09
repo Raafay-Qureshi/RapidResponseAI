@@ -43,8 +43,15 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
-  background: rgba(76, 175, 80, 0.1);
   border-radius: 4px;
+}
+
+.status-indicator.connected {
+  background: rgba(76, 175, 80, 0.1);
+}
+
+.status-indicator.disconnected {
+  background: rgba(255, 68, 68, 0.1);
 }
 
 .status-dot {
@@ -65,36 +72,75 @@
 
 .status-text {
   font-size: 0.875rem;
-  color: var(--safe-green);
   font-weight: 500;
 }
 
-/* Progress Bar */
-.progress-bar-container {
-  padding: 1rem 2rem;
-  background: var(--panel-bg);
-  border-bottom: 1px solid var(--border);
+.status-indicator.connected .status-text {
+  color: var(--safe-green);
 }
 
-.progress-bar {
-  width: 100%;
-  height: 8px;
-  background: #2d2d2d;
+.status-indicator.disconnected .status-text {
+  color: var(--danger-red);
+}
+
+.socket-id {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-family: monospace;
+}
+
+.websocket-ready-badge {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background: rgba(76, 175, 80, 0.1);
+  border: 1px solid var(--safe-green);
   border-radius: 4px;
-  overflow: hidden;
-  margin-bottom: 0.5rem;
-}
-
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #667eea, #764ba2);
-  transition: width 0.3s ease;
-}
-
-.progress-text {
-  margin: 0;
+  color: var(--safe-green);
   font-size: 0.875rem;
-  color: var(--text-secondary);
+}
+
+/* Error Banner */
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 2rem;
+  background: rgba(255, 68, 68, 0.2);
+  border-bottom: 2px solid var(--danger-red);
+}
+
+.error-icon {
+  font-size: 1.5rem;
+}
+
+.error-message {
+  flex: 1;
+  color: var(--danger-red);
+  font-weight: 500;
+}
+
+.error-dismiss {
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: 1px solid var(--danger-red);
+  border-radius: 4px;
+  color: var(--danger-red);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.error-dismiss:hover {
+  background: var(--danger-red);
+  color: white;
+}
+
+/* Status Indicator Updates */
+.status-indicator.disconnected .status-dot {
+  background: var(--danger-red);
+}
+
+.status-indicator.disconnected .status-text {
+  color: var(--danger-red);
 }
 
 /* Main Content Grid */

@@ -4,6 +4,7 @@ import ExecutiveSummary from './ExecutiveSummary';
 import Timeline from './Timeline';
 import ResourceTable from './ResourceTable';
 import PopulationImpact from './PopulationImpact';
+import CommunicationTemplates from './CommunicationTemplates';
 
 function PlanViewer({ plan, loading }) {
   if (loading) {
@@ -74,6 +75,8 @@ function PlanViewer({ plan, loading }) {
           populationImpact={plan.population_impact}
           affectedAreas={plan.affected_areas}
         />
+        <CommunicationTemplates templates={plan.communication_templates} />
+        {/* Population impact will go here (Task 7.6) */}
         
         <div className="plan-section placeholder">
           <p>Additional plan sections will be added in subsequent tasks...</p>
