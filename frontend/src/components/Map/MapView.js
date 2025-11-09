@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import DangerZoneLayer from './DangerZoneLayer';
 import './MapView.css';
 
 // Set Mapbox access token
@@ -82,6 +83,12 @@ function MapView({ disaster, plan }) {
   return (
     <div className="map-view">
       <div ref={mapContainer} className="map-container" />
+      
+      {/* Add danger zone layer when disaster is active */}
+      {mapLoaded && disaster && (
+        <DangerZoneLayer map={map.current} disaster={disaster} />
+      )}
+      
       {!mapLoaded && (
         <div className="map-loading">
           <div className="spinner"></div>
