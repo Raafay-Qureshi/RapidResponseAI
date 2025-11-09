@@ -3,6 +3,7 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import DangerZoneLayer from './DangerZoneLayer';
 import EvacuationRoutes from './EvacuationRoutes';
+import Markers from './Markers';
 import './MapView.css';
 
 // Set Mapbox access token
@@ -89,11 +90,24 @@ function MapView({ disaster, plan }) {
       {mapLoaded && disaster && (
         <>
           <DangerZoneLayer map={map.current} disaster={disaster} />
-          {plan && plan.evacuation_plan && (
-            <EvacuationRoutes
-              map={map.current}
-              routes={plan.evacuation_plan.routes || []}
-            />
+          
+          {plan && (
+            <>
+              {plan.evacuation_plan && (
+                <EvacuationRoutes
+                  map={map.current}
+                  routes={plan.evacuation_plan.routes || []}
+                />
+              )}
+              
+              {plan.population_impact && (
+                <Markers
+                  map={map.current}
+                  facilities={plan.population_impact.critical_facilities || []}
+                  dangerZone={disaster.data?.fire_perimeter}
+                />
+              )}
+            </>
           )}
         </>
       )}
