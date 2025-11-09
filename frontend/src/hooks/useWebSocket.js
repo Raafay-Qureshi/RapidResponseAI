@@ -89,14 +89,16 @@ function useWebSocket() {
 
   // Cleanup all event handlers on unmount
   useEffect(() => {
+    // Capture the ref value to avoid stale reference in cleanup
+    const handlers = eventHandlers.current;
     return () => {
       console.log('[useWebSocket] Cleaning up all event handlers');
-      eventHandlers.current.forEach((handler, eventName) => {
+      handlers.forEach((handler, eventName) => {
         if (socket) {
           socket.off(eventName, handler);
         }
       });
-      eventHandlers.current.clear();
+      handlers.clear();
     };
   }, [socket]);
 
