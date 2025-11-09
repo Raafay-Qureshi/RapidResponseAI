@@ -51,6 +51,51 @@ function DisasterTrigger({ onTrigger, disabled }) {
     }
   };
 
+  const handleMarch2022Trigger = async () => {
+    try {
+      setIsTriggering(true);
+      setError(null);
+
+      console.log('[DisasterTrigger] Triggering March 2022 residential fire...');
+
+      // Configure for March 27, 2022 Conestoga Drive fire
+      const disasterData = {
+        type: 'fire',
+        subtype: 'residential',
+        location: {
+          lat: 43.7091,  // Kennedy Rd & Sandalwood Parkway area
+          lon: -79.7358,
+        },
+        severity: 'critical',
+        use_real_apis: mode === 'real_apis',
+        metadata: {
+          scenario: 'march_2022_backtest',
+          description: 'March 2022 Conestoga Drive Fire',
+          historical: true,
+          date: '2022-03-27',
+          time: '02:00',
+          mode: mode,
+        },
+      };
+
+      // Call backend API
+      const response = await disasterAPI.trigger(disasterData);
+
+      console.log('[DisasterTrigger] March 2022 disaster triggered successfully:', response);
+
+      // Notify parent component
+      if (onTrigger) {
+        onTrigger(response);
+      }
+
+    } catch (err) {
+      console.error('[DisasterTrigger] Failed to trigger March 2022 disaster:', err);
+      setError(err.message || 'Failed to trigger simulation');
+    } finally {
+      setIsTriggering(false);
+    }
+  };
+
   const handleGenericTrigger = async () => {
     try {
       setIsTriggering(true);
@@ -159,6 +204,25 @@ function DisasterTrigger({ onTrigger, disabled }) {
               {mode === 'real_apis'
                 ? 'HWY 407/410 • Live Data • Real API Calls'
                 : 'HWY 407/410 • 40 acres • Historical Backtest'}
+            </span>
+          </span>
+          {isTriggering && <span className="button-spinner">⏳</span>}
+        </button>
+
+        <button
+          onClick={handleMarch2022Trigger}
+          disabled={disabled || isTriggering}
+          className={`trigger-button march-2022 ${mode === 'real_apis' ? 'real-apis-mode' : ''}`}
+        >
+          <span className="button-icon">🏠</span>
+          <span className="button-content">
+            <span className="button-title">
+              {mode === 'real_apis' ? 'Trigger March 2022 Fire (Real APIs)' : 'Simulate March 2022 Fire'}
+            </span>
+            <span className="button-subtitle">
+              {mode === 'real_apis'
+                ? 'Conestoga Dr • Live Data • Real API Calls'
+                : 'Conestoga Dr • Residential • 3-Alarm Fire'}
             </span>
           </span>
           {isTriggering && <span className="button-spinner">⏳</span>}

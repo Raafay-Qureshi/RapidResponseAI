@@ -198,6 +198,23 @@
   box-shadow: 0 8px 24px rgba(244, 67, 54, 0.6);
 }
 
+.trigger-button.march-2022 {
+  background: linear-gradient(135deg, #e91e63, #9c27b0);
+}
+
+.trigger-button.march-2022.real-apis-mode {
+  background: linear-gradient(135deg, #e91e63, #673ab7);
+  border: 2px solid #ffeb3b;
+}
+
+.trigger-button.march-2022:hover:not(:disabled) {
+  box-shadow: 0 8px 24px rgba(233, 30, 99, 0.4);
+}
+
+.trigger-button.march-2022.real-apis-mode:hover:not(:disabled) {
+  box-shadow: 0 8px 24px rgba(233, 30, 99, 0.6);
+}
+
 .button-icon {
   font-size: 2rem;
   flex-shrink: 0;

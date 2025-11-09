@@ -18,6 +18,7 @@ from agents.prediction import PredictionAgent
 from agents.resource_allocation import ResourceAllocationAgent
 from agents.routing import RoutingAgent
 from scenarios.july_2020_fire import load_july_2020_scenario, is_july_2020_scenario
+from scenarios.march_2022_fire import load_march_2022_scenario, is_march_2022_scenario
 from utils.cached_loader import load_cached_july_2020, is_cached_data_available
 from utils.config import config
 
@@ -115,6 +116,28 @@ class DisasterOrchestrator:
                 disaster['fire_perimeter'] = scenario_config['fire_perimeter']
 
                 self._log(f"July 2020 scenario loaded: {scenario_config['disaster']['name']}")
+            # Check if this is March 2022 scenario
+            elif is_march_2022_scenario(disaster.get('trigger', {})):
+                self._log("Loading March 2022 scenario configuration")
+                scenario_config = load_march_2022_scenario()
+
+                # Store scenario config for reference
+                disaster['scenario_config'] = scenario_config
+
+                # Use scenario data instead of fetching
+                data = {
+                    'weather_current': scenario_config['weather'],
+                    'weather_forecast': scenario_config['weather'],
+                    'satellite': None,  # Will use fire_perimeter directly
+                    'population': scenario_config['population_estimate'],
+                    'infrastructure': scenario_config['infrastructure'],
+                    'roads': None,  # Will fetch this normally
+                }
+
+                # Add fire perimeter to disaster data for agents
+                disaster['fire_perimeter'] = scenario_config['fire_perimeter']
+
+                self._log(f"March 2022 scenario loaded: {scenario_config['disaster']['name']}")
             else:
                 data = await self._fetch_all_data(disaster)
 

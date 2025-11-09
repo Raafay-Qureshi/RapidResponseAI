@@ -38,7 +38,15 @@ def simulate_disaster_processing(socketio, disaster_id):
 def get_mock_plan(disaster_id):
     """
     Returns a mock emergency response plan.
+    Detects scenario type from disaster_id and returns appropriate mock data.
     """
+    # Detect if this is March 2022 scenario
+    is_march_2022 = 'march-2022' in disaster_id.lower()
+    
+    if is_march_2022:
+        return get_march_2022_mock_plan(disaster_id)
+    
+    # Default to July 2020 wildfire scenario
     return {
         'disaster_id': disaster_id,
         'disaster_type': 'wildfire',
@@ -280,5 +288,172 @@ def get_mock_plan(disaster_id):
             'en': '🚨 WILDFIRE ALERT: Evacuate immediately from HWY 407/410 area. Fire spreading rapidly at 2.5 km/h. Follow emergency routes. Stay tuned for updates.',
             'pa': '🚨 ਅੱਗ ਸੰਕਟ ਚੇਤਾਵਨੀ: HWY 407/410 ਖੇਤਰ ਤੋਂ ਤੁਰੰਤ ਖਾਲੀ ਕਰੋ। ਅੱਗ 2.5 km/h ਦੀ ਰਫ਼ਤਾਰ ਨਾਲ ਫੈਲ ਰਹੀ ਹੈ। ਐਮਰਜੈਂਸੀ ਰੂਟਾਂ ਦੀ ਪਾਲਣਾ ਕਰੋ।',
             'hi': '🚨 अग्नि संकट चेतावनी: HWY 407/410 क्षेत्र से तुरंत खाली करें। आग 2.5 km/h की गति से फैल रही है। आपातकालीन मार्गों का पालन करें।'
+        }
+    }
+
+def get_march_2022_mock_plan(disaster_id):
+    """
+    Returns mock emergency response plan for March 2022 residential fire scenario.
+    """
+    return {
+        'disaster_id': disaster_id,
+        'disaster_type': 'fire',
+        'subtype': 'residential',
+        'confidence': 0.92,
+        'generated_at': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
+        'executive_summary': 'CRITICAL: Three-alarm residential fire at Conestoga Drive. Rapid spread with severe casualties. Immediate evacuation of adjacent homes required. Fire detection via satellite thermal anomalies.',
+        'situation_overview': {
+            'fire_size': 'Single residential home (~0.25 acres)',
+            'spread_rate': 'Rapid structural fire',
+            'wind_conditions': 'Calm, early morning conditions',
+            'population_at_risk': '850 residents in immediate area',
+            'structures_threatened': '8 adjacent homes',
+            'alarm_level': 'Three-alarm fire'
+        },
+        'affected_areas': {
+            'affected_area_km2': 0.001,
+            'fire_perimeter': {
+                'type': 'Polygon',
+                'coordinates': [[
+                    [-79.7368, 43.7086],
+                    [-79.7348, 43.7086],
+                    [-79.7348, 43.7096],
+                    [-79.7368, 43.7096],
+                    [-79.7368, 43.7086]
+                ]]
+            }
+        },
+        'timeline_predictions': {
+            'critical_arrival_times': [
+                {
+                    'location': 'Adjacent homes (East)',
+                    'hours_until_arrival': 0.5,
+                    'confidence': 'high'
+                },
+                {
+                    'location': 'Adjacent homes (West)',
+                    'hours_until_arrival': 0.75,
+                    'confidence': 'high'
+                },
+                {
+                    'location': 'Neighborhood block',
+                    'hours_until_arrival': 1.2,
+                    'confidence': 'medium'
+                }
+            ],
+            'current_spread_rate_kmh': 0.0,
+            'factors': {
+                'wind_speed_kmh': 15,
+                'wind_direction_deg': 180,
+                'temperature_c': 2,
+                'humidity_percent': 65
+            }
+        },
+        'resource_deployment': {
+            'required_resources': {
+                'personnel': 45,
+                'ambulances': 4,
+                'evacuation_support': 2
+            },
+            'available_resources': {
+                'fire_stations': [
+                    {'id': 'Fire Station 204', 'lat': 43.7050, 'lon': -79.7300, 'trucks': 3},
+                    {'id': 'Fire Station 206', 'lat': 43.7150, 'lon': -79.7450, 'trucks': 2},
+                    {'id': 'Fire Station 201', 'lat': 43.7450, 'lon': -79.7800, 'trucks': 4}
+                ],
+                'hospitals': [
+                    {'id': 'Brampton Civic Hospital', 'lat': 43.7315, 'lon': -79.7624, 'ambulances': 8},
+                    {'id': 'Peel Memorial Centre', 'lat': 43.6900, 'lon': -79.7500, 'ambulances': 5}
+                ],
+                'police_stations': [
+                    {'id': 'Peel Police 22 Division', 'lat': 43.7100, 'lon': -79.7600, 'units': 10}
+                ]
+            },
+            'resource_gaps': [
+                {
+                    'resource': 'Advanced Life Support',
+                    'description': 'Critical casualties require immediate ALS response'
+                },
+                {
+                    'resource': 'Smoke Detection Systems',
+                    'description': 'Early warning could have prevented casualties'
+                }
+            ]
+        },
+        'evacuation_plan': {
+            'routes': [
+                {
+                    'id': 'route-1',
+                    'origin': {'lat': 43.7091, 'lon': -79.7358},
+                    'destination': {
+                        'name': 'Community Centre Shelter',
+                        'lat': 43.7050,
+                        'lon': -79.7300,
+                        'capacity': 500
+                    },
+                    'path': {
+                        'type': 'Feature',
+                        'geometry': {
+                            'type': 'LineString',
+                            'coordinates': [
+                                [-79.7358, 43.7091],
+                                [-79.7330, 43.7070],
+                                [-79.7300, 43.7050]
+                            ]
+                        }
+                    },
+                    'distance_km': 0.8,
+                    'time_minutes': 15,
+                    'status': 'open',
+                    'priority': 'primary'
+                }
+            ],
+            'priority_routes': [
+                {
+                    'name': 'Emergency Evacuation Route',
+                    'status': 'open',
+                    'distance_km': 0.8,
+                    'notes': 'Immediate evacuation of adjacent homes'
+                }
+            ]
+        },
+        'population_impact': {
+            'total_affected': 850,
+            'vulnerable_population': {
+                'elderly': 95,
+                'children': 180,
+                'disabled': 35
+            },
+            'languages': {
+                'English': 450,
+                'Punjabi': 210,
+                'Hindi': 120,
+                'Urdu': 40,
+                'Other': 30
+            },
+            'critical_facilities': [
+                {
+                    'name': 'Affected Residence',
+                    'type': 'residential',
+                    'population': 12,
+                    'location': {'lat': 43.7091, 'lon': -79.7358}
+                },
+                {
+                    'name': 'Adjacent Homes',
+                    'type': 'residential',
+                    'population': 48,
+                    'location': {'lat': 43.7091, 'lon': -79.7350}
+                }
+            ],
+            'affected_neighborhoods': [
+                'Conestoga Drive Area',
+                'Kennedy Road Corridor',
+                'Sandalwood Parkway Vicinity'
+            ]
+        },
+        'communication_templates': {
+            'en': '🚨 RESIDENTIAL FIRE ALERT: Three-alarm fire at Conestoga Drive. Adjacent homes must evacuate immediately. Fire crews on scene. Avoid Kennedy Rd area.',
+            'pa': '🚨 ਰਿਹਾਇਸ਼ੀ ਅੱਗ ਚੇਤਾਵਨੀ: Conestoga Drive ਤੇ ਤਿੰਨ-ਅਲਾਰਮ ਅੱਗ। ਨੇੜਲੇ ਘਰਾਂ ਨੂੰ ਤੁਰੰਤ ਖਾਲੀ ਕਰੋ। Kennedy Rd ਖੇਤਰ ਤੋਂ ਬਚੋ।',
+            'hi': '🚨 आवासीय अग्नि चेतावनी: Conestoga Drive पर तीन-अलार्म आग। निकटवर्ती घरों को तुरंत खाली करें। Kennedy Rd क्षेत्र से बचें।'
         }
     }

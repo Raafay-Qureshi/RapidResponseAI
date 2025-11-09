@@ -20,18 +20,23 @@ def create_routes(orchestrator):
             if not data:
                 return jsonify({"error": "No data provided"}), 400
 
-            # Check if this is a July 2020 scenario
+            # Check scenario type
             metadata = data.get("metadata", {})
-            is_july_2020 = metadata.get("scenario") == "july_2020_backtest"
+            scenario_type = metadata.get("scenario", "")
+            is_july_2020 = scenario_type == "july_2020_backtest"
+            is_march_2022 = scenario_type == "march_2022_backtest"
             
             # Determine which mode to use
             use_real_apis = data.get("use_real_apis", config.USE_REAL_APIS)
 
-            # Generate disaster ID
+            # Generate disaster ID based on scenario
             if is_july_2020:
                 disaster_id = f"wildfire-july-2020-{uuid.uuid4().hex[:8]}"
+            elif is_march_2022:
+                disaster_id = f"fire-march-2022-{uuid.uuid4().hex[:8]}"
             else:
-                disaster_id = f"wildfire-{uuid.uuid4().hex[:8]}"
+                disaster_type = data.get("type", "event").lower()
+                disaster_id = f"{disaster_type}-{uuid.uuid4().hex[:8]}"
 
             response = {
                 "disaster_id": disaster_id,
