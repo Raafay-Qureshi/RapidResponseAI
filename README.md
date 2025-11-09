@@ -1,147 +1,128 @@
-# RapidResponseAI: Automated Emergency Response Intelligence
+# 🔥 RapidResponseAI - Automated Emergency Response Intelligence
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**RapidResponseAI** is a proactive, AI-powered intelligence platform designed for emergency management professionals. It autonomously detects wildfires using satellite data and generates comprehensive, actionable emergency response plans in under 60 seconds, a process that typically takes 2-3 hours of manual analysis.
+**RapidResponseAI** is an AI-powered emergency response platform that generates comprehensive emergency plans in under 60 seconds using real-time satellite data and multi-agent AI analysis.
 
-This tool provides a critical head-start, enabling faster, more effective decisions that can save lives and property.
+## 🎯 The Problem
 
-## Core Features
+Emergency managers currently spend 2-3 hours manually analyzing disasters to create response plans. In emergencies, every minute counts.
 
-- **Proactive Wildfire Detection:** Automatically identifies potential wildfires using near real-time satellite thermal anomaly data from NASA FIRMS.
-- **Multi-Agent AI System:** Utilizes a team of specialized AI agents that work in parallel to analyze the situation.
-- **Comprehensive Response Plan Generation:** The AI agents assess damage, population impact, resource needs, and predict the fire's spread to generate a complete response strategy.
-- **LLM-Powered Synthesis:** An AI Language Model synthesizes the data from all agents into a human-readable, multi-page emergency plan.
-- **Real-time Dashboard:** A web-based dashboard provides a real-time map-based view of the incident, including danger zones, evacuation routes, and the full emergency plan.
-- **Continuous Updates:** The system monitors the situation and provides updates every 15 minutes.
-- **Historical Scenario Analysis:** Includes a "backtest" feature to simulate historical events, such as the July 2020 wildfire in Brampton, Ontario, to validate the system's effectiveness.
+## 💡 Our Solution
 
-## System Architecture
+An automated intelligence pipeline that:
+- **Detects** wildfires using NASA satellite data
+- **Analyzes** impact using 5 specialized AI agents
+- **Generates** complete response plans via LLM synthesis
+- **Updates** every 15 minutes with real-time data
 
-The system is composed of a React-based frontend dashboard that communicates with a Python backend via a REST API and WebSockets for real-time updates.
+**Result:** 60 seconds vs 2-3 hours = Lives saved
 
-The backend features a multi-agent orchestrator that coordinates the analysis and response generation process. Each agent is responsible for a specific task, and their findings are synthesized by a Large Language Model (LLM) into a complete plan.
-
-```
-┌────────────────────────────────┐
-│      React Web Dashboard       │
-└───────────────┬────────────────┘
-                │ (REST API / WebSocket)
-┌───────────────▼────────────────┐
-│      Python Backend (Flask)    │
-└───────────────┬────────────────┘
-                │
-┌───────────────▼────────────────┐
-│     Orchestrator Service       │
-└──────┬─────────┬─────────┬─────┘
-       │         │         │
-┌──────▼───┐ ┌───▼─────┐ ┌─▼───────┐
-│  Agent 1 │ │ Agent 2 │ │ Agent N │
-└──────────┘ └─────────┘ └─────────┘
-```
-
-## Technology Stack
-
-- **Backend:** Python, Flask, Flask-SocketIO, Geopandas, Shapely
-- **Frontend:** React, Mapbox GL JS, Socket.IO Client, Axios, Chart.js
-- **AI:** OpenRouter API for Large Language Model access
-- **Data Sources:** NASA FIRMS, OpenWeather, OpenStreetMap
-
-## Getting Started
+## 🚀 Quick Start
 
 ### Prerequisites
-
 - Python 3.9+
-- Node.js and npm
-- API keys for:
-  - NASA FIRMS
-  - OpenWeather
-  - Mapbox
-  - OpenRouter API
+- Node.js 16+
+- API Keys: [NASA FIRMS](https://firms.modaps.eosdis.nasa.gov/api/), [OpenWeather](https://openweathermap.org/api), [Mapbox](https://account.mapbox.com/), [OpenRouter](https://openrouter.ai/)
 
-### 1. Clone the Repository
+### Setup & Run
 
-```bash
-git clone https://github.com/your-username/RapidResponseAI.git
-cd RapidResponseAI
-```
-
-### 2. Backend Setup
-
+**Backend:**
 ```bash
 cd backend
-
-# Create and activate a virtual environment
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
+source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-
-# Configure environment variables
 cp .env.example .env
-# Edit .env and add your API keys
+# Edit .env with your API keys
+python app.py
 ```
 
-### 3. Frontend Setup
-
+**Frontend:**
 ```bash
 cd frontend
-
-# Install dependencies
 npm install
-
-# Configure environment variables
 cp .env.example .env
-# Edit .env and add your REACT_APP_MAPBOX_TOKEN
+# Edit .env with your REACT_APP_MAPBOX_TOKEN
+npm start
 ```
 
-### 4. Running the Application
+Access at `http://localhost:3000`
 
-1.  **Start the Backend Server:**
-    ```bash
-    cd backend
-    python app.py
-    ```
+## 🏗️ Architecture
 
-2.  **Start the Frontend Development Server:**
-    ```bash
-    cd frontend
-    npm start
-    ```
+```
+React Dashboard
+      ↓ WebSocket/REST
+Flask Backend
+      ↓
+Orchestrator (LLM-powered)
+      ↓
+5 AI Agents (parallel processing)
+├─ Damage Assessment
+├─ Population Impact
+├─ Routing & Evacuation
+├─ Resource Allocation
+└─ Prediction Modeling
+      ↓
+Real-time Data Sources
+├─ NASA FIRMS (satellite)
+├─ OpenWeather (weather)
+└─ OpenStreetMap (infrastructure)
+```
 
-The application will be available at `http://localhost:3000`.
+## ✨ Key Features
 
-## Configuration
+- **Proactive Detection:** Automatic wildfire identification via satellite
+- **Multi-Agent AI:** Parallel specialized analysis
+- **60-Second Plans:** Complete emergency response in under a minute
+- **Real-time Updates:** Continuous monitoring every 15 minutes
+- **Interactive Dashboard:** Map visualization with danger zones & evacuation routes
+- **Demo Mode:** Pre-cached historical scenarios for reliable demonstrations
 
-The application is configured using environment variables. See the `.env.example` files in both the `frontend` and `backend` directories for a full list of available options.
+## 🎮 Demo Mode
 
-### Key Backend Variables
+For demonstrations without live API calls:
 
-- `OPENROUTER_API_KEY`: For LLM access.
-- `FIRMS_API_KEY`: For NASA FIRMS satellite data.
-- `OPENWEATHER_API_KEY`: For weather data.
-- `USE_CACHED_RESPONSES`: Set to `True` to use the demo mode.
+1. Set `USE_CACHED_RESPONSES=True` in `backend/.env`
+2. Restart backend server
+3. System will use pre-generated July 2020 Brampton fire scenario
 
-### Key Frontend Variables
+## 📊 Tech Stack
 
-- `REACT_APP_API_URL`: The URL of the backend server.
-- `REACT_APP_MAPBOX_TOKEN`: Your Mapbox access token for rendering maps.
+**Backend:** Python, Flask, Flask-SocketIO, Geopandas, Shapely  
+**Frontend:** React, Mapbox GL JS, Socket.IO, Axios, Chart.js  
+**AI:** OpenRouter API (LLM orchestration)  
+**Data:** NASA FIRMS, OpenWeather, OpenStreetMap
 
-## Running in Demo Mode
+## 📚 Documentation
 
-For reliable demonstrations or offline use, you can run the system in "Demo Mode." In this mode, the backend serves a pre-generated, cached response for the July 2020 historical scenario, bypassing the need for live API calls.
+- [`SETUP.md`](./SETUP.md) - Detailed installation & configuration
+- [`ARCHITECTURE.md`](./ARCHITECTURE.md) - System design & data flow
+- [`CONTRIBUTING.md`](./CONTRIBUTING.md) - Development guidelines
 
-1.  In the `backend/.env` file, set `USE_CACHED_RESPONSES=True`.
-2.  Restart the backend server.
+## 🧪 Testing
 
-When running in demo mode, the frontend will display a banner indicating that you are viewing cached data.
-
-To regenerate the cached data, run the following command from the `backend` directory:
 ```bash
-python scripts/generate_cached_july_2020.py
+# Backend tests
+cd backend
+pytest tests/
+
+# Frontend tests
+cd frontend
+npm test
 ```
 
-## License
+## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT License - see [LICENSE](LICENSE) file for details
+
+## 🙏 Acknowledgments
+
+- NASA FIRMS for satellite fire data
+- OpenWeather for weather APIs
+- Brampton GeoHub for local infrastructure data
+
+---
+
+**Built with ❤️ for emergency responders everywhere**
