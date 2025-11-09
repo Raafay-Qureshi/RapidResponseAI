@@ -162,10 +162,13 @@ def simulate_disaster_processing(disaster_id):
         }, room=disaster_id)
         print(f'[WebSocket] Progress update sent: {progress}% - {phase}')
     
-    # Send completion with mock plan
+    # Send completion with mock plan matching orchestrator structure
     mock_plan = {
         'disaster_id': disaster_id,
-        'executive_summary': '40-acre wildfire detected at HWY 407/410 interchange. High-risk WUI area with immediate evacuation needed.',
+        'disaster_type': 'wildfire',
+        'confidence': 0.85,
+        'generated_at': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
+        'executive_summary': '40-acre wildfire detected at HWY 407/410 interchange. High-risk WUI area with immediate evacuation needed. 2,500+ residents affected.',
         'situation_overview': {
             'fire_size': '40 acres',
             'spread_rate': '2.5 km/h',
@@ -173,21 +176,127 @@ def simulate_disaster_processing(disaster_id):
             'population_at_risk': '2,500 residents',
             'structures_threatened': '150 homes'
         },
-        'timeline': [
-            {'time': 'T+0:00', 'action': 'Initial alert and evacuation order issued'},
-            {'time': 'T+0:15', 'action': 'First responders dispatched to perimeter'},
-            {'time': 'T+0:30', 'action': 'Aerial water drops commence'},
-            {'time': 'T+1:00', 'action': 'Secondary evacuation zone established'}
-        ],
-        'resources': [
-            {'type': 'Fire Trucks', 'quantity': 8, 'status': 'En Route'},
-            {'type': 'Water Bombers', 'quantity': 2, 'status': 'Active'},
-            {'type': 'Ambulances', 'quantity': 4, 'status': 'Standby'}
-        ],
+        'affected_areas': {
+            'affected_area_km2': 1.6,
+            'fire_perimeter': {
+                'type': 'Polygon',
+                'coordinates': [[
+                    [-79.8620, 43.7315],
+                    [-79.8600, 43.7315],
+                    [-79.8600, 43.7295],
+                    [-79.8620, 43.7295],
+                    [-79.8620, 43.7315]
+                ]]
+            }
+        },
+        'timeline_predictions': {
+            'critical_arrival_times': [
+                {
+                    'location': 'Bovaird Business District',
+                    'hours_until_arrival': 2.3,
+                    'confidence': 'high'
+                },
+                {
+                    'location': 'Mount Pleasant Village',
+                    'hours_until_arrival': 4.5,
+                    'confidence': 'high'
+                },
+                {
+                    'location': 'Sandalwood Heights',
+                    'hours_until_arrival': 6.2,
+                    'confidence': 'medium'
+                },
+                {
+                    'location': 'Highway 410 Corridor',
+                    'hours_until_arrival': 1.8,
+                    'confidence': 'high'
+                }
+            ],
+            'current_spread_rate_kmh': 2.5,
+            'factors': {
+                'wind_speed_kmh': 18,
+                'wind_direction_deg': 225,
+                'temperature_c': 28,
+                'humidity_percent': 32
+            }
+        },
+        'resource_deployment': {
+            'required_resources': {
+                'personnel': 120,
+                'ambulances': 8,
+                'evacuation_buses': 12
+            },
+            'available_resources': {
+                'fire_stations': [
+                    {'id': 'Fire Station 202', 'lat': 43.7200, 'lon': -79.8400, 'trucks': 3},
+                    {'id': 'Fire Station 205', 'lat': 43.7350, 'lon': -79.8750, 'trucks': 2},
+                    {'id': 'Fire Station 201', 'lat': 43.7450, 'lon': -79.7800, 'trucks': 4}
+                ],
+                'hospitals': [
+                    {'id': 'Brampton Civic Hospital', 'lat': 43.7315, 'lon': -79.7624, 'ambulances': 8},
+                    {'id': 'Peel Memorial Centre', 'lat': 43.6900, 'lon': -79.7500, 'ambulances': 5}
+                ],
+                'police_stations': [
+                    {'id': 'Peel Police 21 Division', 'lat': 43.7280, 'lon': -79.8300, 'units': 12},
+                    {'id': 'Peel Police 22 Division', 'lat': 43.7100, 'lon': -79.7600, 'units': 10}
+                ]
+            },
+            'resource_gaps': [
+                {
+                    'resource': 'Fire Personnel',
+                    'description': 'Need additional 40 firefighters for perimeter control'
+                },
+                {
+                    'resource': 'Evacuation Transport',
+                    'description': 'Require 4 more buses for assisted evacuation'
+                }
+            ]
+        },
+        'population_impact': {
+            'total_affected': 2580,
+            'vulnerable_population': {
+                'elderly': 450,
+                'children': 620,
+                'disabled': 185
+            },
+            'languages': {
+                'English': 1200,
+                'Punjabi': 680,
+                'Hindi': 380,
+                'Urdu': 180,
+                'Other': 140
+            },
+            'critical_facilities': [
+                {
+                    'name': 'Bovaird Public School',
+                    'type': 'elementary_school',
+                    'population': 420,
+                    'location': {'lat': 43.7305, 'lon': -79.8610}
+                },
+                {
+                    'name': 'Mount Pleasant Care Centre',
+                    'type': 'senior_center',
+                    'population': 85,
+                    'location': {'lat': 43.7325, 'lon': -79.8605}
+                },
+                {
+                    'name': 'Little Explorers Daycare',
+                    'type': 'daycare',
+                    'population': 65,
+                    'location': {'lat': 43.7310, 'lon': -79.8615}
+                }
+            ],
+            'affected_neighborhoods': [
+                'Bovaird Business District',
+                'Mount Pleasant Village',
+                'Sandalwood Heights',
+                'Highway 410 Corridor'
+            ]
+        },
         'communication_templates': {
-            'en': '🚨 WILDFIRE ALERT: Evacuate immediately from HWY 407/410 area. Fire spreading rapidly. Follow emergency routes. Stay tuned for updates.',
-            'pa': '🚨 ਅੱਗ ਸੰਕਟ ਚੇਤਾਵਨੀ: HWY 407/410 ਖੇਤਰ ਤੋਂ ਤੁਰੰਤ ਖਾਲੀ ਕਰੋ। ਅੱਗ ਤੇਜ਼ੀ ਨਾਲ ਫੈਲ ਰਹੀ ਹੈ।',
-            'hi': '🚨 अग्नि संकट चेतावनी: HWY 407/410 क्षेत्र से तुरंत खाली करें। आग तेजी से फैल रही है।'
+            'en': '🚨 WILDFIRE ALERT: Evacuate immediately from HWY 407/410 area. Fire spreading rapidly at 2.5 km/h. Follow emergency routes. Stay tuned for updates.',
+            'pa': '🚨 ਅੱਗ ਸੰਕਟ ਚੇਤਾਵਨੀ: HWY 407/410 ਖੇਤਰ ਤੋਂ ਤੁਰੰਤ ਖਾਲੀ ਕਰੋ। ਅੱਗ 2.5 km/h ਦੀ ਰਫ਼ਤਾਰ ਨਾਲ ਫੈਲ ਰਹੀ ਹੈ। ਐਮਰਜੈਂਸੀ ਰੂਟਾਂ ਦੀ ਪਾਲਣਾ ਕਰੋ।',
+            'hi': '🚨 अग्नि संकट चेतावनी: HWY 407/410 क्षेत्र से तुरंत खाली करें। आग 2.5 km/h की गति से फैल रही है। आपातकालीन मार्गों का पालन करें।'
         }
     }
     
