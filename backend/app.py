@@ -13,10 +13,13 @@ load_dotenv()
 
 # App Initialization
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:3000", "http://localhost:3001"])
+
+# CORS Configuration - supports both local development and production
+ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', 'http://localhost:3000,http://localhost:3001').split(',')
+CORS(app, origins=ALLOWED_ORIGINS)
 
 # SocketIO Initialization
-socketio = SocketIO(app, cors_allowed_origins=["http://localhost:3000", "http://localhost:3001"])
+socketio = SocketIO(app, cors_allowed_origins=ALLOWED_ORIGINS)
 
 # Orchestrator Initialization
 from orchestrator import DisasterOrchestrator
