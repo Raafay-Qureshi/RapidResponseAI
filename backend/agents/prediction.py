@@ -80,7 +80,7 @@ class PredictionAgent(BaseAgent):
             return self._predict_july_2020_spread(scenario_config)
 
         try:
-            if disaster_type == 'wildfire':
+            if disaster_type in ['wildfire', 'fire']:
                 result = await self._model_fire_spread(disaster, data)
                 logger.info(f"Wildfire analysis complete: spread_rate={result.get('current_spread_rate_kmh')} km/h")
                 return result

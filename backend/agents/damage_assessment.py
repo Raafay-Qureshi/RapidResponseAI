@@ -18,7 +18,7 @@ class DamageAssessmentAgent(BaseAgent):
             self._log("Using July 2020 scenario parameters")
             return self._assess_july_2020_fire(scenario_config)
 
-        if disaster_type == "wildfire":
+        if disaster_type in ["wildfire", "fire"]:
             return await self._assess_fire_damage(satellite_imagery, disaster_location)
         elif disaster_type == "flood":
             return await self._assess_flood_damage(satellite_imagery)
