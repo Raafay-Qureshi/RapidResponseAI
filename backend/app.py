@@ -19,7 +19,13 @@ ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', 'http://localhost:3000,http://loc
 CORS(app, origins=ALLOWED_ORIGINS)
 
 # SocketIO Initialization
-socketio = SocketIO(app, cors_allowed_origins=ALLOWED_ORIGINS)
+socketio = SocketIO(
+    app,
+    cors_allowed_origins=ALLOWED_ORIGINS,
+    async_mode='gevent',
+    logger=True,
+    engineio_logger=True
+)
 
 # Orchestrator Initialization
 from orchestrator import DisasterOrchestrator
